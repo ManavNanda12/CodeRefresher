@@ -1,0 +1,71 @@
+<div class="tech-page">
+
+  <!-- ── Hero Header ─────────────────────────────────── -->
+  <header class="page-hero" [style.background]="techMeta().gradient">
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+      <div class="hero-icon-wrap">
+        <span class="hero-icon">{{ techMeta().icon }}</span>
+      </div>
+      <div class="hero-text">
+        <span class="hero-tag">{{ techMeta().tag }}</span>
+        <h1 class="hero-title">{{ title() }}</h1>
+        <p class="hero-subtitle">
+          @if (loading()) {
+            Loading questions…
+          } @else {
+            {{ totalCount() }} questions across 2 experience levels
+          }
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Tabs ───────────────────────────────────────── -->
+  <div class="tabs-section">
+    <div class="tabs-pill" role="tablist" aria-label="Experience level">
+      @for (tab of tabs; track tab.key) {
+        <button
+          class="tab-btn"
+          role="tab"
+          [class.active]="activeTab() === tab.key"
+          [attr.aria-selected]="activeTab() === tab.key"
+          (click)="setTab(tab.key)">
+          <span class="tab-label">{{ tab.label }}</span>
+          <span class="tab-chip">{{ allData()[tab.key]?.length || 0 }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ── Loading ────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-wrap">
+      <div class="skeleton-grid">
+        @for (_ of [1,2,3,4]; track $index) {
+          <div class="skeleton-card">
+            <div class="sk-line sk-line--title"></div>
+            <div class="sk-line sk-line--body"></div>
+            <div class="sk-line sk-line--body short"></div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- ── Cards Grid ──────────────────────────────── -->
+    <div class="cards-grid">
+      @for (item of currentItems(); track item.question; let idx = $index) {
+        <app-card
+          [item]="item"
+          [index]="idx + 1"
+          [style.--delay]="cardDelay(idx)" />
+      } @empty {
+        <div class="empty-state">
+          <span class="empty-icon">📭</span>
+          <p>No questions found for this category.</p>
+        </div>
+      }
+    </div>
+  }
+
+</div>

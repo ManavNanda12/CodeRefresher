@@ -1,0 +1,104 @@
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay"
+     [class.active]="sidebarOpen()"
+     (click)="closeSidebar()">
+</div>
+
+<!-- Sidebar (mobile drawer) -->
+<aside class="sidebar" [class.open]="sidebarOpen()" aria-label="Sidebar navigation">
+  <div class="sidebar-header">
+    <div class="brand">
+      <span class="brand-icon">&#60;/&#62;</span>
+      <span class="brand-name">Dev Refresher</span>
+    </div>
+    <button class="close-btn" (click)="closeSidebar()" aria-label="Close sidebar">&#10005;</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.path) {
+      <a [routerLink]="item.path"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: !!item.exact }"
+         class="sidebar-link"
+         (click)="closeSidebar()">
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <span>Developer Refresher</span>
+    <small>v1.0</small>
+  </div>
+</aside>
+
+<!-- ── Single Responsive Header ────────────────── -->
+<header class="app-header" role="banner">
+  <a routerLink="/" class="header-brand" aria-label="Developer Refresher Home">
+    <span class="brand-icon">&#60;/&#62;</span>
+    <span class="header-title">Developer Refresher</span>
+  </a>
+
+  <!-- Desktop nav — hidden below 768px via CSS -->
+  <nav class="header-nav" aria-label="Main navigation">
+    @for (item of navItems; track item.path) {
+      <a [routerLink]="item.path"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: !!item.exact }"
+         class="header-link">
+        <span class="link-icon">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Hamburger — hidden above 768px via CSS -->
+  <button class="hamburger-btn" (click)="toggleSidebar()" aria-label="Open navigation menu">
+    &#9776;
+  </button>
+</header>
+
+<!-- Page Content -->
+<main class="page-content">
+  <ng-content></ng-content>
+
+  <!-- ── Footer ──────────────────────────────── -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-col footer-brand-col">
+          <a routerLink="/" class="footer-brand" aria-label="Home">
+            <span class="brand-icon">&#60;/&#62;</span>
+            <span class="footer-brand-name">Dev Refresher</span>
+          </a>
+          <p class="footer-tagline">
+            Your personal interview prep companion.<br>
+            Structured. Simple. Free forever.
+          </p>
+          <span class="footer-ai-badge">🤖 AI Coach coming soon</span>
+        </div>
+
+        <div class="footer-col">
+          <span class="footer-col-title">Topics</span>
+          <a routerLink="/angular" class="footer-nav-link">⚡ Angular</a>
+          <a routerLink="/dotnet"  class="footer-nav-link">🔷 .NET / ASP.NET Core</a>
+          <a routerLink="/sql"     class="footer-nav-link">🗄️ SQL</a>
+        </div>
+
+        <div class="footer-col">
+          <span class="footer-col-title">On the Roadmap</span>
+          <span class="footer-roadmap-item">☁️ AWS / Cloud</span>
+          <span class="footer-roadmap-item">⚛️ React</span>
+          <span class="footer-roadmap-item">🐍 Python</span>
+          <span class="footer-roadmap-item">🐳 Docker / Kubernetes</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span class="footer-copy">© {{returnCurrentYear()}} Developer Refresher · Made for developers, by developers.</span>
+        <a routerLink="/" class="footer-top-link" (click)="scrollToTop()">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+</main>

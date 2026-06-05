@@ -1,0 +1,270 @@
+{
+  "categories": {
+    "0-2": [
+      {
+        "question": "What is a Pipe in Angular?",
+        "answer": "A Pipe is used to transform data in Angular templates before displaying it to the user. Pipes only change how data is displayed and do not modify the original value stored in the component.",
+        "codeExample": "{{ name | uppercase }}\n{{ amount | currency:'INR' }}\n{{ today | date:'dd/MM/yyyy' }}",
+        "simpleExample": "Think of a pipe as a display filter. The original data stays the same, but Angular shows it in a different format."
+      },
+      {
+        "question": "What are some commonly used built-in pipes?",
+        "answer": "Angular provides several built-in pipes such as uppercase, lowercase, date, currency, percent, number, and slice.",
+        "codeExample": "{{ name | uppercase }}\n{{ amount | currency:'INR' }}\n{{ 0.75 | percent }}\n{{ today | date:'dd/MM/yyyy' }}",
+        "simpleExample": "Instead of manually formatting data in TypeScript, Angular pipes format it directly in the template."
+      },
+      {
+        "question": "What is a Custom Pipe?",
+        "answer": "A Custom Pipe is a pipe created by developers when Angular's built-in pipes do not satisfy a business requirement. It helps keep formatting logic reusable and centralized.",
+        "codeExample": "@Pipe({name:'capitalize'})\nexport class CapitalizePipe implements PipeTransform {\n  transform(value:string){\n    return value.charAt(0).toUpperCase() + value.slice(1);\n  }\n}",
+        "simpleExample": "If you need to format user names in many places, create one custom pipe and reuse it everywhere."
+      },
+      {
+        "question": "Why use a Custom Pipe instead of a Component Method?",
+        "answer": "Custom Pipes improve reusability, keep templates cleaner, and separate formatting logic from business logic. Updating the pipe updates behavior everywhere it is used.",
+        "codeExample": "{{ product.price | customCurrency }}",
+        "simpleExample": "If currency formatting changes from Rupees to Dollars, update the pipe once instead of changing every component."
+      },
+      {
+        "question": "What is a Directive in Angular?",
+        "answer": "A Directive is a class that changes the behavior, structure, or appearance of DOM elements.",
+        "codeExample": "<div *ngIf='isLoggedIn'>Welcome</div>",
+        "simpleExample": "Directives tell Angular what to do with HTML elements."
+      },
+      {
+        "question": "What are the types of Directives?",
+        "answer": "Angular has three main types of directives: Component Directives, Structural Directives, and Attribute Directives.",
+        "codeExample": "Component -> @Component\nStructural -> *ngIf, *ngFor\nAttribute -> ngClass, ngStyle",
+        "simpleExample": "Structural directives change the DOM, while attribute directives modify existing elements."
+      },
+      {
+        "question": "What is a Structural Directive?",
+        "answer": "Structural Directives add, remove, or manipulate DOM elements. Common examples are *ngIf, *ngFor, and *ngSwitch.",
+        "codeExample": "<div *ngIf='isAdmin'>Admin Panel</div>\n<li *ngFor='let product of products'>{{product}}</li>",
+        "simpleExample": "Structural directives decide what appears on the page."
+      },
+      {
+        "question": "What is an Attribute Directive?",
+        "answer": "Attribute Directives modify the appearance or behavior of existing DOM elements without adding or removing them.",
+        "codeExample": "<div [ngClass]=\"{'active': isSelected}\">Product</div>\n<div [ngStyle]=\"{'color':'red'}\">Error</div>",
+        "simpleExample": "Attribute directives change how an element looks or behaves."
+      },
+      {
+        "question": "What is the difference between ngIf and hidden?",
+        "answer": "ngIf removes or adds elements to the DOM, while hidden only hides the element but keeps it in the DOM.",
+        "codeExample": "<div *ngIf='showContent'>Content</div>\n<div [hidden]='!showContent'>Content</div>",
+        "simpleExample": "ngIf removes the chair from the room. hidden covers the chair with a cloth."
+      },
+      {
+        "question": "What is the difference between a Pipe and a Directive?",
+        "answer": "Pipes transform data for display. Directives change the DOM's structure, appearance, or behavior.",
+        "codeExample": "{{ name | uppercase }}\n<div *ngIf='isLoggedIn'>Welcome</div>",
+        "simpleExample": "Pipe changes the data. Directive changes the HTML."
+      },
+      {
+        "question": "What is a Service in Angular?",
+        "answer": "A Service is a reusable class that contains business logic, API calls, shared state, or utility methods. Services help keep components clean and promote code reusability.",
+        "codeExample": "@Injectable({providedIn:'root'})\nexport class UserService {\n getUsers() {\n  return this.http.get('/api/users');\n }\n}",
+        "simpleExample": "Instead of writing API calls in every component, create them once in a service and reuse them everywhere."
+      },
+      {
+        "question": "Why do we use Services in Angular?",
+        "answer": "Services help centralize business logic, improve code reusability, reduce duplicate code, and keep components focused on UI logic.",
+        "codeExample": "constructor(private userService: UserService) {}",
+        "simpleExample": "Think of a service as a common helper that multiple components can use."
+      },
+      {
+        "question": "What is Dependency Injection?",
+        "answer": "Dependency Injection is a design pattern where Angular automatically creates and provides required dependencies to a class instead of the class creating them manually.",
+        "codeExample": "constructor(private productService: ProductService) {}",
+        "simpleExample": "Instead of cooking your own food, a waiter brings it to your table. Angular provides the service instead of the component creating it."
+      },
+      {
+        "question": "What is a Dependency?",
+        "answer": "A dependency is any service or object that a class needs to function.",
+        "codeExample": "constructor(private userService: UserService) {}",
+        "simpleExample": "If ProductComponent needs ProductService, then ProductService is its dependency."
+      },
+      {
+        "question": "What does providedIn: 'root' mean?",
+        "answer": "Angular creates a single shared instance of the service for the entire application. This is known as a Singleton Service.",
+        "codeExample": "@Injectable({providedIn:'root'})",
+        "simpleExample": "One service instance shared across all components."
+      },
+      {
+        "question": "What is HttpClient?",
+        "answer": "HttpClient is Angular's built-in service used to communicate with backend APIs. It supports GET, POST, PUT, PATCH, and DELETE requests.",
+        "codeExample": "this.http.get('/api/users')",
+        "simpleExample": "HttpClient is Angular's way of talking to backend APIs."
+      },
+      {
+        "question": "What is the difference between GET and POST?",
+        "answer": "GET is used to retrieve data, while POST is used to create or submit data to the server.",
+        "codeExample": "this.http.get('/api/products')\nthis.http.post('/api/users', payload)",
+        "simpleExample": "GET = Fetch Data, POST = Save Data."
+      },
+      {
+        "question": "What is the difference between PUT and PATCH?",
+        "answer": "PUT replaces the entire resource, while PATCH updates only specific fields.",
+        "codeExample": "this.http.put('/api/user/1', fullUser)\nthis.http.patch('/api/user/1', {name:'Manav'})",
+        "simpleExample": "PUT updates everything. PATCH updates only what changed."
+      },
+      {
+        "question": "What is an Angular Lifecycle Hook?",
+        "answer": "Lifecycle Hooks are methods that Angular calls during different stages of a component's life, from creation to destruction.",
+        "codeExample": "ngOnInit() {}\nngOnDestroy() {}",
+        "simpleExample": "Angular notifies you when a component starts, updates, and ends."
+      },
+      {
+        "question": "What is ngOnInit?",
+        "answer": "ngOnInit runs after Angular initializes the component. It is commonly used for API calls and initialization logic.",
+        "codeExample": "ngOnInit() {\n this.loadProducts();\n}",
+        "simpleExample": "Component is ready, now load data."
+      },
+      {
+        "question": "What is ngOnDestroy?",
+        "answer": "ngOnDestroy runs before a component is removed from the DOM. It is commonly used to clean up subscriptions, intervals, and event listeners.",
+        "codeExample": "ngOnDestroy() {\n this.subscription.unsubscribe();\n}",
+        "simpleExample": "Clean up before leaving the component."
+      },
+      {
+        "question": "What is ngAfterViewInit?",
+        "answer": "ngAfterViewInit runs after Angular has fully initialized the component view and child views.",
+        "codeExample": "@ViewChild('input') input!: ElementRef;\nngAfterViewInit() {\n this.input.nativeElement.focus();\n}",
+        "simpleExample": "The HTML is ready, now safely access DOM elements."
+      },
+      {
+        "question": "Why should we unsubscribe from Observables?",
+        "answer": "Unsubscribing prevents memory leaks and unnecessary processing when a component is destroyed.",
+        "codeExample": "ngOnDestroy() {\n this.subscription.unsubscribe();\n}",
+        "simpleExample": "Stop listening when you no longer need updates."
+      },
+      {
+    "question": "What is Angular Routing?",
+    "answer": "Angular Routing allows navigation between different components without reloading the entire page. It enables Single Page Application (SPA) behavior.",
+    "simpleExample": "Like switching pages inside the same app without full page reload."
+  },
+  {
+    "question": "What is routerLink in Angular?",
+    "answer": "routerLink is used to navigate between routes from HTML templates without reloading the page.",
+    "codeExample": "<a routerLink='/products'>Products</a>",
+    "simpleExample": "It is Angular's way of navigating like an anchor tag."
+  },
+  {
+    "question": "What happens when you use routerLink?",
+    "answer": "Angular updates the URL, matches it with route configuration, and loads the corresponding component inside router-outlet without reloading the page.",
+    "simpleExample": "Click link → URL changes → Angular loads matching component."
+  },
+  {
+    "question": "What is router-outlet in Angular?",
+    "answer": "router-outlet is a placeholder where Angular renders the matched component based on the current route.",
+    "simpleExample": "It acts as a container where routed components are displayed."
+  },
+  {
+    "question": "What happens when user directly enters URL in browser?",
+    "answer": "Angular router checks the current URL on app startup, matches it with route configuration, and loads the corresponding component.",
+    "simpleExample": "Direct URL like /products still loads correct component without clicking anything."
+  },
+  {
+    "question": "What are Route Parameters in Angular?",
+    "answer": "Route parameters are dynamic values in the URL used to pass data like IDs.",
+    "codeExample": "/product/:id → /product/101",
+    "simpleExample": "Used when value is required in route."
+  },
+  {
+    "question": "Difference between Route Parameters and Query Parameters?",
+    "answer": "Route params are part of URL path and required, while query params are optional values passed after ? used for filters or pagination.",
+    "simpleExample": "Route param: /product/1 | Query param: /product?page=1"
+  },
+  {
+    "question": "What are Child Routes in Angular?",
+    "answer": "Child routes allow nesting routes inside a parent route and render them inside a child router-outlet.",
+    "simpleExample": "Used for layouts like Admin → Users, Settings, Reports."
+  },
+  {
+    "question": "What happens if parent component does not have router-outlet for child route?",
+    "answer": "Child components will not render because Angular has no placeholder to display them.",
+    "simpleExample": "Route matches but nothing is displayed."
+  },
+  {
+    "question": "Why is Lazy Loading used in Angular?",
+    "answer": "Lazy Loading loads modules only when required instead of loading everything at application startup, improving performance.",
+    "simpleExample": "Modules load only when user navigates to that section."
+  },
+  {
+    "question": "When does a lazy-loaded module load?",
+    "answer": "A lazy-loaded module is loaded only when the user navigates to its route.",
+    "simpleExample": "Module downloads only when route is visited."
+  },
+  {
+    "question": "What is CanActivate guard?",
+    "answer": "CanActivate is a route guard used to allow or block access to a route based on conditions like authentication.",
+    "simpleExample": "Prevents unauthorized users from accessing routes."
+  },
+  {
+    "question": "What happens when CanActivate returns false?",
+    "answer": "Navigation is cancelled and the component is not created. User stays on current page unless manually redirected.",
+    "simpleExample": "Route access is blocked."
+  }
+    ],
+     "2-4": [
+      {
+        "question": "What is an HTTP Interceptor?",
+        "answer": "An Interceptor is middleware that sits between Angular and the backend. It can modify requests and responses globally.",
+        "codeExample": "export const authInterceptor: HttpInterceptorFn = (req, next) => {\n return next(req);\n}",
+        "simpleExample": "Every API request passes through the interceptor first."
+      },
+      {
+        "question": "Why use an Interceptor instead of adding JWT headers in every API call?",
+        "answer": "Interceptors centralize common logic such as authentication, loaders, logging, and error handling. This avoids repeating code in every service.",
+        "simpleExample": "Write once, use everywhere."
+      },
+      {
+        "question": "How do Interceptors help with JWT Authentication?",
+        "answer": "Interceptors automatically attach JWT tokens to outgoing requests and can handle authentication-related errors such as 401 responses.",
+        "simpleExample": "Token is automatically added to every API request."
+      },
+      {
+        "question": "What is a Singleton Service?",
+        "answer": "A Singleton Service is a service where only one instance exists throughout the application and is shared by all components.",
+        "simpleExample": "One shared service instance across app."
+      },
+
+      {
+        "question": "What is Lazy Loading in Angular?",
+        "answer": "Lazy Loading loads feature modules only when the user navigates to them instead of loading everything at startup, improving performance and initial load time.",
+        "simpleExample": "Modules are loaded only when needed (on demand)."
+      },
+      {
+        "question": "What triggers a lazy-loaded module to load?",
+        "answer": "A lazy-loaded module is downloaded only when the user navigates to its configured route.",
+        "simpleExample": "Visiting /admin triggers AdminModule download."
+      },
+      {
+        "question": "What is CanActivate guard?",
+        "answer": "CanActivate is a route guard that decides whether a user can access a route based on conditions like authentication or roles.",
+        "simpleExample": "Used to protect routes from unauthorized access."
+      },
+      {
+        "question": "What happens when CanActivate returns false?",
+        "answer": "Navigation is cancelled, component is not created, and user remains on the current route unless manually redirected.",
+        "simpleExample": "Route access is blocked and page does not load."
+      },
+      {
+        "question": "What is CanDeactivate guard?",
+        "answer": "CanDeactivate prevents users from leaving a route, commonly used to stop navigation when there are unsaved changes in a form.",
+        "simpleExample": "Warns user before leaving a form without saving."
+      },
+      {
+        "question": "What is CanLoad guard?",
+        "answer": "CanLoad prevents lazy-loaded modules from being downloaded if the condition fails, such as user not having permission.",
+        "simpleExample": "Blocks module download for unauthorized users."
+      },
+      {
+        "question": "What is CanMatch guard?",
+        "answer": "CanMatch decides whether a route should even be considered for matching during navigation, used in modern Angular routing.",
+        "simpleExample": "Prevents route from being selected entirely."
+      }
+    ]
+  }
+}

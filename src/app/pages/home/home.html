@@ -1,0 +1,149 @@
+<!-- ── Hero ────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Interview Ready · Real Questions · Real Code
+    </div>
+
+    <h1 class="hero-headline">
+      Master Dev Interviews.<br>
+      <span class="headline-accent">One Topic at a Time.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Structured Q&amp;A for Angular, .NET, SQL and more — organized by experience
+      level, with code examples and simple analogies so concepts actually stick.
+    </p>
+
+    <div class="hero-actions">
+      <a routerLink="/angular" class="btn-primary">Start Refreshing →</a>
+      <a routerLink="/sql" class="btn-ghost">Browse All Topics</a>
+    </div>
+
+    <!-- Floating Code Preview -->
+    <div class="code-preview">
+      <div class="code-header">
+        <span class="mac-dot mac-red"></span>
+        <span class="mac-dot mac-yellow"></span>
+        <span class="mac-dot mac-green"></span>
+        <span class="code-filename">interview-prep.ts</span>
+      </div>
+      <pre class="code-body"><code><span class="tk-kw">const</span> topics = [<span class="tk-str">'Angular'</span>, <span class="tk-str">'.NET'</span>, <span class="tk-str">'SQL'</span>];
+<span class="tk-kw">const</span> levels = [<span class="tk-str">'0–2 years'</span>, <span class="tk-str">'2–4 years'</span>];
+
+<span class="tk-kw">await</span> <span class="tk-fn">prepareForInterview</span>(topics, levels);
+<span class="tk-cmt">// ✓ Ready for any dev interview</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats ──────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-num">45+</span>
+    <span class="stat-lbl">Questions</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span class="stat-num">3</span>
+    <span class="stat-lbl">Technologies</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span class="stat-num">2</span>
+    <span class="stat-lbl">Experience Levels</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span class="stat-num">∞</span>
+    <span class="stat-lbl">Free Forever</span>
+  </div>
+</div>
+
+<!-- ── Topics ─────────────────────────────────────────── -->
+<section class="topics-section">
+  <div class="section-header">
+    <span class="section-eyebrow">What's Inside</span>
+    <h2 class="section-title">Pick Your Topic</h2>
+    <p class="section-sub">Bite-sized questions with answers, code examples, and simple analogies</p>
+  </div>
+
+  <div class="topics-grid">
+    @for (card of techCards; track card.id) {
+      <a [routerLink]="card.path" class="topic-card" [style.--card-delay]="card.delay">
+        <div class="topic-strip" [style.background]="card.gradient"></div>
+        <div class="topic-body">
+          <div class="topic-top">
+            <div class="topic-icon-wrap" [style.background]="card.gradient">
+              <span class="topic-icon">{{ card.icon }}</span>
+            </div>
+            <span class="topic-tag">{{ card.tag }}</span>
+          </div>
+          <h3 class="topic-name">{{ card.name }}</h3>
+          <p class="topic-desc">{{ card.description }}</p>
+          <div class="topic-footer">
+            <span class="topic-count">📋 {{ card.count }}</span>
+            <span class="topic-arrow">Explore →</span>
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+</section>
+
+<!-- ── AI Teaser ──────────────────────────────────────── -->
+<section class="ai-section">
+  <div class="ai-card">
+    <div class="ai-glow"></div>
+
+    <div class="ai-left">
+      <span class="ai-badge">Coming Soon</span>
+      <h3 class="ai-title">AI Interview Coach</h3>
+      <p class="ai-desc">
+        Once you've refreshed all topics, practice live Q&amp;A with an AI that knows
+        your weak spots, adapts to your level, and gives real-time feedback.
+      </p>
+      <div class="ai-features">
+        <div class="ai-feature"><span>🎯</span> Adaptive difficulty</div>
+        <div class="ai-feature"><span>⚡</span> Instant feedback</div>
+        <div class="ai-feature"><span>📈</span> Track your progress</div>
+      </div>
+      <button class="btn-coming-soon" disabled>Notify Me When Ready</button>
+    </div>
+
+    <div class="ai-right">
+      <div class="chat-window">
+        <div class="chat-topbar">
+          <span class="chat-status-dot"></span>
+          <span class="chat-label">AI Coach Preview</span>
+        </div>
+        <div class="chat-body">
+          <div class="chat-row chat-row--ai">
+            <span class="chat-avatar">🤖</span>
+            <div class="chat-bubble">Explain Angular's OnPush change detection strategy.</div>
+          </div>
+          <div class="chat-row chat-row--user">
+            <div class="chat-bubble">OnPush only checks when input references change or an event fires...</div>
+            <span class="chat-avatar">👨‍💻</span>
+          </div>
+          <div class="chat-row chat-row--ai">
+            <span class="chat-avatar">🤖</span>
+            <div class="chat-bubble chat-typing">
+              <span class="type-dot"></span>
+              <span class="type-dot"></span>
+              <span class="type-dot"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
