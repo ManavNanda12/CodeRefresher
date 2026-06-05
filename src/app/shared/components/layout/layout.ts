@@ -1,4 +1,5 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { Component, HostListener, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface NavItem {
@@ -15,6 +16,8 @@ interface NavItem {
   styleUrl: './layout.css'
 })
 export class LayoutComponent {
+  private platformId = inject(PLATFORM_ID);
+
   sidebarOpen = signal(false);
 
   navItems: NavItem[] = [
@@ -34,7 +37,7 @@ export class LayoutComponent {
 
   @HostListener('window:resize')
   onResize(): void {
-    if (window.innerWidth >= 768) {
+    if (isPlatformBrowser(this.platformId) && window.innerWidth >= 768) {
       this.sidebarOpen.set(false);
     }
   }
@@ -44,6 +47,8 @@ export class LayoutComponent {
   }
 
   scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }

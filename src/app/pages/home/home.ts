@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SeoService } from '../../core/services/seo.service';
 
 interface TechCard {
   id: string;
@@ -20,6 +21,14 @@ interface TechCard {
   styleUrl: './home.css'
 })
 export class HomeComponent {
+  constructor() {
+    inject(SeoService).update({
+      title: 'Master Dev Interviews',
+      description: 'Structured Q&A for Angular, .NET, SQL and more — organized by experience level, with code examples and simple analogies so concepts actually stick.',
+      keywords: 'angular interview questions, dotnet interview prep, sql interview questions, developer refresher, coding interview'
+    });
+  }
+
   readonly techCards: TechCard[] = [
     {
       id: 'angular',
