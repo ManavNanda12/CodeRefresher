@@ -205,7 +205,57 @@
     "question": "What happens when CanActivate returns false?",
     "answer": "Navigation is cancelled and the component is not created. User stays on current page unless manually redirected.",
     "simpleExample": "Route access is blocked."
-  }
+  },
+  {
+  "question": "What is an Observable?",
+  "answer": "An Observable is an RxJS object that emits data over time. It can emit zero, one, or multiple values asynchronously, and consumers subscribe to receive those values.",
+  "simpleExample": "HTTP requests, route parameters, form value changes, and WebSocket messages are commonly represented as Observables."
+},
+{
+  "question": "Why does Angular HttpClient return an Observable instead of a Promise?",
+  "answer": "Observables can emit multiple values, can be cancelled by unsubscribing, and support powerful RxJS operators. Promises only resolve or reject once.",
+  "simpleExample": "Observables provide more flexibility for asynchronous operations than Promises."
+},
+{
+  "question": "What is subscribe() in RxJS?",
+  "answer": "subscribe() starts listening to an Observable and receives emitted values. For HttpClient Observables, the HTTP request does not execute until someone subscribes.",
+  "codeExample": "this.http.get('/users').subscribe(res => console.log(res));",
+  "simpleExample": "Subscribing is like turning on the TV to start watching a live channel."
+},
+{
+  "question": "What is a Subject?",
+  "answer": "A Subject is both an Observable and an Observer. It allows values to be emitted manually using next() and shared with multiple subscribers.",
+  "codeExample": "const subject = new Subject<string>();",
+  "simpleExample": "A Subject acts like a live broadcaster. Subscribers only receive values emitted after they subscribe."
+},
+{
+  "question": "What is a BehaviorSubject?",
+  "answer": "A BehaviorSubject stores the latest emitted value and immediately sends that value to new subscribers. It requires an initial value.",
+  "codeExample": "const user$ = new BehaviorSubject('Guest');",
+  "simpleExample": "New subscribers always receive the current state immediately."
+},
+{
+  "question": "Difference between Subject and BehaviorSubject?",
+  "answer": "Subject does not store previous values, while BehaviorSubject stores the latest value and provides it immediately to new subscribers.",
+  "simpleExample": "Subject = live TV. BehaviorSubject = live TV that also shows the current score when you join."
+},
+{
+  "question": "What is the Async Pipe?",
+  "answer": "Async Pipe subscribes to an Observable or Promise in the template, updates the view when new values arrive, and automatically unsubscribes when the component is destroyed.",
+  "codeExample": "{{ users$ | async }}",
+  "simpleExample": "It removes the need to manually subscribe and unsubscribe in many scenarios."
+},
+{
+  "question": "Why use Async Pipe instead of manual subscription?",
+  "answer": "Async Pipe automatically handles subscription management and prevents memory leaks caused by forgotten unsubscribe calls.",
+  "simpleExample": "Angular manages the subscription lifecycle for you."
+},
+{
+  "question": "What is debounceTime()?",
+  "answer": "debounceTime waits for a specified amount of inactivity before emitting the latest value.",
+  "codeExample": "searchControl.valueChanges.pipe(debounceTime(500))",
+  "simpleExample": "Wait until user stops typing before calling an API."
+}
     ],
      "2-4": [
       {
@@ -264,7 +314,53 @@
         "question": "What is CanMatch guard?",
         "answer": "CanMatch decides whether a route should even be considered for matching during navigation, used in modern Angular routing.",
         "simpleExample": "Prevents route from being selected entirely."
-      }
+      },
+      {
+  "question": "What is a Cold Observable?",
+  "answer": "A Cold Observable starts execution only when subscribed. Each subscriber gets its own independent execution.",
+  "codeExample": "const users$ = this.http.get('/users');",
+  "simpleExample": "Every subscription starts a new stream."
+},
+{
+  "question": "What happens when multiple subscriptions are made to an HttpClient Observable?",
+  "answer": "Each subscription triggers a new HTTP request because HttpClient Observables are cold Observables.",
+  "codeExample": "users$.subscribe(); users$.subscribe();",
+  "simpleExample": "Two subscriptions result in two API calls."
+},
+{
+  "question": "How does Async Pipe trigger an HTTP request?",
+  "answer": "Async Pipe internally subscribes to the Observable. Since HttpClient Observables execute on subscription, the HTTP request is triggered automatically.",
+  "simpleExample": "No manual subscribe() is required when using Async Pipe."
+},
+{
+  "question": "What is takeUntil()?",
+  "answer": "takeUntil automatically unsubscribes from an Observable when another Observable emits a value.",
+  "codeExample": "source$.pipe(takeUntil(this.destroy$))",
+  "simpleExample": "Used to clean up subscriptions when a component is destroyed."
+},
+{
+  "question": "Why is takeUntil preferred over manually unsubscribing multiple subscriptions?",
+  "answer": "takeUntil provides centralized cleanup for multiple subscriptions and reduces the risk of memory leaks caused by forgotten unsubscribe calls.",
+  "simpleExample": "One destroy Subject can clean up many subscriptions."
+},
+{
+  "question": "What is map() operator in RxJS?",
+  "answer": "map() transforms emitted values into a new form before passing them to the next operator or subscriber.",
+  "codeExample": "of(1,2,3).pipe(map(x => x * 2))",
+  "simpleExample": "Convert data into a different shape."
+},
+{
+  "question": "What is filter() operator in RxJS?",
+  "answer": "filter() only allows values that match a condition to continue through the stream.",
+  "codeExample": "of(1,2,3,4).pipe(filter(x => x > 2))",
+  "simpleExample": "Keeps wanted values and ignores others."
+},
+{
+  "question": "What is catchError() operator in RxJS?",
+  "answer": "catchError handles errors in an Observable stream and allows fallback values or alternate actions.",
+  "codeExample": "catchError(() => of([]))",
+  "simpleExample": "Prevent application crashes from failed API calls."
+}
     ]
   }
 }
