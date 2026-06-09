@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://devrefresher.app/sitemap.xml
+Sitemap: https://coderefresher.pages.dev/sitemap.xml
