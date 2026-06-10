@@ -31,34 +31,36 @@
           <p class="section-content">{{ item().answer }}</p>
         </section>
 
-        <!-- Code Example -->
-        <section class="section code-section">
-          <header class="section-header">
-            <span class="section-badge code-badge">Code Example</span>
-            <button class="copy-btn"
-                    [class.copied]="copied()"
-                    (click)="copyCode($event)"
-                    [attr.aria-label]="copied() ? 'Copied!' : 'Copy code'">
-              @if (copied()) {
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2.5"
-                     stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                Copied!
-              } @else {
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                Copy
-              }
-            </button>
-          </header>
-          <pre class="code-pre"><code class="code-content">{{ item().codeExample }}</code></pre>
-        </section>
+        <!-- Code Example (only shown when present) -->
+        @if (item().codeExample) {
+          <section class="section code-section">
+            <header class="section-header">
+              <span class="section-badge code-badge">Code Example</span>
+              <button class="copy-btn"
+                      [class.copied]="copied()"
+                      (click)="copyCode($event)"
+                      [attr.aria-label]="copied() ? 'Copied!' : 'Copy code'">
+                @if (copied()) {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.5"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Copied!
+                } @else {
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  Copy
+                }
+              </button>
+            </header>
+            <pre class="code-pre"><code class="code-content">{{ item().codeExample }}</code></pre>
+          </section>
+        }
 
         <!-- Simple Example -->
         <section class="section simple-section">

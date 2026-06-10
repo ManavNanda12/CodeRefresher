@@ -1,520 +1,626 @@
 {
   "categories": {
-    "0-2": [
-      {
-        "question": "What is a Pipe in Angular?",
-        "answer": "A Pipe is used to transform data in Angular templates before displaying it to the user. Pipes only change how data is displayed and do not modify the original value stored in the component.",
-        "codeExample": "{{ name | uppercase }}\n{{ amount | currency:'INR' }}\n{{ today | date:'dd/MM/yyyy' }}",
-        "simpleExample": "Think of a pipe as a display filter. The original data stays the same, but Angular shows it in a different format."
-      },
-      {
-        "question": "What are some commonly used built-in pipes?",
-        "answer": "Angular provides several built-in pipes such as uppercase, lowercase, date, currency, percent, number, and slice.",
-        "codeExample": "{{ name | uppercase }}\n{{ amount | currency:'INR' }}\n{{ 0.75 | percent }}\n{{ today | date:'dd/MM/yyyy' }}",
-        "simpleExample": "Instead of manually formatting data in TypeScript, Angular pipes format it directly in the template."
-      },
-      {
-        "question": "What is a Custom Pipe?",
-        "answer": "A Custom Pipe is a pipe created by developers when Angular's built-in pipes do not satisfy a business requirement. It helps keep formatting logic reusable and centralized.",
-        "codeExample": "@Pipe({name:'capitalize'})\nexport class CapitalizePipe implements PipeTransform {\n  transform(value:string){\n    return value.charAt(0).toUpperCase() + value.slice(1);\n  }\n}",
-        "simpleExample": "If you need to format user names in many places, create one custom pipe and reuse it everywhere."
-      },
-      {
-        "question": "Why use a Custom Pipe instead of a Component Method?",
-        "answer": "Custom Pipes improve reusability, keep templates cleaner, and separate formatting logic from business logic. Updating the pipe updates behavior everywhere it is used.",
-        "codeExample": "{{ product.price | customCurrency }}",
-        "simpleExample": "If currency formatting changes from Rupees to Dollars, update the pipe once instead of changing every component."
-      },
-      {
-        "question": "What is a Directive in Angular?",
-        "answer": "A Directive is a class that changes the behavior, structure, or appearance of DOM elements.",
-        "codeExample": "<div *ngIf='isLoggedIn'>Welcome</div>",
-        "simpleExample": "Directives tell Angular what to do with HTML elements."
-      },
-      {
-        "question": "What are the types of Directives?",
-        "answer": "Angular has three main types of directives: Component Directives, Structural Directives, and Attribute Directives.",
-        "codeExample": "Component -> @Component\nStructural -> *ngIf, *ngFor\nAttribute -> ngClass, ngStyle",
-        "simpleExample": "Structural directives change the DOM, while attribute directives modify existing elements."
-      },
-      {
-        "question": "What is a Structural Directive?",
-        "answer": "Structural Directives add, remove, or manipulate DOM elements. Common examples are *ngIf, *ngFor, and *ngSwitch.",
-        "codeExample": "<div *ngIf='isAdmin'>Admin Panel</div>\n<li *ngFor='let product of products'>{{product}}</li>",
-        "simpleExample": "Structural directives decide what appears on the page."
-      },
-      {
-        "question": "What is an Attribute Directive?",
-        "answer": "Attribute Directives modify the appearance or behavior of existing DOM elements without adding or removing them.",
-        "codeExample": "<div [ngClass]=\"{'active': isSelected}\">Product</div>\n<div [ngStyle]=\"{'color':'red'}\">Error</div>",
-        "simpleExample": "Attribute directives change how an element looks or behaves."
-      },
-      {
-        "question": "What is the difference between ngIf and hidden?",
-        "answer": "ngIf removes or adds elements to the DOM, while hidden only hides the element but keeps it in the DOM.",
-        "codeExample": "<div *ngIf='showContent'>Content</div>\n<div [hidden]='!showContent'>Content</div>",
-        "simpleExample": "ngIf removes the chair from the room. hidden covers the chair with a cloth."
-      },
-      {
-        "question": "What is the difference between a Pipe and a Directive?",
-        "answer": "Pipes transform data for display. Directives change the DOM's structure, appearance, or behavior.",
-        "codeExample": "{{ name | uppercase }}\n<div *ngIf='isLoggedIn'>Welcome</div>",
-        "simpleExample": "Pipe changes the data. Directive changes the HTML."
-      },
-      {
-        "question": "What is a Service in Angular?",
-        "answer": "A Service is a reusable class that contains business logic, API calls, shared state, or utility methods. Services help keep components clean and promote code reusability.",
-        "codeExample": "@Injectable({providedIn:'root'})\nexport class UserService {\n getUsers() {\n  return this.http.get('/api/users');\n }\n}",
-        "simpleExample": "Instead of writing API calls in every component, create them once in a service and reuse them everywhere."
-      },
-      {
-        "question": "Why do we use Services in Angular?",
-        "answer": "Services help centralize business logic, improve code reusability, reduce duplicate code, and keep components focused on UI logic.",
-        "codeExample": "constructor(private userService: UserService) {}",
-        "simpleExample": "Think of a service as a common helper that multiple components can use."
-      },
-      {
-        "question": "What is Dependency Injection?",
-        "answer": "Dependency Injection is a design pattern where Angular automatically creates and provides required dependencies to a class instead of the class creating them manually.",
-        "codeExample": "constructor(private productService: ProductService) {}",
-        "simpleExample": "Instead of cooking your own food, a waiter brings it to your table. Angular provides the service instead of the component creating it."
-      },
-      {
-        "question": "What is a Dependency?",
-        "answer": "A dependency is any service or object that a class needs to function.",
-        "codeExample": "constructor(private userService: UserService) {}",
-        "simpleExample": "If ProductComponent needs ProductService, then ProductService is its dependency."
-      },
-      {
-        "question": "What does providedIn: 'root' mean?",
-        "answer": "Angular creates a single shared instance of the service for the entire application. This is known as a Singleton Service.",
-        "codeExample": "@Injectable({providedIn:'root'})",
-        "simpleExample": "One service instance shared across all components."
-      },
-      {
-        "question": "What is HttpClient?",
-        "answer": "HttpClient is Angular's built-in service used to communicate with backend APIs. It supports GET, POST, PUT, PATCH, and DELETE requests.",
-        "codeExample": "this.http.get('/api/users')",
-        "simpleExample": "HttpClient is Angular's way of talking to backend APIs."
-      },
-      {
-        "question": "What is the difference between GET and POST?",
-        "answer": "GET is used to retrieve data, while POST is used to create or submit data to the server.",
-        "codeExample": "this.http.get('/api/products')\nthis.http.post('/api/users', payload)",
-        "simpleExample": "GET = Fetch Data, POST = Save Data."
-      },
-      {
-        "question": "What is the difference between PUT and PATCH?",
-        "answer": "PUT replaces the entire resource, while PATCH updates only specific fields.",
-        "codeExample": "this.http.put('/api/user/1', fullUser)\nthis.http.patch('/api/user/1', {name:'Manav'})",
-        "simpleExample": "PUT updates everything. PATCH updates only what changed."
-      },
-      {
-        "question": "What is an Angular Lifecycle Hook?",
-        "answer": "Lifecycle Hooks are methods that Angular calls during different stages of a component's life, from creation to destruction.",
-        "codeExample": "ngOnInit() {}\nngOnDestroy() {}",
-        "simpleExample": "Angular notifies you when a component starts, updates, and ends."
-      },
-      {
-        "question": "What is ngOnInit?",
-        "answer": "ngOnInit runs after Angular initializes the component. It is commonly used for API calls and initialization logic.",
-        "codeExample": "ngOnInit() {\n this.loadProducts();\n}",
-        "simpleExample": "Component is ready, now load data."
-      },
-      {
-        "question": "What is ngOnDestroy?",
-        "answer": "ngOnDestroy runs before a component is removed from the DOM. It is commonly used to clean up subscriptions, intervals, and event listeners.",
-        "codeExample": "ngOnDestroy() {\n this.subscription.unsubscribe();\n}",
-        "simpleExample": "Clean up before leaving the component."
-      },
-      {
-        "question": "What is ngAfterViewInit?",
-        "answer": "ngAfterViewInit runs after Angular has fully initialized the component view and child views.",
-        "codeExample": "@ViewChild('input') input!: ElementRef;\nngAfterViewInit() {\n this.input.nativeElement.focus();\n}",
-        "simpleExample": "The HTML is ready, now safely access DOM elements."
-      },
-      {
-        "question": "Why should we unsubscribe from Observables?",
-        "answer": "Unsubscribing prevents memory leaks and unnecessary processing when a component is destroyed.",
-        "codeExample": "ngOnDestroy() {\n this.subscription.unsubscribe();\n}",
-        "simpleExample": "Stop listening when you no longer need updates."
-      },
-      {
-        "question": "What is Angular Routing?",
-        "answer": "Angular Routing allows navigation between different components without reloading the entire page. It enables Single Page Application (SPA) behavior.",
-        "simpleExample": "Like switching pages inside the same app without full page reload."
-      },
-      {
-        "question": "What is routerLink in Angular?",
-        "answer": "routerLink is used to navigate between routes from HTML templates without reloading the page.",
-        "codeExample": "<a routerLink='/products'>Products</a>",
-        "simpleExample": "It is Angular's way of navigating like an anchor tag."
-      },
-      {
-        "question": "What happens when you use routerLink?",
-        "answer": "Angular updates the URL, matches it with route configuration, and loads the corresponding component inside router-outlet without reloading the page.",
-        "simpleExample": "Click link → URL changes → Angular loads matching component."
-      },
-      {
-        "question": "What is router-outlet in Angular?",
-        "answer": "router-outlet is a placeholder where Angular renders the matched component based on the current route.",
-        "simpleExample": "It acts as a container where routed components are displayed."
-      },
-      {
-        "question": "What happens when user directly enters URL in browser?",
-        "answer": "Angular router checks the current URL on app startup, matches it with route configuration, and loads the corresponding component.",
-        "simpleExample": "Direct URL like /products still loads correct component without clicking anything."
-      },
-      {
-        "question": "What are Route Parameters in Angular?",
-        "answer": "Route parameters are dynamic values in the URL used to pass data like IDs.",
-        "codeExample": "/product/:id → /product/101",
-        "simpleExample": "Used when value is required in route."
-      },
-      {
-        "question": "Difference between Route Parameters and Query Parameters?",
-        "answer": "Route params are part of URL path and required, while query params are optional values passed after ? used for filters or pagination.",
-        "simpleExample": "Route param: /product/1 | Query param: /product?page=1"
-      },
-      {
-        "question": "What are Child Routes in Angular?",
-        "answer": "Child routes allow nesting routes inside a parent route and render them inside a child router-outlet.",
-        "simpleExample": "Used for layouts like Admin → Users, Settings, Reports."
-      },
-      {
-        "question": "What happens if parent component does not have router-outlet for child route?",
-        "answer": "Child components will not render because Angular has no placeholder to display them.",
-        "simpleExample": "Route matches but nothing is displayed."
-      },
-      {
-        "question": "Why is Lazy Loading used in Angular?",
-        "answer": "Lazy Loading loads modules only when required instead of loading everything at application startup, improving performance.",
-        "simpleExample": "Modules load only when user navigates to that section."
-      },
-      {
-        "question": "When does a lazy-loaded module load?",
-        "answer": "A lazy-loaded module is loaded only when the user navigates to its route.",
-        "simpleExample": "Module downloads only when route is visited."
-      },
-      {
-        "question": "What is CanActivate guard?",
-        "answer": "CanActivate is a route guard used to allow or block access to a route based on conditions like authentication.",
-        "simpleExample": "Prevents unauthorized users from accessing routes."
-      },
-      {
-        "question": "What happens when CanActivate returns false?",
-        "answer": "Navigation is cancelled and the component is not created. User stays on current page unless manually redirected.",
-        "simpleExample": "Route access is blocked."
-      },
-      {
-        "question": "What is an Observable?",
-        "answer": "An Observable is an RxJS object that emits data over time. It can emit zero, one, or multiple values asynchronously, and consumers subscribe to receive those values.",
-        "simpleExample": "HTTP requests, route parameters, form value changes, and WebSocket messages are commonly represented as Observables."
-      },
-      {
-        "question": "Why does Angular HttpClient return an Observable instead of a Promise?",
-        "answer": "Observables can emit multiple values, can be cancelled by unsubscribing, and support powerful RxJS operators. Promises only resolve or reject once.",
-        "simpleExample": "Observables provide more flexibility for asynchronous operations than Promises."
-      },
-      {
-        "question": "What is subscribe() in RxJS?",
-        "answer": "subscribe() starts listening to an Observable and receives emitted values. For HttpClient Observables, the HTTP request does not execute until someone subscribes.",
-        "codeExample": "this.http.get('/users').subscribe(res => console.log(res));",
-        "simpleExample": "Subscribing is like turning on the TV to start watching a live channel."
-      },
-      {
-        "question": "What is a Subject?",
-        "answer": "A Subject is both an Observable and an Observer. It allows values to be emitted manually using next() and shared with multiple subscribers.",
-        "codeExample": "const subject = new Subject<string>();",
-        "simpleExample": "A Subject acts like a live broadcaster. Subscribers only receive values emitted after they subscribe."
-      },
-      {
-        "question": "What is a BehaviorSubject?",
-        "answer": "A BehaviorSubject stores the latest emitted value and immediately sends that value to new subscribers. It requires an initial value.",
-        "codeExample": "const user$ = new BehaviorSubject('Guest');",
-        "simpleExample": "New subscribers always receive the current state immediately."
-      },
-      {
-        "question": "Difference between Subject and BehaviorSubject?",
-        "answer": "Subject does not store previous values, while BehaviorSubject stores the latest value and provides it immediately to new subscribers.",
-        "simpleExample": "Subject = live TV. BehaviorSubject = live TV that also shows the current score when you join."
-      },
-      {
-        "question": "What is the Async Pipe?",
-        "answer": "Async Pipe subscribes to an Observable or Promise in the template, updates the view when new values arrive, and automatically unsubscribes when the component is destroyed.",
-        "codeExample": "{{ users$ | async }}",
-        "simpleExample": "It removes the need to manually subscribe and unsubscribe in many scenarios."
-      },
-      {
-        "question": "Why use Async Pipe instead of manual subscription?",
-        "answer": "Async Pipe automatically handles subscription management and prevents memory leaks caused by forgotten unsubscribe calls.",
-        "simpleExample": "Angular manages the subscription lifecycle for you."
-      },
-      {
-        "question": "What is debounceTime()?",
-        "answer": "debounceTime waits for a specified amount of inactivity before emitting the latest value.",
-        "codeExample": "searchControl.valueChanges.pipe(debounceTime(500))",
-        "simpleExample": "Wait until user stops typing before calling an API."
-      },
-
-      {
-        "question": "What is Change Detection in Angular?",
-        "answer": "Change Detection is Angular's mechanism for checking whether component data has changed and updating the DOM accordingly.",
-        "simpleExample": "When a variable changes, Angular checks bindings and updates the UI."
-      },
-      {
-        "question": "How does Angular update the UI when data changes?",
-        "answer": "Angular runs Change Detection after events such as button clicks, HTTP responses, timers, or Observable emissions. It checks template bindings and updates the DOM when values change.",
-        "simpleExample": "Clicking a button updates a variable, Angular detects the change and refreshes the displayed value."
-      },
-      {
-        "question": "What is Reactive Forms in Angular?",
-        "answer": "Reactive Forms are model-driven forms where form structure, validation, and state are managed in the component class instead of the template.",
-        "simpleExample": "FormGroup and FormControl are defined in TypeScript and bound to the template."
-      },
-      {
-        "question": "What is FormGroup?",
-        "answer": "FormGroup is a collection of FormControls that represents an entire form or a logical section of a form.",
-        "codeExample": "new FormGroup({ firstName: new FormControl(''), email: new FormControl('') })",
-        "simpleExample": "FormGroup acts as a container for multiple form fields."
-      },
-      {
-        "question": "What is FormControl?",
-        "answer": "FormControl represents a single form field. It stores the field value, validation status, touched state, dirty state, and errors.",
-        "codeExample": "new FormControl('', Validators.required)",
-        "simpleExample": "Each input field in a form is typically represented by a FormControl."
-      },
-      {
-        "question": "How do you check validation errors in Reactive Forms?",
-        "answer": "Validation errors can be checked using methods such as hasError(), invalid, touched, and dirty on a FormControl.",
-        "codeExample": "form.get('email')?.hasError('required')",
-        "simpleExample": "Show error messages only when the control is invalid and touched."
-      },
-      {
-        "question": "What is touched, dirty, and invalid in Reactive Forms?",
-        "answer": "touched indicates the user has interacted with the field, dirty indicates the value was modified, and invalid indicates validation rules failed.",
-        "simpleExample": "These properties help control when validation messages should be displayed."
-      },
-      {
-        "question": "What is FormArray?",
-        "answer": "FormArray is a dynamic collection of FormControls, FormGroups, or other FormArrays used when the number of form elements can change at runtime.",
-        "simpleExample": "Useful for adding multiple addresses, officers, bank accounts, or assets dynamically."
-      },
-
-      {
-        "question": "What is @Input in Angular?",
-        "answer": "@Input is used for parent-to-child communication. It allows a parent component to pass data to a child component.",
-        "simpleExample": "<app-user [userName]='userName'></app-user>"
-      },
-      {
-        "question": "What is @Output in Angular?",
-        "answer": "@Output is used for child-to-parent communication. It allows a child component to notify or send data to its parent component using EventEmitter.",
-        "simpleExample": "A child component emits a save event when a button is clicked."
-      },
-      {
-        "question": "What is EventEmitter?",
-        "answer": "EventEmitter is used with @Output to emit events or data from a child component to its parent component.",
-        "simpleExample": "saveClicked.emit(userData);"
-      },
-      {
-        "question": "How can you share data between unrelated components?",
-        "answer": "A shared service can be used to store and share data between unrelated components.",
-        "simpleExample": "NavbarComponent and ProfileComponent can access the same UserService."
-      },
-      {
-        "question": "What is a Signal in Angular?",
-        "answer": "A Signal is a reactive state container that automatically tracks changes and updates dependent values without requiring subscriptions.",
-        "simpleExample": "count = signal(0);"
-      },
-      {
-        "question": "How do you read and update a Signal?",
-        "answer": "Signals are read using function syntax and updated using set() or update().",
-        "codeExample": "count(); count.set(10);",
-        "simpleExample": "Reading a signal returns its current value and set() updates it."
+    "0-1": {
+      "modules": {
+        "Directives": {
+          "icon": "🎯",
+          "questions": [
+            {
+              "question": "What is a Directive in Angular?",
+              "answer": "A Directive is a class that changes the behavior, structure, or appearance of DOM elements.",
+              "codeExample": "<div *ngIf='isLoggedIn'>Welcome</div>",
+              "simpleExample": "Directives tell Angular what to do with HTML elements."
+            },
+            {
+              "question": "What are the types of Directives?",
+              "answer": "Angular has three main types of directives: Component Directives, Structural Directives, and Attribute Directives.",
+              "codeExample": "Component -> @Component\nStructural -> *ngIf, *ngFor\nAttribute -> ngClass, ngStyle",
+              "simpleExample": "Structural directives change the DOM, while attribute directives modify existing elements."
+            },
+            {
+              "question": "What is a Structural Directive?",
+              "answer": "Structural Directives add, remove, or manipulate DOM elements. Common examples are *ngIf, *ngFor, and *ngSwitch.",
+              "codeExample": "<div *ngIf='isAdmin'>Admin Panel</div>\n<li *ngFor='let product of products'>{{product}}</li>",
+              "simpleExample": "Structural directives decide what appears on the page."
+            },
+            {
+              "question": "What is an Attribute Directive?",
+              "answer": "Attribute Directives modify the appearance or behavior of existing DOM elements without adding or removing them.",
+              "codeExample": "<div [ngClass]=\"{'active': isSelected}\">Product</div>\n<div [ngStyle]=\"{'color':'red'}\">Error</div>",
+              "simpleExample": "Attribute directives change how an element looks or behaves."
+            },
+            {
+              "question": "What is the difference between ngIf and hidden?",
+              "answer": "ngIf removes or adds elements to the DOM, while hidden only hides the element but keeps it in the DOM.",
+              "codeExample": "<div *ngIf='showContent'>Content</div>\n<div [hidden]='!showContent'>Content</div>",
+              "simpleExample": "ngIf removes the chair from the room. hidden covers the chair with a cloth."
+            }
+          ]
+        },
+        "Pipes": {
+          "icon": "🔧",
+          "questions": [
+            {
+              "question": "What is a Pipe in Angular?",
+              "answer": "A Pipe is used to transform data in Angular templates before displaying it to the user. Pipes only change how data is displayed and do not modify the original value stored in the component.",
+              "codeExample": "{{ name | uppercase }}\n{{ amount | currency:'INR' }}\n{{ today | date:'dd/MM/yyyy' }}",
+              "simpleExample": "Think of a pipe as a display filter. The original data stays the same, but Angular shows it in a different format."
+            },
+            {
+              "question": "What are some commonly used built-in pipes?",
+              "answer": "Angular provides several built-in pipes such as uppercase, lowercase, date, currency, percent, number, and slice.",
+              "codeExample": "{{ name | uppercase }}\n{{ amount | currency:'INR' }}\n{{ 0.75 | percent }}\n{{ today | date:'dd/MM/yyyy' }}",
+              "simpleExample": "Instead of manually formatting data in TypeScript, Angular pipes format it directly in the template."
+            },
+            {
+              "question": "What is a Custom Pipe?",
+              "answer": "A Custom Pipe is a pipe created by developers when Angular's built-in pipes do not satisfy a business requirement. It helps keep formatting logic reusable and centralized.",
+              "codeExample": "@Pipe({name:'capitalize'})\nexport class CapitalizePipe implements PipeTransform {\n  transform(value:string){\n    return value.charAt(0).toUpperCase() + value.slice(1);\n  }\n}",
+              "simpleExample": "If you need to format user names in many places, create one custom pipe and reuse it everywhere."
+            },
+            {
+              "question": "Why use a Custom Pipe instead of a Component Method?",
+              "answer": "Custom Pipes improve reusability, keep templates cleaner, and separate formatting logic from business logic. Updating the pipe updates behavior everywhere it is used.",
+              "codeExample": "{{ product.price | customCurrency }}",
+              "simpleExample": "If currency formatting changes from Rupees to Dollars, update the pipe once instead of changing every component."
+            },
+            {
+              "question": "What is the difference between a Pipe and a Directive?",
+              "answer": "Pipes transform data for display. Directives change the DOM's structure, appearance, or behavior.",
+              "codeExample": "{{ name | uppercase }}\n<div *ngIf='isLoggedIn'>Welcome</div>",
+              "simpleExample": "Pipe changes the data. Directive changes the HTML."
+            }
+          ]
+        },
+        "Services & DI": {
+          "icon": "💉",
+          "questions": [
+            {
+              "question": "What is a Service in Angular?",
+              "answer": "A Service is a reusable class that contains business logic, API calls, shared state, or utility methods. Services help keep components clean and promote code reusability.",
+              "codeExample": "@Injectable({providedIn:'root'})\nexport class UserService {\n getUsers() {\n  return this.http.get('/api/users');\n }\n}",
+              "simpleExample": "Instead of writing API calls in every component, create them once in a service and reuse them everywhere."
+            },
+            {
+              "question": "Why do we use Services in Angular?",
+              "answer": "Services help centralize business logic, improve code reusability, reduce duplicate code, and keep components focused on UI logic.",
+              "codeExample": "constructor(private userService: UserService) {}",
+              "simpleExample": "Think of a service as a common helper that multiple components can use."
+            },
+            {
+              "question": "What is Dependency Injection?",
+              "answer": "Dependency Injection is a design pattern where Angular automatically creates and provides required dependencies to a class instead of the class creating them manually.",
+              "codeExample": "constructor(private productService: ProductService) {}",
+              "simpleExample": "Instead of cooking your own food, a waiter brings it to your table. Angular provides the service instead of the component creating it."
+            },
+            {
+              "question": "What is a Dependency?",
+              "answer": "A dependency is any service or object that a class needs to function.",
+              "codeExample": "constructor(private userService: UserService) {}",
+              "simpleExample": "If ProductComponent needs ProductService, then ProductService is its dependency."
+            },
+            {
+              "question": "What does providedIn: 'root' mean?",
+              "answer": "Angular creates a single shared instance of the service for the entire application. This is known as a Singleton Service.",
+              "codeExample": "@Injectable({providedIn:'root'})",
+              "simpleExample": "One service instance shared across all components."
+            }
+          ]
+        },
+        "Component Communication": {
+          "icon": "📡",
+          "questions": [
+            {
+              "question": "What is @Input in Angular?",
+              "answer": "@Input is used for parent-to-child communication. It allows a parent component to pass data to a child component.",
+              "codeExample": "// Parent\n<app-user [userName]='userName'></app-user>\n\n// Child\n@Input() userName: string = '';",
+              "simpleExample": "Parent passes data down to child like a parent handing a child their lunchbox."
+            },
+            {
+              "question": "What is @Output in Angular?",
+              "answer": "@Output is used for child-to-parent communication. It allows a child component to notify or send data to its parent component using EventEmitter.",
+              "codeExample": "// Child\n@Output() saved = new EventEmitter<string>();\n\n// Parent\n<app-form (saved)='onSave($event)'></app-form>",
+              "simpleExample": "A child component emits a save event when a button is clicked."
+            },
+            {
+              "question": "What is EventEmitter?",
+              "answer": "EventEmitter is used with @Output to emit events or data from a child component to its parent component.",
+              "codeExample": "@Output() saveClicked = new EventEmitter<UserData>();\n\nonSave() {\n  this.saveClicked.emit(this.userData);\n}",
+              "simpleExample": "saveClicked.emit(userData) fires the event up to the parent."
+            },
+            {
+              "question": "How can you share data between unrelated components?",
+              "answer": "A shared service can be used to store and share data between unrelated components.",
+              "codeExample": "@Injectable({providedIn:'root'})\nexport class SharedDataService {\n  user$ = new BehaviorSubject<User|null>(null);\n}",
+              "simpleExample": "NavbarComponent and ProfileComponent can access the same UserService."
+            }
+          ]
+        },
+        "Lifecycle Hooks": {
+          "icon": "🔄",
+          "questions": [
+            {
+              "question": "What is an Angular Lifecycle Hook?",
+              "answer": "Lifecycle Hooks are methods that Angular calls during different stages of a component's life, from creation to destruction.",
+              "codeExample": "ngOnInit() {}\nngOnChanges() {}\nngOnDestroy() {}",
+              "simpleExample": "Angular notifies you when a component starts, updates, and ends."
+            },
+            {
+              "question": "What is ngOnInit?",
+              "answer": "ngOnInit runs after Angular initializes the component. It is commonly used for API calls and initialization logic.",
+              "codeExample": "ngOnInit() {\n  this.loadProducts();\n}",
+              "simpleExample": "Component is ready, now load data."
+            },
+            {
+              "question": "What is ngOnDestroy?",
+              "answer": "ngOnDestroy runs before a component is removed from the DOM. It is commonly used to clean up subscriptions, intervals, and event listeners.",
+              "codeExample": "ngOnDestroy() {\n  this.subscription.unsubscribe();\n}",
+              "simpleExample": "Clean up before leaving the component."
+            },
+            {
+              "question": "What is ngAfterViewInit?",
+              "answer": "ngAfterViewInit runs after Angular has fully initialized the component view and child views.",
+              "codeExample": "@ViewChild('input') input!: ElementRef;\nngAfterViewInit() {\n  this.input.nativeElement.focus();\n}",
+              "simpleExample": "The HTML is ready, now safely access DOM elements."
+            },
+            {
+              "question": "Why should we unsubscribe from Observables?",
+              "answer": "Unsubscribing prevents memory leaks and unnecessary processing when a component is destroyed.",
+              "codeExample": "ngOnDestroy() {\n  this.subscription.unsubscribe();\n}",
+              "simpleExample": "Stop listening when you no longer need updates."
+            }
+          ]
+        }
       }
-    ],
-    "2-4": [
-      {
-        "question": "What is an HTTP Interceptor?",
-        "answer": "An Interceptor is middleware that sits between Angular and the backend. It can modify requests and responses globally.",
-        "codeExample": "export const authInterceptor: HttpInterceptorFn = (req, next) => {\n return next(req);\n}",
-        "simpleExample": "Every API request passes through the interceptor first."
-      },
-      {
-        "question": "Why use an Interceptor instead of adding JWT headers in every API call?",
-        "answer": "Interceptors centralize common logic such as authentication, loaders, logging, and error handling. This avoids repeating code in every service.",
-        "simpleExample": "Write once, use everywhere."
-      },
-      {
-        "question": "How do Interceptors help with JWT Authentication?",
-        "answer": "Interceptors automatically attach JWT tokens to outgoing requests and can handle authentication-related errors such as 401 responses.",
-        "simpleExample": "Token is automatically added to every API request."
-      },
-      {
-        "question": "What is a Singleton Service?",
-        "answer": "A Singleton Service is a service where only one instance exists throughout the application and is shared by all components.",
-        "simpleExample": "One shared service instance across app."
-      },
-
-      {
-        "question": "What is Lazy Loading in Angular?",
-        "answer": "Lazy Loading loads feature modules only when the user navigates to them instead of loading everything at startup, improving performance and initial load time.",
-        "simpleExample": "Modules are loaded only when needed (on demand)."
-      },
-      {
-        "question": "What triggers a lazy-loaded module to load?",
-        "answer": "A lazy-loaded module is downloaded only when the user navigates to its configured route.",
-        "simpleExample": "Visiting /admin triggers AdminModule download."
-      },
-      {
-        "question": "What is CanActivate guard?",
-        "answer": "CanActivate is a route guard that decides whether a user can access a route based on conditions like authentication or roles.",
-        "simpleExample": "Used to protect routes from unauthorized access."
-      },
-      {
-        "question": "What happens when CanActivate returns false?",
-        "answer": "Navigation is cancelled, component is not created, and user remains on the current route unless manually redirected.",
-        "simpleExample": "Route access is blocked and page does not load."
-      },
-      {
-        "question": "What is CanDeactivate guard?",
-        "answer": "CanDeactivate prevents users from leaving a route, commonly used to stop navigation when there are unsaved changes in a form.",
-        "simpleExample": "Warns user before leaving a form without saving."
-      },
-      {
-        "question": "What is CanLoad guard?",
-        "answer": "CanLoad prevents lazy-loaded modules from being downloaded if the condition fails, such as user not having permission.",
-        "simpleExample": "Blocks module download for unauthorized users."
-      },
-      {
-        "question": "What is CanMatch guard?",
-        "answer": "CanMatch decides whether a route should even be considered for matching during navigation, used in modern Angular routing.",
-        "simpleExample": "Prevents route from being selected entirely."
-      },
-      {
-        "question": "What is a Cold Observable?",
-        "answer": "A Cold Observable starts execution only when subscribed. Each subscriber gets its own independent execution.",
-        "codeExample": "const users$ = this.http.get('/users');",
-        "simpleExample": "Every subscription starts a new stream."
-      },
-      {
-        "question": "What happens when multiple subscriptions are made to an HttpClient Observable?",
-        "answer": "Each subscription triggers a new HTTP request because HttpClient Observables are cold Observables.",
-        "codeExample": "users$.subscribe(); users$.subscribe();",
-        "simpleExample": "Two subscriptions result in two API calls."
-      },
-      {
-        "question": "How does Async Pipe trigger an HTTP request?",
-        "answer": "Async Pipe internally subscribes to the Observable. Since HttpClient Observables execute on subscription, the HTTP request is triggered automatically.",
-        "simpleExample": "No manual subscribe() is required when using Async Pipe."
-      },
-      {
-        "question": "What is takeUntil()?",
-        "answer": "takeUntil automatically unsubscribes from an Observable when another Observable emits a value.",
-        "codeExample": "source$.pipe(takeUntil(this.destroy$))",
-        "simpleExample": "Used to clean up subscriptions when a component is destroyed."
-      },
-      {
-        "question": "Why is takeUntil preferred over manually unsubscribing multiple subscriptions?",
-        "answer": "takeUntil provides centralized cleanup for multiple subscriptions and reduces the risk of memory leaks caused by forgotten unsubscribe calls.",
-        "simpleExample": "One destroy Subject can clean up many subscriptions."
-      },
-      {
-        "question": "What is map() operator in RxJS?",
-        "answer": "map() transforms emitted values into a new form before passing them to the next operator or subscriber.",
-        "codeExample": "of(1,2,3).pipe(map(x => x * 2))",
-        "simpleExample": "Convert data into a different shape."
-      },
-      {
-        "question": "What is filter() operator in RxJS?",
-        "answer": "filter() only allows values that match a condition to continue through the stream.",
-        "codeExample": "of(1,2,3,4).pipe(filter(x => x > 2))",
-        "simpleExample": "Keeps wanted values and ignores others."
-      },
-      {
-        "question": "What is catchError() operator in RxJS?",
-        "answer": "catchError handles errors in an Observable stream and allows fallback values or alternate actions.",
-        "codeExample": "catchError(() => of([]))",
-        "simpleExample": "Prevent application crashes from failed API calls."
-      },
-
-      {
-        "question": "What is ChangeDetectionStrategy.OnPush?",
-        "answer": "OnPush is a change detection strategy that improves performance by checking a component only when an input reference changes, an event occurs inside the component, or an Observable used by Async Pipe emits a value.",
-        "simpleExample": "Angular avoids checking the component during every change detection cycle."
-      },
-      {
-        "question": "Difference between Default and OnPush Change Detection?",
-        "answer": "Default Change Detection checks the entire component tree during each cycle, while OnPush limits checks to specific triggers such as input reference changes, events, and Observable emissions.",
-        "simpleExample": "OnPush reduces unnecessary component checks and improves performance."
-      },
-      {
-        "question": "Why doesn't object mutation trigger OnPush updates?",
-        "answer": "OnPush relies on reference changes. Modifying a property on an existing object keeps the same reference, so Angular does not detect it as a change.",
-        "codeExample": "user.name = 'John';",
-        "simpleExample": "Create a new object instead of modifying the existing one."
-      },
-      {
-        "question": "Why does Async Pipe work with OnPush?",
-        "answer": "When an Observable emits a new value, Async Pipe marks the component for checking, allowing Angular to update the view even when OnPush is enabled.",
-        "simpleExample": "Observable emissions trigger UI updates automatically."
-      },
-      {
-        "question": "How do you add and remove items from a FormArray?",
-        "answer": "Use push() to add a new FormGroup or FormControl and removeAt(index) to remove an item.",
-        "codeExample": "employees.push(new FormGroup({...})); employees.removeAt(index);",
-        "simpleExample": "Commonly used for dynamic forms where users can add or remove entries."
-      },
-      {
-        "question": "What is the difference between patchValue() and setValue()?",
-        "answer": "patchValue() updates only specified controls, while setValue() requires values for all controls in the FormGroup.",
-        "codeExample": "form.patchValue({ firstName: 'Manav' });",
-        "simpleExample": "patchValue behaves like PATCH, setValue behaves like PUT."
-      },
-      {
-        "question": "What is getRawValue() in Reactive Forms?",
-        "answer": "getRawValue() returns all form values including disabled controls, whereas form.value excludes disabled controls.",
-        "codeExample": "const data = form.getRawValue();",
-        "simpleExample": "Useful when disabled fields must still be sent to the backend."
-      },
-
-      {
-        "question": "When would you choose a Shared Service over @Input/@Output?",
-        "answer": "Shared Services are preferred when multiple unrelated components need access to the same state. This avoids excessive parent-child data passing and reduces coupling.",
-        "simpleExample": "Navbar, Profile, Dashboard, and Settings all accessing the logged-in user."
-      },
-      {
-        "question": "What is Prop Drilling and how can it be avoided?",
-        "answer": "Prop Drilling occurs when data is passed through multiple component levels using @Input even though intermediate components do not need the data. Shared Services, Signals, or state management libraries help avoid this.",
-        "simpleExample": "Passing user data through 4 nested components to reach a child."
-      },
-      {
-        "question": "What is BehaviorSubject and why is it commonly used for state management?",
-        "answer": "BehaviorSubject stores the latest emitted value and immediately provides it to new subscribers. This makes it useful for maintaining shared application state.",
-        "simpleExample": "User information shared across Navbar and Profile components."
-      },
-      {
-        "question": "What is computed() in Angular Signals?",
-        "answer": "computed() creates derived state that automatically recalculates whenever dependent signals change.",
-        "codeExample": "doubleCount = computed(() => count() * 2);",
-        "simpleExample": "Updating count automatically updates doubleCount."
-      },
-      {
-        "question": "What is effect() in Angular Signals?",
-        "answer": "effect() executes side effects whenever a signal dependency changes.",
-        "codeExample": "effect(() => console.log(user()));",
-        "simpleExample": "Logging, analytics tracking, or localStorage updates when state changes."
-      },
-      {
-        "question": "Difference between BehaviorSubject and Signals?",
-        "answer": "BehaviorSubject is RxJS-based and requires subscriptions, while Signals provide built-in Angular reactivity with automatic dependency tracking and no subscriptions.",
-        "simpleExample": "Signals are simpler for local UI state, while BehaviorSubject is commonly used for shared application state."
-      },
-      {
-        "question": "How do Signals improve state management compared to traditional RxJS patterns?",
-        "answer": "Signals reduce the need for subscriptions, Async Pipe usage, and manual cleanup while automatically tracking dependencies and updating derived state.",
-        "simpleExample": "computed() recalculates automatically when dependent signals change."
+    },
+    "1-2": {
+      "modules": {
+        "Routing": {
+          "icon": "🗺️",
+          "questions": [
+            {
+              "question": "What is Angular Routing?",
+              "answer": "Angular Routing allows navigation between different components without reloading the entire page. It enables Single Page Application (SPA) behavior.",
+              "simpleExample": "Like switching pages inside the same app without a full page reload."
+            },
+            {
+              "question": "What is routerLink in Angular?",
+              "answer": "routerLink is used to navigate between routes from HTML templates without reloading the page.",
+              "codeExample": "<a routerLink='/products'>Products</a>\n<a [routerLink]=\"['/product', product.id]\">View</a>",
+              "simpleExample": "It is Angular's way of navigating like an anchor tag."
+            },
+            {
+              "question": "What is router-outlet in Angular?",
+              "answer": "router-outlet is a placeholder where Angular renders the matched component based on the current route.",
+              "codeExample": "<!-- app.html -->\n<app-layout>\n  <router-outlet></router-outlet>\n</app-layout>",
+              "simpleExample": "It acts as a container where routed components are displayed."
+            },
+            {
+              "question": "What are Route Parameters in Angular?",
+              "answer": "Route parameters are dynamic values in the URL used to pass data like IDs.",
+              "codeExample": "// Route config\n{ path: 'product/:id', component: ProductDetailComponent }\n\n// Component\nroute.params['id']",
+              "simpleExample": "Used when value is required in route: /product/101"
+            },
+            {
+              "question": "Difference between Route Parameters and Query Parameters?",
+              "answer": "Route params are part of URL path and required, while query params are optional values passed after ? used for filters or pagination.",
+              "codeExample": "// Route param: /product/1\n// Query param: /products?page=2&sort=price",
+              "simpleExample": "Route param: /product/1 | Query param: /product?page=1"
+            },
+            {
+              "question": "What are Child Routes in Angular?",
+              "answer": "Child routes allow nesting routes inside a parent route and render them inside a child router-outlet.",
+              "codeExample": "{\n  path: 'admin',\n  children: [\n    { path: 'users', component: UsersComponent },\n    { path: 'settings', component: SettingsComponent }\n  ]\n}",
+              "simpleExample": "Used for layouts like Admin → Users, Settings, Reports."
+            },
+            {
+              "question": "Why is Lazy Loading used in Angular?",
+              "answer": "Lazy Loading loads modules only when required instead of loading everything at application startup, improving performance.",
+              "codeExample": "{\n  path: 'admin',\n  loadComponent: () => import('./admin/admin').then(m => m.AdminComponent)\n}",
+              "simpleExample": "Modules load only when user navigates to that section."
+            },
+            {
+              "question": "What is CanActivate guard?",
+              "answer": "CanActivate is a route guard used to allow or block access to a route based on conditions like authentication.",
+              "codeExample": "export const authGuard: CanActivateFn = (route, state) => {\n  return inject(AuthService).isLoggedIn();\n};",
+              "simpleExample": "Prevents unauthorized users from accessing routes."
+            },
+            {
+              "question": "What happens when CanActivate returns false?",
+              "answer": "Navigation is cancelled and the component is not created. User stays on current page unless manually redirected.",
+              "simpleExample": "Route access is blocked."
+            }
+          ]
+        },
+        "HttpClient": {
+          "icon": "🌐",
+          "questions": [
+            {
+              "question": "What is HttpClient?",
+              "answer": "HttpClient is Angular's built-in service used to communicate with backend APIs. It supports GET, POST, PUT, PATCH, and DELETE requests.",
+              "codeExample": "constructor(private http: HttpClient) {}\n\ngetUsers() {\n  return this.http.get('/api/users');\n}",
+              "simpleExample": "HttpClient is Angular's way of talking to backend APIs."
+            },
+            {
+              "question": "What is the difference between GET and POST?",
+              "answer": "GET is used to retrieve data, while POST is used to create or submit data to the server.",
+              "codeExample": "this.http.get('/api/products')\nthis.http.post('/api/users', payload)",
+              "simpleExample": "GET = Fetch Data, POST = Save Data."
+            },
+            {
+              "question": "What is the difference between PUT and PATCH?",
+              "answer": "PUT replaces the entire resource, while PATCH updates only specific fields.",
+              "codeExample": "this.http.put('/api/user/1', fullUser)\nthis.http.patch('/api/user/1', {name:'Manav'})",
+              "simpleExample": "PUT updates everything. PATCH updates only what changed."
+            }
+          ]
+        },
+        "RxJS & Observables": {
+          "icon": "🌊",
+          "questions": [
+            {
+              "question": "What is an Observable?",
+              "answer": "An Observable is an RxJS object that emits data over time. It can emit zero, one, or multiple values asynchronously, and consumers subscribe to receive those values.",
+              "codeExample": "const users$ = this.http.get<User[]>('/api/users');\nusers$.subscribe(data => this.users = data);",
+              "simpleExample": "HTTP requests, route parameters, form value changes, and WebSocket messages are commonly represented as Observables."
+            },
+            {
+              "question": "Why does Angular HttpClient return an Observable instead of a Promise?",
+              "answer": "Observables can emit multiple values, can be cancelled by unsubscribing, and support powerful RxJS operators. Promises only resolve or reject once.",
+              "simpleExample": "Observables provide more flexibility for asynchronous operations than Promises."
+            },
+            {
+              "question": "What is subscribe() in RxJS?",
+              "answer": "subscribe() starts listening to an Observable and receives emitted values. For HttpClient Observables, the HTTP request does not execute until someone subscribes.",
+              "codeExample": "this.http.get('/users').subscribe(res => console.log(res));",
+              "simpleExample": "Subscribing is like turning on the TV to start watching a live channel."
+            },
+            {
+              "question": "What is a Subject?",
+              "answer": "A Subject is both an Observable and an Observer. It allows values to be emitted manually using next() and shared with multiple subscribers.",
+              "codeExample": "const subject = new Subject<string>();\nsubject.subscribe(v => console.log(v));\nsubject.next('Hello');",
+              "simpleExample": "A Subject acts like a live broadcaster. Subscribers only receive values emitted after they subscribe."
+            },
+            {
+              "question": "What is a BehaviorSubject?",
+              "answer": "A BehaviorSubject stores the latest emitted value and immediately sends that value to new subscribers. It requires an initial value.",
+              "codeExample": "const user$ = new BehaviorSubject<User|null>(null);\nuser$.next(loggedInUser);",
+              "simpleExample": "New subscribers always receive the current state immediately."
+            },
+            {
+              "question": "Difference between Subject and BehaviorSubject?",
+              "answer": "Subject does not store previous values, while BehaviorSubject stores the latest value and provides it immediately to new subscribers.",
+              "simpleExample": "Subject = live TV. BehaviorSubject = live TV that also shows the current score when you join."
+            },
+            {
+              "question": "What is the Async Pipe?",
+              "answer": "Async Pipe subscribes to an Observable or Promise in the template, updates the view when new values arrive, and automatically unsubscribes when the component is destroyed.",
+              "codeExample": "<div *ngFor='let user of users$ | async'>{{ user.name }}</div>",
+              "simpleExample": "It removes the need to manually subscribe and unsubscribe in many scenarios."
+            },
+            {
+              "question": "Why use Async Pipe instead of manual subscription?",
+              "answer": "Async Pipe automatically handles subscription management and prevents memory leaks caused by forgotten unsubscribe calls.",
+              "simpleExample": "Angular manages the subscription lifecycle for you."
+            },
+            {
+              "question": "What is debounceTime()?",
+              "answer": "debounceTime waits for a specified amount of inactivity before emitting the latest value.",
+              "codeExample": "searchControl.valueChanges.pipe(\n  debounceTime(500)\n).subscribe(term => this.search(term));",
+              "simpleExample": "Wait until user stops typing before calling an API."
+            }
+          ]
+        },
+        "Change Detection": {
+          "icon": "👁️",
+          "questions": [
+            {
+              "question": "What is Change Detection in Angular?",
+              "answer": "Change Detection is Angular's mechanism for checking whether component data has changed and updating the DOM accordingly.",
+              "simpleExample": "When a variable changes, Angular checks bindings and updates the UI."
+            },
+            {
+              "question": "How does Angular update the UI when data changes?",
+              "answer": "Angular runs Change Detection after events such as button clicks, HTTP responses, timers, or Observable emissions. It checks template bindings and updates the DOM when values change.",
+              "simpleExample": "Clicking a button updates a variable, Angular detects the change and refreshes the displayed value."
+            }
+          ]
+        },
+        "Reactive Forms": {
+          "icon": "📝",
+          "questions": [
+            {
+              "question": "What is Reactive Forms in Angular?",
+              "answer": "Reactive Forms are model-driven forms where form structure, validation, and state are managed in the component class instead of the template.",
+              "codeExample": "this.form = new FormGroup({\n  name: new FormControl('', Validators.required),\n  email: new FormControl('', [Validators.required, Validators.email])\n});",
+              "simpleExample": "FormGroup and FormControl are defined in TypeScript and bound to the template."
+            },
+            {
+              "question": "What is FormGroup?",
+              "answer": "FormGroup is a collection of FormControls that represents an entire form or a logical section of a form.",
+              "codeExample": "new FormGroup({ firstName: new FormControl(''), email: new FormControl('') })",
+              "simpleExample": "FormGroup acts as a container for multiple form fields."
+            },
+            {
+              "question": "What is FormControl?",
+              "answer": "FormControl represents a single form field. It stores the field value, validation status, touched state, dirty state, and errors.",
+              "codeExample": "new FormControl('', Validators.required)",
+              "simpleExample": "Each input field in a form is typically represented by a FormControl."
+            },
+            {
+              "question": "How do you check validation errors in Reactive Forms?",
+              "answer": "Validation errors can be checked using methods such as hasError(), invalid, touched, and dirty on a FormControl.",
+              "codeExample": "form.get('email')?.hasError('required')\nform.get('email')?.invalid && form.get('email')?.touched",
+              "simpleExample": "Show error messages only when the control is invalid and touched."
+            },
+            {
+              "question": "What is touched, dirty, and invalid in Reactive Forms?",
+              "answer": "touched indicates the user has interacted with the field, dirty indicates the value was modified, and invalid indicates validation rules failed.",
+              "simpleExample": "These properties help control when validation messages should be displayed."
+            },
+            {
+              "question": "What is FormArray?",
+              "answer": "FormArray is a dynamic collection of FormControls, FormGroups, or other FormArrays used when the number of form elements can change at runtime.",
+              "codeExample": "this.form = new FormGroup({\n  items: new FormArray([])\n});\n\nget items() { return this.form.get('items') as FormArray; }",
+              "simpleExample": "Useful for adding multiple addresses, officers, bank accounts, or assets dynamically."
+            }
+          ]
+        }
       }
-    ]
+    },
+    "2-3": {
+      "modules": {
+        "HTTP Interceptors": {
+          "icon": "🔒",
+          "questions": [
+            {
+              "question": "What is an HTTP Interceptor?",
+              "answer": "An Interceptor is middleware that sits between Angular and the backend. It can modify requests and responses globally.",
+              "codeExample": "export const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(AuthService).getToken();\n  const authReq = req.clone({\n    headers: req.headers.set('Authorization', `Bearer ${token}`)\n  });\n  return next(authReq);\n}",
+              "simpleExample": "Every API request passes through the interceptor first."
+            },
+            {
+              "question": "Why use an Interceptor instead of adding JWT headers in every API call?",
+              "answer": "Interceptors centralize common logic such as authentication, loaders, logging, and error handling. This avoids repeating code in every service.",
+              "simpleExample": "Write once, use everywhere."
+            },
+            {
+              "question": "How do Interceptors help with JWT Authentication?",
+              "answer": "Interceptors automatically attach JWT tokens to outgoing requests and can handle authentication-related errors such as 401 responses.",
+              "codeExample": "return next(authReq).pipe(\n  catchError(err => {\n    if (err.status === 401) router.navigate(['/login']);\n    return throwError(() => err);\n  })\n);",
+              "simpleExample": "Token is automatically added to every API request."
+            }
+          ]
+        },
+        "Route Guards": {
+          "icon": "🛡️",
+          "questions": [
+            {
+              "question": "What is CanActivate guard (advanced)?",
+              "answer": "CanActivate is a route guard that decides whether a user can access a route based on conditions like authentication or roles. In modern Angular it is a function: CanActivateFn.",
+              "codeExample": "export const authGuard: CanActivateFn = (route, state) => {\n  const auth = inject(AuthService);\n  return auth.isLoggedIn() ? true : inject(Router).createUrlTree(['/login']);\n};",
+              "simpleExample": "Used to protect routes from unauthorized access."
+            },
+            {
+              "question": "What is CanDeactivate guard?",
+              "answer": "CanDeactivate prevents users from leaving a route, commonly used to stop navigation when there are unsaved changes in a form.",
+              "codeExample": "export const unsavedGuard: CanDeactivateFn<FormComponent> = (component) => {\n  return component.hasUnsavedChanges()\n    ? confirm('You have unsaved changes. Leave anyway?')\n    : true;\n};",
+              "simpleExample": "Warns user before leaving a form without saving."
+            },
+            {
+              "question": "What is CanLoad guard?",
+              "answer": "CanLoad prevents lazy-loaded modules from being downloaded if the condition fails, such as user not having permission.",
+              "simpleExample": "Blocks module download for unauthorized users."
+            },
+            {
+              "question": "What is CanMatch guard?",
+              "answer": "CanMatch decides whether a route should even be considered for matching during navigation, used in modern Angular routing.",
+              "simpleExample": "Prevents route from being selected entirely."
+            },
+            {
+              "question": "What is the difference between CanActivate and CanMatch?",
+              "answer": "CanActivate runs after route matching and blocks component activation. CanMatch runs during route matching and prevents the route from being considered, allowing fallback routes to match instead.",
+              "simpleExample": "CanMatch lets Angular fall through to the next matching route. CanActivate does not."
+            }
+          ]
+        },
+        "Change Detection": {
+          "icon": "👁️",
+          "questions": [
+            {
+              "question": "What is ChangeDetectionStrategy.OnPush?",
+              "answer": "OnPush is a change detection strategy that improves performance by checking a component only when an input reference changes, an event occurs inside the component, or an Observable used by Async Pipe emits a value.",
+              "codeExample": "@Component({\n  selector: 'app-user',\n  changeDetection: ChangeDetectionStrategy.OnPush\n})",
+              "simpleExample": "Angular avoids checking the component during every change detection cycle."
+            },
+            {
+              "question": "Difference between Default and OnPush Change Detection?",
+              "answer": "Default Change Detection checks the entire component tree during each cycle, while OnPush limits checks to specific triggers such as input reference changes, events, and Observable emissions.",
+              "simpleExample": "OnPush reduces unnecessary component checks and improves performance."
+            },
+            {
+              "question": "Why doesn't object mutation trigger OnPush updates?",
+              "answer": "OnPush relies on reference changes. Modifying a property on an existing object keeps the same reference, so Angular does not detect it as a change.",
+              "codeExample": "// ❌ Won't trigger OnPush\nuser.name = 'John';\n\n// ✅ New reference triggers OnPush\nthis.user = { ...this.user, name: 'John' };",
+              "simpleExample": "Create a new object instead of modifying the existing one."
+            },
+            {
+              "question": "Why does Async Pipe work with OnPush?",
+              "answer": "When an Observable emits a new value, Async Pipe marks the component for checking, allowing Angular to update the view even when OnPush is enabled.",
+              "simpleExample": "Observable emissions trigger UI updates automatically."
+            }
+          ]
+        },
+        "RxJS Operators": {
+          "icon": "⚙️",
+          "questions": [
+            {
+              "question": "What is a Cold Observable?",
+              "answer": "A Cold Observable starts execution only when subscribed. Each subscriber gets its own independent execution.",
+              "codeExample": "const users$ = this.http.get('/users');\n// No request yet\nusers$.subscribe(); // Request 1\nusers$.subscribe(); // Request 2 — separate!",
+              "simpleExample": "Every subscription starts a new stream."
+            },
+            {
+              "question": "What happens when multiple subscriptions are made to an HttpClient Observable?",
+              "answer": "Each subscription triggers a new HTTP request because HttpClient Observables are cold Observables.",
+              "codeExample": "users$.subscribe(); // HTTP call 1\nusers$.subscribe(); // HTTP call 2",
+              "simpleExample": "Two subscriptions result in two API calls."
+            },
+            {
+              "question": "What is takeUntil()?",
+              "answer": "takeUntil automatically unsubscribes from an Observable when another Observable emits a value.",
+              "codeExample": "private destroy$ = new Subject<void>();\n\nthis.data$.pipe(\n  takeUntil(this.destroy$)\n).subscribe();\n\nngOnDestroy() {\n  this.destroy$.next();\n  this.destroy$.complete();\n}",
+              "simpleExample": "Used to clean up subscriptions when a component is destroyed."
+            },
+            {
+              "question": "Why is takeUntil preferred over manually unsubscribing multiple subscriptions?",
+              "answer": "takeUntil provides centralized cleanup for multiple subscriptions and reduces the risk of memory leaks caused by forgotten unsubscribe calls.",
+              "simpleExample": "One destroy Subject can clean up many subscriptions."
+            },
+            {
+              "question": "What is map() operator in RxJS?",
+              "answer": "map() transforms emitted values into a new form before passing them to the next operator or subscriber.",
+              "codeExample": "this.http.get<ApiResponse>('/users').pipe(\n  map(res => res.data)\n)",
+              "simpleExample": "Convert data into a different shape."
+            },
+            {
+              "question": "What is filter() operator in RxJS?",
+              "answer": "filter() only allows values that match a condition to continue through the stream.",
+              "codeExample": "of(1,2,3,4).pipe(\n  filter(x => x > 2)\n) // emits 3, 4",
+              "simpleExample": "Keeps wanted values and ignores others."
+            },
+            {
+              "question": "What is switchMap() in RxJS?",
+              "answer": "switchMap cancels the previous inner Observable and switches to the new one. Commonly used for search-as-you-type to avoid stale responses.",
+              "codeExample": "searchControl.valueChanges.pipe(\n  debounceTime(300),\n  switchMap(term => this.api.search(term))\n).subscribe(results => this.results = results);",
+              "simpleExample": "If user types fast, only the last search request is kept. Previous ones are cancelled."
+            },
+            {
+              "question": "What is catchError() operator in RxJS?",
+              "answer": "catchError handles errors in an Observable stream and allows fallback values or alternate actions.",
+              "codeExample": "this.http.get('/users').pipe(\n  catchError(err => {\n    console.error(err);\n    return of([]);\n  })\n)",
+              "simpleExample": "Prevent application crashes from failed API calls."
+            }
+          ]
+        },
+        "Forms Advanced": {
+          "icon": "📋",
+          "questions": [
+            {
+              "question": "How do you add and remove items from a FormArray?",
+              "answer": "Use push() to add a new FormGroup or FormControl and removeAt(index) to remove an item.",
+              "codeExample": "// Add\nthis.employees.push(new FormGroup({ name: new FormControl('') }));\n\n// Remove\nthis.employees.removeAt(index);",
+              "simpleExample": "Commonly used for dynamic forms where users can add or remove entries."
+            },
+            {
+              "question": "What is the difference between patchValue() and setValue()?",
+              "answer": "patchValue() updates only specified controls, while setValue() requires values for all controls in the FormGroup.",
+              "codeExample": "// patchValue — partial update\nform.patchValue({ firstName: 'Manav' });\n\n// setValue — must provide all fields\nform.setValue({ firstName: 'Manav', email: 'manav@example.com' });",
+              "simpleExample": "patchValue behaves like PATCH, setValue behaves like PUT."
+            },
+            {
+              "question": "What is getRawValue() in Reactive Forms?",
+              "answer": "getRawValue() returns all form values including disabled controls, whereas form.value excludes disabled controls.",
+              "codeExample": "// form.value skips disabled controls\n// getRawValue() includes them\nconst data = form.getRawValue();",
+              "simpleExample": "Useful when disabled fields must still be sent to the backend."
+            }
+          ]
+        }
+      }
+    },
+    "4+": {
+      "modules": {
+        "State Management": {
+          "icon": "🏗️",
+          "questions": [
+            {
+              "question": "What is a Singleton Service?",
+              "answer": "A Singleton Service is a service where only one instance exists throughout the application and is shared by all components.",
+              "codeExample": "@Injectable({ providedIn: 'root' })\nexport class AppStateService {\n  private state = signal({ user: null, cart: [] });\n}",
+              "simpleExample": "One shared service instance across app."
+            },
+            {
+              "question": "When would you choose a Shared Service over @Input/@Output?",
+              "answer": "Shared Services are preferred when multiple unrelated components need access to the same state. This avoids excessive parent-child data passing and reduces coupling.",
+              "simpleExample": "Navbar, Profile, Dashboard, and Settings all accessing the logged-in user."
+            },
+            {
+              "question": "What is Prop Drilling and how can it be avoided?",
+              "answer": "Prop Drilling occurs when data is passed through multiple component levels using @Input even though intermediate components do not need the data. Shared Services, Signals, or state management libraries help avoid this.",
+              "simpleExample": "Passing user data through 4 nested components to reach a child."
+            },
+            {
+              "question": "What is BehaviorSubject and why is it commonly used for state management?",
+              "answer": "BehaviorSubject stores the latest emitted value and immediately provides it to new subscribers. This makes it useful for maintaining shared application state.",
+              "codeExample": "private userState = new BehaviorSubject<User|null>(null);\nuser$ = this.userState.asObservable();\n\nsetUser(user: User) { this.userState.next(user); }",
+              "simpleExample": "User information shared across Navbar and Profile components."
+            }
+          ]
+        },
+        "Signals": {
+          "icon": "⚡",
+          "questions": [
+            {
+              "question": "What is a Signal in Angular?",
+              "answer": "A Signal is a reactive state container that automatically tracks changes and updates dependent values without requiring subscriptions.",
+              "codeExample": "count = signal(0);\nthis.count.set(5);\nthis.count.update(v => v + 1);",
+              "simpleExample": "count = signal(0); — any template or computed that reads it rerenders automatically."
+            },
+            {
+              "question": "How do you read and update a Signal?",
+              "answer": "Signals are read using function syntax and updated using set() or update().",
+              "codeExample": "const value = count();    // read\ncount.set(10);            // set absolute value\ncount.update(v => v + 1); // update based on current",
+              "simpleExample": "Reading a signal returns its current value and set() updates it."
+            },
+            {
+              "question": "What is computed() in Angular Signals?",
+              "answer": "computed() creates derived state that automatically recalculates whenever dependent signals change.",
+              "codeExample": "count = signal(5);\ndoubleCount = computed(() => this.count() * 2);\n// doubleCount() = 10, auto-updates when count changes",
+              "simpleExample": "Updating count automatically updates doubleCount."
+            },
+            {
+              "question": "What is effect() in Angular Signals?",
+              "answer": "effect() executes side effects whenever a signal dependency changes.",
+              "codeExample": "effect(() => {\n  console.log('User changed:', this.user());\n  localStorage.setItem('user', JSON.stringify(this.user()));\n});",
+              "simpleExample": "Logging, analytics tracking, or localStorage updates when state changes."
+            },
+            {
+              "question": "Difference between BehaviorSubject and Signals?",
+              "answer": "BehaviorSubject is RxJS-based and requires subscriptions, while Signals provide built-in Angular reactivity with automatic dependency tracking and no subscriptions.",
+              "simpleExample": "Signals are simpler for local UI state, while BehaviorSubject is commonly used for shared application state."
+            },
+            {
+              "question": "How do Signals improve state management compared to traditional RxJS patterns?",
+              "answer": "Signals reduce the need for subscriptions, Async Pipe usage, and manual cleanup while automatically tracking dependencies and updating derived state.",
+              "codeExample": "// RxJS: manual subscription + async pipe\nusers$ = this.service.getUsers();\n\n// Signals: no subscriptions, no pipe\nusers = signal<User[]>([]);\n// template: {{ users().length }} — just works",
+              "simpleExample": "computed() recalculates automatically when dependent signals change."
+            }
+          ]
+        },
+        "Lazy Loading & Performance": {
+          "icon": "🚀",
+          "questions": [
+            {
+              "question": "What is Lazy Loading in Angular (advanced)?",
+              "answer": "Lazy Loading loads feature modules or standalone components only when the user navigates to them instead of loading everything at startup, improving performance and initial load time.",
+              "codeExample": "// Lazy-loaded standalone component\n{\n  path: 'dashboard',\n  loadComponent: () =>\n    import('./dashboard/dashboard').then(m => m.DashboardComponent)\n}",
+              "simpleExample": "Modules are loaded only when needed (on demand)."
+            },
+            {
+              "question": "What is preloading strategy in Angular routing?",
+              "answer": "Preloading loads lazy modules in the background after the initial load, so they are already available when the user navigates to them. Angular's PreloadAllModules strategy preloads everything.",
+              "codeExample": "provideRouter(\n  routes,\n  withPreloading(PreloadAllModules)\n)",
+              "simpleExample": "App loads fast first, then quietly downloads other modules in background."
+            },
+            {
+              "question": "What is trackBy in *ngFor and why is it important?",
+              "answer": "trackBy is a function that tells Angular how to identify list items. Without it, Angular re-renders the entire list on any change. With trackBy, Angular only updates changed items.",
+              "codeExample": "// Template\n*ngFor='let item of items; trackBy: trackById'\n\n// Component\ntrackById(index: number, item: Item) {\n  return item.id;\n}",
+              "simpleExample": "Instead of rebuilding the entire list, Angular only updates what actually changed."
+            }
+          ]
+        }
+      }
+    }
   }
 }

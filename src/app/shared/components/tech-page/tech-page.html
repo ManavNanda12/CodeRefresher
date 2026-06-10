@@ -14,17 +14,17 @@
           @if (loading()) {
             Loading questions…
           } @else {
-            {{ totalCount() }} questions across 2 experience levels
+            {{ totalCount() }} questions across 4 experience levels
           }
         </p>
       </div>
     </div>
   </header>
 
-  <!-- ── Tabs ───────────────────────────────────────── -->
+  <!-- ── Year Tabs ──────────────────────────────────── -->
   <div class="tabs-section">
     <div class="tabs-pill" role="tablist" aria-label="Experience level">
-      @for (tab of tabs; track tab.key) {
+      @for (tab of tabs(); track tab.key) {
         <button
           class="tab-btn"
           role="tab"
@@ -32,11 +32,41 @@
           [attr.aria-selected]="activeTab() === tab.key"
           (click)="setTab(tab.key)">
           <span class="tab-label">{{ tab.label }}</span>
-          <span class="tab-chip">{{ allData()[tab.key]?.length || 0 }}</span>
+          <span class="tab-chip">{{ tabCounts()[tab.key] || 0 }}</span>
         </button>
       }
     </div>
   </div>
+
+  <!-- ── Module Filter Pills ───────────────────────── -->
+  @if (!loading() && currentModules().length > 0) {
+    <div class="modules-section">
+      <div class="modules-row" role="group" aria-label="Topic modules">
+
+        <button
+          class="module-pill"
+          [class.active]="activeModule() === null"
+          (click)="setModule(null)">
+          <span class="module-icon">🗂️</span>
+          <span class="module-name">All Topics</span>
+          <span class="module-count">{{ tabCounts()[activeTab()] || 0 }}</span>
+        </button>
+
+        @for (mod of currentModules(); track mod; let i = $index) {
+          <button
+            class="module-pill"
+            [class.active]="activeModule() === mod"
+            [style.--pill-delay]="(i * 60) + 'ms'"
+            (click)="setModule(mod)">
+            <span class="module-icon">{{ getModuleIcon(mod) }}</span>
+            <span class="module-name">{{ mod }}</span>
+            <span class="module-count">{{ getModuleCount(mod) }}</span>
+          </button>
+        }
+
+      </div>
+    </div>
+  }
 
   <!-- ── Loading ────────────────────────────────────── -->
   @if (loading()) {
@@ -62,7 +92,7 @@
       } @empty {
         <div class="empty-state">
           <span class="empty-icon">📭</span>
-          <p>No questions found for this category.</p>
+          <p>No questions found for this module.</p>
         </div>
       }
     </div>

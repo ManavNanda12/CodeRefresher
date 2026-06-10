@@ -345,6 +345,144 @@
   font-size: 0.875rem;
 }
 
+/* ── Creator Card ────────────────────────────────────────────────── */
+.footer-creator-row {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  justify-content: center;
+}
+
+.creator-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.creator-card:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.35);
+  transform: translateY(-3px);
+  box-shadow:
+    0 12px 40px rgba(99, 102, 241, 0.18),
+    0 0 0 1px rgba(99, 102, 241, 0.15);
+}
+
+/* Animated glow blob that sweeps on hover */
+.creator-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.18) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.creator-card:hover .creator-glow {
+  opacity: 1;
+}
+
+/* Avatar circle with pulse ring */
+.creator-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.creator-initials {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+.creator-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  animation: creatorPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes creatorPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.15); opacity: 0; }
+}
+
+/* Text info */
+.creator-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.creator-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #475569;
+}
+
+.creator-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  transition: color 0.25s;
+}
+
+.creator-card:hover .creator-name {
+  color: #a5b4fc;
+}
+
+.creator-handle {
+  font-size: 0.75rem;
+  color: #475569;
+}
+
+/* Link badge */
+.creator-link-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 100px;
+  color: #818cf8;
+  font-size: 0.74rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.creator-card:hover .creator-link-badge {
+  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(99, 102, 241, 0.45);
+  color: #c7d2fe;
+  transform: translateX(3px);
+}
+
+/* ── Footer Bottom ──────────────────────────────────────────────── */
 .footer-bottom {
   display: flex;
   align-items: center;
@@ -374,4 +512,6 @@
   .footer-top { grid-template-columns: 1fr; gap: 2rem; }
   .footer-inner { padding: 2.5rem 1.25rem 1.5rem; }
   .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .creator-card { width: 100%; }
+  .creator-link-badge { margin-left: auto; }
 }

@@ -23,7 +23,9 @@ export class CardComponent {
   copyCode(event: Event): void {
     event.stopPropagation();
     if (!isPlatformBrowser(this.platformId)) return;
-    navigator.clipboard.writeText(this.item().codeExample).then(() => {
+    const code = this.item().codeExample;
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 2000);
     });

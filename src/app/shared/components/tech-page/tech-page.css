@@ -7,11 +7,9 @@
   position: relative;
   overflow: hidden;
   padding: 2.5rem 2.5rem 3rem;
-  margin-bottom: 0;
   color: white;
 }
 
-/* Subtle dot-grid overlay */
 .hero-pattern {
   position: absolute;
   inset: 0;
@@ -20,7 +18,6 @@
   pointer-events: none;
 }
 
-/* Soft glow at top-right */
 .page-hero::before {
   content: '';
   position: absolute;
@@ -58,10 +55,7 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
 }
 
-.hero-icon {
-  font-size: 2rem;
-  line-height: 1;
-}
+.hero-icon { font-size: 2rem; line-height: 1; }
 
 .hero-tag {
   display: inline-block;
@@ -91,7 +85,7 @@
   opacity: 0.85;
 }
 
-/* ── Tabs ─────────────────────────────────────────── */
+/* ── Year Tabs ────────────────────────────────────── */
 .tabs-section {
   padding: 1.5rem 2.5rem 0;
   max-width: 1400px;
@@ -105,6 +99,7 @@
   padding: 5px;
   border-radius: 14px;
   border: 1px solid #cbd5e1;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -119,7 +114,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
   white-space: nowrap;
 }
@@ -151,12 +146,107 @@
   border-radius: 100px;
   background: #e2e8f0;
   color: #64748b;
-  transition: all 0.2s;
+  transition: all 0.22s;
 }
 
 .tab-btn.active .tab-chip {
   background: #e0e7ff;
   color: #4338ca;
+}
+
+/* ── Module Pills ─────────────────────────────────── */
+.modules-section {
+  padding: 1.25rem 2.5rem 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.modules-row {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.modules-row::-webkit-scrollbar {
+  height: 3px;
+}
+.modules-row::-webkit-scrollbar-track { background: transparent; }
+.modules-row::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+.module-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 100px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pillSlideIn 0.35s ease-out var(--pill-delay, 0ms) both;
+  flex-shrink: 0;
+}
+
+.module-pill:hover:not(.active) {
+  border-color: #a5b4fc;
+  color: #4f46e5;
+  background: #f5f3ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+}
+
+.module-pill.active {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+  transform: translateY(-1px);
+}
+
+.module-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.module-name {
+  font-size: 0.8rem;
+}
+
+.module-count {
+  font-size: 0.67rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.35rem;
+  border-radius: 100px;
+  background: rgba(0,0,0,0.08);
+  transition: background 0.22s;
+}
+
+.module-pill.active .module-count {
+  background: rgba(255,255,255,0.25);
+}
+
+@keyframes pillSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 /* ── Skeleton Loading ───────────────────────────── */
@@ -209,6 +299,22 @@
   margin: 0 auto;
 }
 
+/* Card enter animation driven by --delay from parent */
+.cards-grid > * {
+  animation: cardEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms) both;
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* ── Empty State ────────────────────────────────── */
 .empty-state {
   grid-column: 1 / -1;
@@ -230,11 +336,15 @@
   .hero-icon-wrap   { width: 56px; height: 56px; border-radius: 14px; }
   .hero-icon        { font-size: 1.5rem; }
   .tabs-section     { padding: 1.25rem 1.25rem 0; }
+  .modules-section  { padding: 1rem 1.25rem 0; }
   .cards-grid       { grid-template-columns: 1fr; padding: 1.25rem 1.25rem 0; gap: 1rem; }
   .skeleton-grid    { grid-template-columns: 1fr; }
   .loading-wrap     { padding: 1.5rem 1.25rem; }
+  .tabs-pill        { width: 100%; }
+  .tab-btn          { flex: 1; justify-content: center; padding: 0.5rem 0.75rem; }
 }
 
 @media (max-width: 480px) {
-  .tab-btn { padding: 0.5rem 1rem; }
+  .tab-btn { padding: 0.45rem 0.6rem; font-size: 0.8rem; }
+  .tab-label { font-size: 0.8rem; }
 }
