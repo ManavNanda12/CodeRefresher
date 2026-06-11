@@ -3,7 +3,7 @@
     "0-1": {
       "modules": {
         "Directives": {
-          "icon": "🎯",
+          "icon": "\ud83c\udfaf",
           "questions": [
             {
               "question": "What is a Directive in Angular?",
@@ -38,7 +38,7 @@
           ]
         },
         "Pipes": {
-          "icon": "🔧",
+          "icon": "\ud83d\udd27",
           "questions": [
             {
               "question": "What is a Pipe in Angular?",
@@ -73,7 +73,7 @@
           ]
         },
         "Services & DI": {
-          "icon": "💉",
+          "icon": "\ud83d\udc89",
           "questions": [
             {
               "question": "What is a Service in Angular?",
@@ -108,7 +108,7 @@
           ]
         },
         "Component Communication": {
-          "icon": "📡",
+          "icon": "\ud83d\udce1",
           "questions": [
             {
               "question": "What is @Input in Angular?",
@@ -137,7 +137,7 @@
           ]
         },
         "Lifecycle Hooks": {
-          "icon": "🔄",
+          "icon": "\ud83d\udd04",
           "questions": [
             {
               "question": "What is an Angular Lifecycle Hook?",
@@ -176,7 +176,7 @@
     "1-2": {
       "modules": {
         "Routing": {
-          "icon": "🗺️",
+          "icon": "\ud83d\uddfa\ufe0f",
           "questions": [
             {
               "question": "What is Angular Routing?",
@@ -211,7 +211,7 @@
               "question": "What are Child Routes in Angular?",
               "answer": "Child routes allow nesting routes inside a parent route and render them inside a child router-outlet.",
               "codeExample": "{\n  path: 'admin',\n  children: [\n    { path: 'users', component: UsersComponent },\n    { path: 'settings', component: SettingsComponent }\n  ]\n}",
-              "simpleExample": "Used for layouts like Admin → Users, Settings, Reports."
+              "simpleExample": "Used for layouts like Admin \u2192 Users, Settings, Reports."
             },
             {
               "question": "Why is Lazy Loading used in Angular?",
@@ -233,7 +233,7 @@
           ]
         },
         "HttpClient": {
-          "icon": "🌐",
+          "icon": "\ud83c\udf10",
           "questions": [
             {
               "question": "What is HttpClient?",
@@ -255,8 +255,31 @@
             }
           ]
         },
+        "HTTP Interceptors": {
+          "icon": "\ud83d\udd0c",
+          "questions": [
+            {
+              "question": "What is an HTTP Interceptor in Angular?",
+              "answer": "An HTTP Interceptor is a middleware that intercepts HTTP requests and responses globally before they reach the server or component.",
+              "codeExample": "export const loggingInterceptor: HttpInterceptorFn = (req, next) => {\n  console.log('Outgoing request:', req.method, req.url);\n  return next(req);\n};",
+              "simpleExample": "Automatically attaching authentication headers to every API request."
+            },
+            {
+              "question": "Why use an HTTP Interceptor instead of repeating logic in every API call?",
+              "answer": "Interceptors centralize common request and response logic such as authentication, error handling, logging, and loaders, reducing duplicate code.",
+              "codeExample": "// \u274c Without Interceptor \u2014 repeated in every service\nthis.http.get('/api/users', {\n  headers: { Authorization: `Bearer ${token}` }\n});\n\n// \u2705 With Interceptor \u2014 handled once globally\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const authReq = req.clone({\n    setHeaders: { Authorization: `Bearer ${token}` }\n  });\n  return next(authReq);\n};",
+              "simpleExample": "Adding a Bearer token to all API requests from one place."
+            },
+            {
+              "question": "How can HTTP Interceptors be used for authentication?",
+              "answer": "Interceptors can clone outgoing requests and attach authorization headers before sending them to the server.",
+              "codeExample": "export const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(AuthService).getToken();\n  const authReq = req.clone({\n    setHeaders: { Authorization: `Bearer ${token}` }\n  });\n  return next(authReq);\n};",
+              "simpleExample": "Adding Authorization: Bearer TOKEN to every request."
+            }
+          ]
+        },
         "RxJS & Observables": {
-          "icon": "🌊",
+          "icon": "\ud83c\udf0a",
           "questions": [
             {
               "question": "What is an Observable?",
@@ -312,7 +335,7 @@
           ]
         },
         "Change Detection": {
-          "icon": "👁️",
+          "icon": "\ud83d\udc41\ufe0f",
           "questions": [
             {
               "question": "What is Change Detection in Angular?",
@@ -327,7 +350,7 @@
           ]
         },
         "Reactive Forms": {
-          "icon": "📝",
+          "icon": "\ud83d\udcdd",
           "questions": [
             {
               "question": "What is Reactive Forms in Angular?",
@@ -365,13 +388,58 @@
               "simpleExample": "Useful for adding multiple addresses, officers, bank accounts, or assets dynamically."
             }
           ]
+        },
+        "Ngrx Store": {
+          "icon": "\ud83d\udce6",
+          "questions": [
+            {
+              "question": "What is NgRx and why is it used?",
+              "answer": "NgRx is a state management library for Angular that provides a centralized store for managing application state in a predictable way.",
+              "simpleExample": "User, notifications, and theme data can be managed from a single store."
+            },
+            {
+              "question": "What is a Store in NgRx?",
+              "answer": "Store is the centralized state container that holds the application's state and allows components to access it.",
+              "simpleExample": "The store may contain user, employees, notifications, and settings data."
+            },
+            {
+              "question": "What is an Action in NgRx?",
+              "answer": "An Action represents an event or operation that occurred in the application. Actions describe what happened but do not contain business logic.",
+              "simpleExample": "Load Employees, Login, Logout, Delete Employee."
+            },
+            {
+              "question": "What is an Effect in NgRx?",
+              "answer": "Effects handle side effects such as API calls, HTTP requests, logging, and external operations. They listen for actions and can dispatch new actions based on results.",
+              "simpleExample": "LoadEmployees action triggers an API call and dispatches LoadEmployeesSuccess."
+            },
+            {
+              "question": "What is a Reducer in NgRx?",
+              "answer": "A Reducer is a pure function that takes the current state and an action and returns a new state. Reducers should not perform API calls or side effects.",
+              "simpleExample": "Updating the employees array in the store after a successful API response."
+            },
+            {
+              "question": "What is a Selector in NgRx?",
+              "answer": "Selectors are used to retrieve specific slices of state from the store instead of subscribing to the entire store.",
+              "simpleExample": "Selecting only employees data from the application state."
+            },
+            {
+              "question": "What is the typical NgRx data flow?",
+              "answer": "A component dispatches an action, an effect performs side effects such as API calls, a success action is dispatched, a reducer updates the store, and selectors provide updated data to components.",
+              "simpleExample": "Load Employees \u2192 Effect \u2192 API Call \u2192 Success Action \u2192 Reducer \u2192 Store Update."
+            },
+            {
+              "question": "When would you choose NgRx over a Shared Service with BehaviorSubject?",
+              "answer": "NgRx is preferred for large applications with complex shared state, multiple features, and many components requiring predictable state management. Shared Services are often sufficient for smaller applications.",
+              "simpleExample": "Enterprise applications with user state, permissions, notifications, and multiple modules."
+            }
+          ]
         }
       }
     },
     "2-3": {
       "modules": {
         "HTTP Interceptors": {
-          "icon": "🔒",
+          "icon": "\ud83d\udd12",
           "questions": [
             {
               "question": "What is an HTTP Interceptor?",
@@ -389,11 +457,23 @@
               "answer": "Interceptors automatically attach JWT tokens to outgoing requests and can handle authentication-related errors such as 401 responses.",
               "codeExample": "return next(authReq).pipe(\n  catchError(err => {\n    if (err.status === 401) router.navigate(['/login']);\n    return throwError(() => err);\n  })\n);",
               "simpleExample": "Token is automatically added to every API request."
+            },
+            {
+              "question": "How can HTTP Interceptors help with global error handling?",
+              "answer": "Interceptors can catch common HTTP errors such as 401, 403, and 500 and execute centralized handling logic like redirects, toast notifications, or logging.",
+              "codeExample": "export const errorInterceptor: HttpInterceptorFn = (req, next) => {\n  return next(req).pipe(\n    catchError(err => {\n      if (err.status === 401) inject(Router).navigate(['/login']);\n      if (err.status === 403) inject(Router).navigate(['/forbidden']);\n      if (err.status >= 500) inject(ToastService).show('Server error');\n      return throwError(() => err);\n    })\n  );\n};",
+              "simpleExample": "Redirecting users to the login page when a 401 Unauthorized response is received."
+            },
+            {
+              "question": "How can HTTP Interceptors be used to show a global loader?",
+              "answer": "Interceptors can display a loader when a request starts and hide it when the request completes or fails using the finalize() operator.",
+              "codeExample": "export const loaderInterceptor: HttpInterceptorFn = (req, next) => {\n  const loader = inject(LoaderService);\n  loader.show();\n  return next(req).pipe(\n    finalize(() => loader.hide())\n  );\n};",
+              "simpleExample": "Using a spinner service to show loading status for all API calls automatically."
             }
           ]
         },
         "Route Guards": {
-          "icon": "🛡️",
+          "icon": "\ud83d\udee1\ufe0f",
           "questions": [
             {
               "question": "What is CanActivate guard (advanced)?",
@@ -425,7 +505,7 @@
           ]
         },
         "Change Detection": {
-          "icon": "👁️",
+          "icon": "\ud83d\udc41\ufe0f",
           "questions": [
             {
               "question": "What is ChangeDetectionStrategy.OnPush?",
@@ -441,7 +521,7 @@
             {
               "question": "Why doesn't object mutation trigger OnPush updates?",
               "answer": "OnPush relies on reference changes. Modifying a property on an existing object keeps the same reference, so Angular does not detect it as a change.",
-              "codeExample": "// ❌ Won't trigger OnPush\nuser.name = 'John';\n\n// ✅ New reference triggers OnPush\nthis.user = { ...this.user, name: 'John' };",
+              "codeExample": "// \u274c Won't trigger OnPush\nuser.name = 'John';\n\n// \u2705 New reference triggers OnPush\nthis.user = { ...this.user, name: 'John' };",
               "simpleExample": "Create a new object instead of modifying the existing one."
             },
             {
@@ -452,12 +532,12 @@
           ]
         },
         "RxJS Operators": {
-          "icon": "⚙️",
+          "icon": "\u2699\ufe0f",
           "questions": [
             {
               "question": "What is a Cold Observable?",
               "answer": "A Cold Observable starts execution only when subscribed. Each subscriber gets its own independent execution.",
-              "codeExample": "const users$ = this.http.get('/users');\n// No request yet\nusers$.subscribe(); // Request 1\nusers$.subscribe(); // Request 2 — separate!",
+              "codeExample": "const users$ = this.http.get('/users');\n// No request yet\nusers$.subscribe(); // Request 1\nusers$.subscribe(); // Request 2 \u2014 separate!",
               "simpleExample": "Every subscription starts a new stream."
             },
             {
@@ -504,7 +584,7 @@
           ]
         },
         "Forms Advanced": {
-          "icon": "📋",
+          "icon": "\ud83d\udccb",
           "questions": [
             {
               "question": "How do you add and remove items from a FormArray?",
@@ -515,7 +595,7 @@
             {
               "question": "What is the difference between patchValue() and setValue()?",
               "answer": "patchValue() updates only specified controls, while setValue() requires values for all controls in the FormGroup.",
-              "codeExample": "// patchValue — partial update\nform.patchValue({ firstName: 'Manav' });\n\n// setValue — must provide all fields\nform.setValue({ firstName: 'Manav', email: 'manav@example.com' });",
+              "codeExample": "// patchValue \u2014 partial update\nform.patchValue({ firstName: 'Manav' });\n\n// setValue \u2014 must provide all fields\nform.setValue({ firstName: 'Manav', email: 'manav@example.com' });",
               "simpleExample": "patchValue behaves like PATCH, setValue behaves like PUT."
             },
             {
@@ -531,7 +611,7 @@
     "4+": {
       "modules": {
         "State Management": {
-          "icon": "🏗️",
+          "icon": "\ud83c\udfd7\ufe0f",
           "questions": [
             {
               "question": "What is a Singleton Service?",
@@ -558,13 +638,13 @@
           ]
         },
         "Signals": {
-          "icon": "⚡",
+          "icon": "\u26a1",
           "questions": [
             {
               "question": "What is a Signal in Angular?",
               "answer": "A Signal is a reactive state container that automatically tracks changes and updates dependent values without requiring subscriptions.",
               "codeExample": "count = signal(0);\nthis.count.set(5);\nthis.count.update(v => v + 1);",
-              "simpleExample": "count = signal(0); — any template or computed that reads it rerenders automatically."
+              "simpleExample": "count = signal(0); \u2014 any template or computed that reads it rerenders automatically."
             },
             {
               "question": "How do you read and update a Signal?",
@@ -592,13 +672,30 @@
             {
               "question": "How do Signals improve state management compared to traditional RxJS patterns?",
               "answer": "Signals reduce the need for subscriptions, Async Pipe usage, and manual cleanup while automatically tracking dependencies and updating derived state.",
-              "codeExample": "// RxJS: manual subscription + async pipe\nusers$ = this.service.getUsers();\n\n// Signals: no subscriptions, no pipe\nusers = signal<User[]>([]);\n// template: {{ users().length }} — just works",
+              "codeExample": "// RxJS: manual subscription + async pipe\nusers$ = this.service.getUsers();\n\n// Signals: no subscriptions, no pipe\nusers = signal<User[]>([]);\n// template: {{ users().length }} \u2014 just works",
               "simpleExample": "computed() recalculates automatically when dependent signals change."
             }
           ]
         },
+        "HTTP Interceptors (Advanced)": {
+          "icon": "\ud83d\udd10",
+          "questions": [
+            {
+              "question": "How can HTTP Interceptors be used with refresh tokens?",
+              "answer": "When a request receives a 401 response, the interceptor can call a refresh token API, obtain a new access token, and retry the original request transparently.",
+              "codeExample": "export const refreshTokenInterceptor: HttpInterceptorFn = (req, next) => {\n  const auth = inject(AuthService);\n  return next(req).pipe(\n    catchError(err => {\n      if (err.status === 401 && !req.url.includes('/refresh')) {\n        return auth.refreshToken().pipe(\n          switchMap(newToken => {\n            const retryReq = req.clone({\n              setHeaders: { Authorization: `Bearer ${newToken}` }\n            });\n            return next(retryReq);\n          }),\n          catchError(refreshErr => {\n            auth.logout();\n            return throwError(() => refreshErr);\n          })\n        );\n      }\n      return throwError(() => err);\n    })\n  );\n};",
+              "simpleExample": "Users remain logged in without manually re-authenticating."
+            },
+            {
+              "question": "Should API response transformation happen in services or interceptors?",
+              "answer": "Feature-specific transformations are usually handled in services, while common transformations shared across all APIs can be handled in interceptors. Interceptors are best for unwrapping a standard API envelope, while services handle domain-specific mapping.",
+              "codeExample": "// \u2705 Service \u2014 feature-specific transformation\ngetUsers(): Observable<User[]> {\n  return this.http.get<ApiResponse<User[]>>('/users').pipe(\n    map(res => res.data)\n  );\n}\n\n// \u2705 Interceptor \u2014 common envelope unwrapping\nexport const responseInterceptor: HttpInterceptorFn = (req, next) => {\n  return next(req).pipe(\n    map(event => {\n      if (event instanceof HttpResponse && event.body?.data) {\n        return event.clone({ body: event.body.data });\n      }\n      return event;\n    })\n  );\n};",
+              "simpleExample": "Extracting res.data in a service versus normalizing all API responses in an interceptor."
+            }
+          ]
+        },
         "Lazy Loading & Performance": {
-          "icon": "🚀",
+          "icon": "\ud83d\ude80",
           "questions": [
             {
               "question": "What is Lazy Loading in Angular (advanced)?",
