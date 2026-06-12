@@ -1,7 +1,9 @@
 import { Component, computed, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
+import { ProgressService, RoundRecord } from '../../core/services/progress.service';
 import { RefresherData, RefresherItem } from '../../core/models/refresher-item.model';
 import {
   TestMeService,
@@ -83,7 +85,7 @@ const HISTORY_MAX = 6;
 
 @Component({
   selector: 'app-test-me',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './test-me.html',
   styleUrl: './test-me.css',
 })
@@ -91,6 +93,7 @@ export class TestMeComponent {
   private platformId = inject(PLATFORM_ID);
   private dataService = inject(DataService);
   private testMe = inject(TestMeService);
+  private progressService = inject(ProgressService);
 
   readonly arenas = ARENAS;
   readonly verdictMap = VERDICT_DISPLAY;
@@ -113,6 +116,7 @@ export class TestMeComponent {
   evalProgress = signal(0); // 0..QUIZ_SIZE, drives the grading animation
 
   private startedAt = 0;
+  private elapsedSeconds = 0;
   elapsedLabel = signal('');
 
   // ── Derived ────────────────────────────────────────────────
@@ -239,7 +243,9 @@ export class TestMeComponent {
 
   // ── Stage 4: evaluate ──────────────────────────────────────
   submitQuiz(): void {
-    this.elapsedLabel.set(this.formatElapsed(this.now() - this.startedAt));
+    const elapsedMs = this.now() - this.startedAt;
+    this.elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
+    this.elapsedLabel.set(this.formatElapsed(elapsedMs));
     this.stage.set('evaluating');
     this.evalProgress.set(0);
     this.runProgressAnimation();
@@ -265,6 +271,7 @@ export class TestMeComponent {
     // small delay so the grading animation feels complete
     const reveal = () => {
       this.persistStats();
+      this.recordProgress();
       this.stage.set('results');
     };
     if (isPlatformBrowser(this.platformId)) {
@@ -403,6 +410,35 @@ export class TestMeComponent {
 
   isNewBest(): boolean {
     return this.newBest();
+  }
+
+  /**
+   * Build a round record from the graded answers and hand it to ProgressService,
+   * which updates the local cache (per-module stats + history) and fires a
+   * non-blocking sync to Cloudflare KV. Drives the Dashboard.
+   */
+  private recordProgress(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const arena = this.selectedArena();
+    const level = this.selectedLevel();
+    const results = this.results();
+    if (!arena || !level || !results.length) return;
+
+    const round: RoundRecord = {
+      id: 'r_' + Math.random().toString(36).slice(2, 10) + this.now().toString(36),
+      date: new Date().toISOString(),
+      arena: arena.id,
+      level: level.key,
+      levelName: level.label,
+      score: this.overallScore(),
+      time: this.elapsedSeconds,
+      questions: this.questions().map((q, i) => ({
+        module: q.module,
+        question: q.question,
+        score: results[i]?.score ?? 0,
+      })),
+    };
+    this.progressService.recordRound(round);
   }
 
   // ── time helpers ───────────────────────────────────────────

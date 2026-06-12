@@ -416,7 +416,8 @@
 
 /* ── buttons ── */
 .btn-soft, .btn-accent, .btn-submit {
-  font-family: inherit; font-weight: 700; font-size: 0.85rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: inherit; font-weight: 700; font-size: 0.85rem; text-decoration: none;
   padding: 0.7rem 1.3rem; border-radius: 11px; cursor: pointer;
   border: 1px solid transparent; transition: transform 0.18s, background 0.2s, box-shadow 0.2s, opacity 0.2s;
 }

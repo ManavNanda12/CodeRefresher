@@ -1,0 +1,67 @@
+@if (open()) {
+  <div class="ob-backdrop" (click)="dismiss()">
+    <div class="ob-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="ob-orb ob-orb-1"></div>
+      <div class="ob-orb ob-orb-2"></div>
+
+      <button class="ob-close" type="button" (click)="dismiss()" aria-label="Close">&#10005;</button>
+
+      @if (mode() === 'email') {
+        <div class="ob-body">
+          <span class="ob-wave">👋</span>
+          <h2 class="ob-title">Welcome to CodeRefresher</h2>
+          <p class="ob-sub">Drop your email to unlock your progress dashboard — track every round, spot weak areas, and pick up on any device.</p>
+
+          <div class="ob-field">
+            <input
+              type="email"
+              class="ob-input"
+              placeholder="you@example.com"
+              autocomplete="email"
+              [value]="emailInput()"
+              (input)="onEmailChange($any($event.target).value)"
+              (keyup.enter)="submitEmail()" />
+          </div>
+
+          @if (error()) { <p class="ob-error">{{ error() }}</p> }
+
+          <button class="ob-go" type="button" [disabled]="submitting()" (click)="submitEmail()">
+            {{ submitting() ? 'Setting up…' : "Let's go →" }}
+          </button>
+
+          <p class="ob-fine">🔒 Saved with a private recovery code — no password needed. We'll only email you about your prep.</p>
+
+          <button class="ob-link" type="button" (click)="switchMode('recover')">
+            Already have a recovery code? Restore →
+          </button>
+        </div>
+      } @else {
+        <div class="ob-body">
+          <span class="ob-wave">🔑</span>
+          <h2 class="ob-title">Restore your progress</h2>
+          <p class="ob-sub">Paste the recovery code from your dashboard to bring your stats to this device.</p>
+
+          <div class="ob-field">
+            <input
+              type="text"
+              class="ob-input"
+              placeholder="cr_1a2b3c4d"
+              [value]="codeInput()"
+              (input)="onCodeChange($any($event.target).value)"
+              (keyup.enter)="submitRecover()" />
+          </div>
+
+          @if (error()) { <p class="ob-error">{{ error() }}</p> }
+
+          <button class="ob-go" type="button" [disabled]="submitting()" (click)="submitRecover()">
+            {{ submitting() ? 'Restoring…' : 'Restore →' }}
+          </button>
+
+          <button class="ob-link" type="button" (click)="switchMode('email')">
+            ← Start fresh with an email instead
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

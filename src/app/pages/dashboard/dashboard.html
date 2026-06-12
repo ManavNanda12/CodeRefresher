@@ -1,0 +1,199 @@
+<section class="arena">
+  <div class="arena-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="arena-inner">
+
+    <!-- ════ OVERVIEW ════ -->
+    @if (view() === 'overview') {
+      <div class="stage-head">
+        <span class="kicker">📊 Your Dashboard</span>
+        <h1 class="dash-title">
+          @if (user.email()) { {{ user.email() }} } @else { Welcome back }
+        </h1>
+        <p class="dash-tagline">
+          @if (refreshing()) { Syncing your latest progress… }
+          @else { Every round you take sharpens this picture. }
+        </p>
+      </div>
+
+      @if (!hasAnyData()) {
+        <!-- empty state -->
+        <div class="empty-card">
+          <span class="empty-emoji">🎯</span>
+          <h2>No rounds yet</h2>
+          <p>Take a Test Me round and your readiness, weak spots, and history will show up here.</p>
+          <a routerLink="/test-me" class="cta-primary">🧪 Start a round →</a>
+        </div>
+      } @else {
+
+        <!-- readiness rings -->
+        <div class="panel">
+          <h2 class="panel-title">Overall Readiness</h2>
+          <div class="ring-grid">
+            @for (c of cards(); track c.meta.id) {
+              <button
+                class="ring-card"
+                type="button"
+                [disabled]="c.rounds === 0"
+                (click)="openArena(c.meta.id)">
+                <span class="ring-arena">{{ c.meta.icon }} {{ c.meta.name }}</span>
+                <div class="ring-wrap">
+                  <svg viewBox="0 0 80 80">
+                    <circle class="ring-bg" cx="40" cy="40" r="34" />
+                    <circle class="ring-fg" cx="40" cy="40" r="34"
+                            [style.stroke]="band(c.avg)"
+                            [style.stroke-dasharray]="RING_CIRC"
+                            [style.stroke-dashoffset]="ringOffset(c.avg)" />
+                  </svg>
+                  <div class="ring-center">
+                    @if (c.avg !== null) {
+                      <span class="ring-score" [style.color]="band(c.avg)">{{ c.avg }}</span>
+                      <span class="ring-out">/10</span>
+                    } @else {
+                      <span class="ring-empty">—</span>
+                    }
+                  </div>
+                </div>
+                @if (c.rounds > 0) {
+                  <span class="ring-meta">{{ c.totalQs }} Qs · {{ c.rounds }} rounds</span>
+                } @else {
+                  <span class="ring-meta dim">not tested yet</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- weak spots -->
+        @if (weakSpots().length) {
+          <div class="panel">
+            <h2 class="panel-title">🔥 Weak Spots</h2>
+            <div class="weak-list">
+              @for (w of weakSpots(); track w.arena.id + w.module) {
+                <div class="weak-row">
+                  <span class="weak-rank">{{ $index + 1 }}</span>
+                  <div class="weak-info">
+                    <span class="weak-name">{{ w.arena.icon }} {{ w.module }}</span>
+                    <span class="weak-sub">{{ w.arena.name }} · {{ w.tested }} Qs tested</span>
+                  </div>
+                  <div class="weak-bar-track">
+                    <div class="weak-bar-fill" [style.width.%]="barPct(w.avg)" [style.background]="band(w.avg)"></div>
+                  </div>
+                  <span class="weak-score" [style.color]="band(w.avg)">{{ w.avg }}</span>
+                </div>
+              }
+            </div>
+            <a routerLink="/test-me" class="cta-primary wide">🎯 Drill these in Test Me →</a>
+          </div>
+        }
+
+        <!-- recent rounds -->
+        @if (recent().length) {
+          <div class="panel">
+            <h2 class="panel-title">📅 Recent Rounds</h2>
+            <div class="round-list">
+              @for (r of recent(); track r.id) {
+                <div class="round-row">
+                  <span class="round-date">{{ formatDate(r.date) }}</span>
+                  <span class="round-arena">{{ arenaMeta(r.arena).icon }} {{ arenaMeta(r.arena).name }}</span>
+                  <span class="round-level">{{ levelName(r) }}</span>
+                  <span class="round-score" [style.color]="band(r.score)">{{ r.score }}/10</span>
+                  <span class="round-time">⏱ {{ formatTime(r.time) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <!-- recovery code -->
+      @if (user.isKnown()) {
+        <div class="recovery-bar">
+          <div class="recovery-text">
+            <span class="recovery-label">🔑 Recovery code</span>
+            <code class="recovery-code">{{ user.recoveryCode() }}</code>
+          </div>
+          <button class="recovery-copy" type="button" (click)="copyRecovery()">
+            {{ copied() ? '✓ Copied' : '📋 Copy' }}
+          </button>
+          <p class="recovery-note">Use this to restore your progress on another device.</p>
+        </div>
+      }
+    }
+
+    <!-- ════ ARENA DETAIL ════ -->
+    @else if (selectedMeta(); as meta) {
+      <button class="back-link" type="button" (click)="backToOverview()">← Dashboard</button>
+
+      <div class="detail-head" [style.--accent]="meta.accent">
+        <span class="detail-icon" [style.background]="meta.gradient">{{ meta.icon }}</span>
+        <div class="detail-titles">
+          <h1 class="detail-name">{{ meta.name }}</h1>
+          @if (selectedProgress(); as p) {
+            <span class="detail-sub">{{ p.overall.totalQsTested }} questions across {{ p.overall.rounds }} rounds</span>
+          }
+        </div>
+        @if (selectedProgress(); as p) {
+          <span class="detail-overall" [style.color]="band(p.overall.avgScore)">{{ p.overall.avgScore }}<small>/10</small></span>
+        }
+      </div>
+
+      <!-- heatmap -->
+      <div class="panel">
+        <h2 class="panel-title">Module Heatmap</h2>
+        <div class="heatmap">
+          @for (row of moduleRows(); track row.name) {
+            <div class="heat-row" [class.untested]="row.avg === null">
+              <span class="heat-name">{{ row.icon }} {{ row.name }}</span>
+              <span class="heat-avg" [style.color]="band(row.avg)">{{ row.avg ?? '—' }}</span>
+              <div class="heat-track">
+                <div class="heat-fill" [style.width.%]="barPct(row.avg)" [style.background]="band(row.avg)"></div>
+              </div>
+              <span class="heat-tested">{{ row.tested > 0 ? row.tested + ' Qs' : 'not tested' }}</span>
+            </div>
+          }
+        </div>
+        <div class="legend">
+          <span><i style="background:#34d399"></i> 7+ strong</span>
+          <span><i style="background:#fbbf24"></i> 4–6 shaky</span>
+          <span><i style="background:#f87171"></i> &lt;4 weak</span>
+          <span><i style="background:#475569"></i> untested</span>
+        </div>
+      </div>
+
+      <!-- strengths vs focus -->
+      <div class="split-panel">
+        <div class="split-col">
+          <h3 class="split-title">💪 Strengths</h3>
+          @if (strengths().length) {
+            @for (s of strengths(); track s.name) {
+              <span class="split-item">{{ s.icon }} {{ s.name }} <b>{{ s.avg }}</b></span>
+            }
+          } @else {
+            <span class="split-empty">Keep going — no 7+ modules yet.</span>
+          }
+        </div>
+        <div class="split-col">
+          <h3 class="split-title">🎯 Focus Areas</h3>
+          @if (focusAreas().length || untestedCount() > 0) {
+            @for (f of focusAreas(); track f.name) {
+              <span class="split-item">{{ f.icon }} {{ f.name }} <b>{{ f.avg }}</b></span>
+            }
+            @if (untestedCount() > 0) {
+              <span class="split-item dim">+ {{ untestedCount() }} untested module{{ untestedCount() === 1 ? '' : 's' }}</span>
+            }
+          } @else {
+            <span class="split-empty">Nothing weak — nice.</span>
+          }
+        </div>
+      </div>
+
+      <a routerLink="/test-me" class="cta-primary wide">🧪 Test {{ meta.name }} again →</a>
+    }
+  </div>
+</section>

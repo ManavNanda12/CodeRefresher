@@ -1,6 +1,7 @@
 import { Component, HostListener, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { OnboardingModalComponent } from '../onboarding-modal/onboarding-modal';
 
 interface NavItem {
   path: string;
@@ -12,7 +13,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, OnboardingModalComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })
@@ -26,7 +27,8 @@ export class LayoutComponent {
     { path: '/angular', label: 'Angular', icon: '⚡' },
     { path: '/dotnet',  label: '.NET',    icon: '🔷' },
     { path: '/sql',     label: 'SQL',     icon: '🗄️' },
-    { path: '/test-me', label: 'Test Me', icon: '🧪', badge: 'NEW' },
+    { path: '/test-me',   label: 'Test Me',   icon: '🧪' },
+    { path: '/dashboard', label: 'Dashboard', icon: '📊', badge: 'NEW' },
   ];
 
   toggleSidebar(): void {
