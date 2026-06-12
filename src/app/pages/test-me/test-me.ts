@@ -78,6 +78,8 @@ const LEVEL_META: Record<string, { label: string; badge: string; difficulty: num
 const QUIZ_SIZE = 5;
 const BEST_KEY = 'testme_best_score';
 const TAKEN_KEY = 'testme_total_taken';
+const HISTORY_KEY = 'testme_history';
+const HISTORY_MAX = 6;
 
 @Component({
   selector: 'app-test-me',
@@ -135,7 +137,9 @@ export class TestMeComponent {
   });
   readonly isLast = computed(() => this.currentIndex() === this.total() - 1);
   readonly currentAnswer = computed(() => this.answers()[this.currentIndex()] ?? '');
+  readonly currentAnswered = computed(() => this.currentAnswer().trim().length > 0);
   readonly allAnswered = computed(() => this.answeredCount() === this.total() && this.total() > 0);
+  readonly skippedCount = computed(() => this.total() - this.answeredCount());
 
   readonly overallScore = computed(() => {
     const r = this.results();
@@ -144,6 +148,14 @@ export class TestMeComponent {
   });
   readonly rank = computed<Rank>(() => rankFor(this.overallScore()));
   readonly bestScore = signal(0);
+  history = signal<Record<string, number[]>>({});
+
+  /** Recent scores (most recent last, max 3) for a given level of the selected arena. */
+  recentAttempts(levelKey: string): number[] {
+    const arena = this.selectedArena();
+    if (!arena) return [];
+    return (this.history()[`${arena.id}:${levelKey}`] ?? []).slice(-3);
+  }
 
   constructor() {
     inject(SeoService).update({
@@ -153,6 +165,7 @@ export class TestMeComponent {
       keywords: 'angular quiz, dotnet quiz, sql quiz, ai interview practice, mock interview, developer test',
     });
     this.loadBest();
+    this.loadHistory();
   }
 
   // ── Stage 1: pick a tech arena ─────────────────────────────
@@ -349,21 +362,47 @@ export class TestMeComponent {
     if (!Number.isNaN(v)) this.bestScore.set(v);
   }
 
+  private loadHistory(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      if (raw) this.history.set(JSON.parse(raw));
+    } catch {
+      /* ignore corrupt history */
+    }
+  }
+
   totalTaken = signal(0);
+  newBest = signal(false);
 
   private persistStats(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const score = this.overallScore();
+    // capture "new best" BEFORE bumping the stored best, else it's always true
+    this.newBest.set(score > 0 && score > this.bestScore());
     const best = Math.max(this.bestScore(), score);
     this.bestScore.set(best);
     localStorage.setItem(BEST_KEY, String(best));
     const taken = Number(localStorage.getItem(TAKEN_KEY) ?? '0') + 1;
     this.totalTaken.set(taken);
     localStorage.setItem(TAKEN_KEY, String(taken));
+
+    // record this attempt under arena:level so the level screen can show a trend
+    const arena = this.selectedArena();
+    const level = this.selectedLevel();
+    if (arena && level) {
+      const key = `${arena.id}:${level.key}`;
+      this.history.update(h => {
+        const arr = [...(h[key] ?? []), score].slice(-HISTORY_MAX);
+        const next = { ...h, [key]: arr };
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+        return next;
+      });
+    }
   }
 
   isNewBest(): boolean {
-    return this.overallScore() >= this.bestScore() && this.overallScore() > 0;
+    return this.newBest();
   }
 
   // ── time helpers ───────────────────────────────────────────

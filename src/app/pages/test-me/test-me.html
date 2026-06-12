@@ -44,11 +44,11 @@
 
       <!-- ════════ STAGE 2 · PICK LEVEL ════════ -->
       @case ('pick-level') {
-        <header class="stage-head">
+        <header class="stage-head stage-head--picked">
           <button class="back-link" type="button" (click)="restart()">← Change arena</button>
           <div class="picked-arena">
             <span class="pa-icon" [style.background]="selectedArena()?.gradient">{{ selectedArena()?.icon }}</span>
-            <div>
+            <div class="pa-meta">
               <span class="pa-name">{{ selectedArena()?.name }}</span>
               <span class="pa-tag">{{ selectedArena()?.tag }}</span>
             </div>
@@ -83,6 +83,15 @@
                   }
                 </div>
                 <span class="lc-count">{{ lvl.count }} questions in the pool</span>
+                @if (recentAttempts(lvl.key).length) {
+                  <span class="lc-history">
+                    <span class="lch-label">Recent</span>
+                    @for (s of recentAttempts(lvl.key); track $index; let last = $last) {
+                      <strong [style.color]="ringColor(s)">{{ s }}</strong>
+                      @if (!last) { <span class="lch-arr">→</span> }
+                    }
+                  </span>
+                }
                 <span class="lc-go">Start 5-question test →</span>
               </button>
             }
@@ -125,14 +134,19 @@
                         placeholder="Answer as if you're in the interview room. Type what you genuinely remember…"></textarea>
 
               <div class="q-foot">
-                <span class="q-chars">{{ currentAnswer().length }} chars</span>
+                <div class="q-meta-left">
+                  <span class="q-chars">{{ currentAnswer().length }} chars</span>
+                  <span class="q-hint">💬 A couple of sentences is plenty</span>
+                </div>
                 <div class="q-nav">
                   <button class="btn-soft" type="button" (click)="prev()" [disabled]="currentIndex() === 0">← Prev</button>
                   @if (!isLast()) {
-                    <button class="btn-accent" type="button" (click)="next()">Next →</button>
+                    <button class="btn-accent" type="button" (click)="next()">
+                      {{ currentAnswered() ? 'Next →' : 'Skip →' }}
+                    </button>
                   } @else {
                     <button class="btn-submit" type="button" (click)="submitQuiz()" [disabled]="answeredCount() === 0">
-                      ⚡ Evaluate {{ answeredCount() }}/{{ total() }}
+                      ⚡ Submit · {{ answeredCount() }}/{{ total() }} answered
                     </button>
                   }
                 </div>
@@ -151,10 +165,11 @@
                       [attr.aria-label]="'Go to question ' + (i + 1)"></button>
             }
           </div>
+          <p class="dots-hint">Tap any dot to jump · <span class="dh-key answered"></span> answered · <span class="dh-key"></span> still open</p>
 
           @if (!isLast() && allAnswered()) {
             <button class="btn-submit wide" type="button" (click)="submitQuiz()">
-              ⚡ All answered — Evaluate now
+              ⚡ All {{ total() }} answered — Submit now
             </button>
           }
         </div>
@@ -243,6 +258,13 @@
               </div>
             </div>
           </div>
+
+          @if (skippedCount() > 0) {
+            <div class="skip-nudge">
+              💡 You skipped {{ skippedCount() }} question{{ skippedCount() === 1 ? '' : 's' }} —
+              answer {{ skippedCount() === 1 ? 'it' : 'them all' }} next round to see real AI feedback and lift your score.
+            </div>
+          }
 
           <!-- Per-question breakdown -->
           <h3 class="breakdown-title">Question Breakdown</h3>
