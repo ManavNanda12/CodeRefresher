@@ -1,0 +1,380 @@
+import { Component, computed, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { DataService } from '../../core/services/data.service';
+import { SeoService } from '../../core/services/seo.service';
+import { RefresherData, RefresherItem } from '../../core/models/refresher-item.model';
+import {
+  TestMeService,
+  EvalResult,
+  VERDICT_DISPLAY,
+  VerdictStyle,
+  scoreColor,
+  rankFor,
+  Rank,
+} from '../../services/test-me-service/test-me-service';
+
+type Stage = 'pick-tech' | 'pick-level' | 'quiz' | 'evaluating' | 'results';
+
+interface Arena {
+  id: string;
+  name: string;
+  icon: string;
+  tag: string;
+  blurb: string;
+  gradient: string;
+  accent: string;
+}
+
+interface LevelOption {
+  key: string;
+  label: string;
+  badge: string;
+  count: number;
+  difficulty: number; // 1..4 — drives the strength meter
+}
+
+interface QuizQuestion extends RefresherItem {
+  module: string;
+  icon: string;
+}
+
+const ARENAS: Arena[] = [
+  {
+    id: 'angular',
+    name: 'Angular',
+    icon: '⚡',
+    tag: 'Frontend Framework',
+    blurb: 'Components, signals, DI, RxJS & change detection.',
+    gradient: 'linear-gradient(135deg, #c3002f 0%, #ff4857 100%)',
+    accent: '#ff4857',
+  },
+  {
+    id: 'dotnet',
+    name: '.NET',
+    icon: '🔷',
+    tag: 'Backend Platform',
+    blurb: 'Async, LINQ, EF Core, middleware & SOLID.',
+    gradient: 'linear-gradient(135deg, #512bd4 0%, #9333ea 100%)',
+    accent: '#9333ea',
+  },
+  {
+    id: 'sql',
+    name: 'SQL',
+    icon: '🗄️',
+    tag: 'Database Language',
+    blurb: 'JOINs, window functions, indexing & transactions.',
+    gradient: 'linear-gradient(135deg, #0050a0 0%, #0ea5e9 100%)',
+    accent: '#0ea5e9',
+  },
+];
+
+const LEVEL_META: Record<string, { label: string; badge: string; difficulty: number }> = {
+  '0-1': { label: 'Rookie',   badge: '0–1 yr',  difficulty: 1 },
+  '1-2': { label: 'Builder',  badge: '1–2 yrs', difficulty: 2 },
+  '2-3': { label: 'Senior',   badge: '2–3 yrs', difficulty: 3 },
+  '4+':  { label: 'Architect', badge: '4+ yrs', difficulty: 4 },
+};
+
+const QUIZ_SIZE = 5;
+const BEST_KEY = 'testme_best_score';
+const TAKEN_KEY = 'testme_total_taken';
+
+@Component({
+  selector: 'app-test-me',
+  imports: [],
+  templateUrl: './test-me.html',
+  styleUrl: './test-me.css',
+})
+export class TestMeComponent {
+  private platformId = inject(PLATFORM_ID);
+  private dataService = inject(DataService);
+  private testMe = inject(TestMeService);
+
+  readonly arenas = ARENAS;
+  readonly verdictMap = VERDICT_DISPLAY;
+
+  // ── State machine ──────────────────────────────────────────
+  stage = signal<Stage>('pick-tech');
+  loadingLevels = signal(false);
+  loadError = signal(false);
+
+  selectedArena = signal<Arena | null>(null);
+  selectedLevel = signal<LevelOption | null>(null);
+
+  private rawData = signal<RefresherData | null>(null);
+
+  questions = signal<QuizQuestion[]>([]);
+  answers = signal<string[]>([]);
+  currentIndex = signal(0);
+
+  results = signal<EvalResult[]>([]);
+  evalProgress = signal(0); // 0..QUIZ_SIZE, drives the grading animation
+
+  private startedAt = 0;
+  elapsedLabel = signal('');
+
+  // ── Derived ────────────────────────────────────────────────
+  readonly levels = computed<LevelOption[]>(() => {
+    const data = this.rawData();
+    if (!data) return [];
+    return Object.entries(data.categories)
+      .map(([key, cat]) => {
+        const count = Object.values(cat.modules).reduce((s, m) => s + m.questions.length, 0);
+        const meta = LEVEL_META[key] ?? { label: key, badge: key, difficulty: 2 };
+        return { key, label: meta.label, badge: meta.badge, count, difficulty: meta.difficulty };
+      })
+      .filter(l => l.count > 0);
+  });
+
+  readonly current = computed<QuizQuestion | null>(() => this.questions()[this.currentIndex()] ?? null);
+  readonly total = computed(() => this.questions().length);
+  readonly answeredCount = computed(() => this.answers().filter(a => a.trim().length > 0).length);
+  readonly progressPct = computed(() => {
+    const t = this.total();
+    return t ? Math.round(((this.currentIndex() + 1) / t) * 100) : 0;
+  });
+  readonly isLast = computed(() => this.currentIndex() === this.total() - 1);
+  readonly currentAnswer = computed(() => this.answers()[this.currentIndex()] ?? '');
+  readonly allAnswered = computed(() => this.answeredCount() === this.total() && this.total() > 0);
+
+  readonly overallScore = computed(() => {
+    const r = this.results();
+    if (!r.length) return 0;
+    return Math.round((r.reduce((s, x) => s + x.score, 0) / r.length) * 10) / 10;
+  });
+  readonly rank = computed<Rank>(() => rankFor(this.overallScore()));
+  readonly bestScore = signal(0);
+
+  constructor() {
+    inject(SeoService).update({
+      title: 'Test Me — AI Interview Practice',
+      description:
+        'Put your skills to the test. Pick a technology and level, answer 5 random interview questions, and get instant AI feedback scored against expert answers.',
+      keywords: 'angular quiz, dotnet quiz, sql quiz, ai interview practice, mock interview, developer test',
+    });
+    this.loadBest();
+  }
+
+  // ── Stage 1: pick a tech arena ─────────────────────────────
+  pickArena(arena: Arena): void {
+    this.selectedArena.set(arena);
+    this.loadError.set(false);
+    this.loadingLevels.set(true);
+    this.stage.set('pick-level');
+    this.dataService.loadData(arena.id).subscribe({
+      next: data => {
+        this.rawData.set(data);
+        this.loadingLevels.set(false);
+      },
+      error: () => {
+        this.loadError.set(true);
+        this.loadingLevels.set(false);
+      },
+    });
+  }
+
+  // ── Stage 2: pick a level → build the quiz ─────────────────
+  pickLevel(level: LevelOption): void {
+    this.selectedLevel.set(level);
+    const data = this.rawData();
+    if (!data) return;
+    this.questions.set(this.buildQuiz(data, level.key));
+    this.answers.set(this.questions().map(() => ''));
+    this.results.set([]);
+    this.currentIndex.set(0);
+    this.startedAt = this.now();
+    this.stage.set('quiz');
+  }
+
+  private buildQuiz(data: RefresherData, levelKey: string): QuizQuestion[] {
+    const cat = data.categories[levelKey];
+    const pool: QuizQuestion[] = [];
+    for (const [name, mod] of Object.entries(cat.modules)) {
+      for (const q of mod.questions) {
+        pool.push({ ...q, module: name, icon: mod.icon });
+      }
+    }
+    // Fisher–Yates shuffle, then take the first N.
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, Math.min(QUIZ_SIZE, pool.length));
+  }
+
+  // ── Stage 3: the quiz ──────────────────────────────────────
+  updateAnswer(value: string): void {
+    this.answers.update(arr => {
+      const next = [...arr];
+      next[this.currentIndex()] = value;
+      return next;
+    });
+  }
+
+  goTo(index: number): void {
+    if (index < 0 || index >= this.total()) return;
+    this.currentIndex.set(index);
+  }
+
+  next(): void {
+    if (!this.isLast()) this.currentIndex.update(i => i + 1);
+  }
+
+  prev(): void {
+    if (this.currentIndex() > 0) this.currentIndex.update(i => i - 1);
+  }
+
+  // ── Stage 4: evaluate ──────────────────────────────────────
+  submitQuiz(): void {
+    this.elapsedLabel.set(this.formatElapsed(this.now() - this.startedAt));
+    this.stage.set('evaluating');
+    this.evalProgress.set(0);
+    this.runProgressAnimation();
+
+    this.testMe.evaluateBatch(this.questions(), this.answers()).subscribe({
+      next: res => {
+        this.results.set(res);
+        this.evalProgress.set(this.total());
+        this.finishToResults();
+      },
+      error: () => {
+        // evaluateBatch already swallows per-item errors; this is a safety net.
+        const fallback: EvalResult = {
+          score: 0, verdict: 'needs_work', strengths: '—', missing: 'Evaluation failed.', tip: 'Try again.',
+        };
+        this.results.set(this.questions().map(() => fallback));
+        this.finishToResults();
+      },
+    });
+  }
+
+  private finishToResults(): void {
+    // small delay so the grading animation feels complete
+    const reveal = () => {
+      this.persistStats();
+      this.stage.set('results');
+    };
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(reveal, 650);
+    } else {
+      reveal();
+    }
+  }
+
+  private runProgressAnimation(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const total = this.total();
+    let step = 0;
+    const tick = () => {
+      if (this.stage() !== 'evaluating') return;
+      if (step >= total) return;
+      step++;
+      // don't overshoot past whatever the real results already set
+      this.evalProgress.update(p => Math.max(p, Math.min(step, total)));
+      if (step < total) setTimeout(tick, 700);
+    };
+    setTimeout(tick, 500);
+  }
+
+  // ── Stage 5: results actions ───────────────────────────────
+  expanded = signal<Set<number>>(new Set());
+
+  toggleExpand(i: number): void {
+    this.expanded.update(set => {
+      const next = new Set(set);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
+
+  isExpanded(i: number): boolean {
+    return this.expanded().has(i);
+  }
+
+  retrySameLevel(): void {
+    const data = this.rawData();
+    const level = this.selectedLevel();
+    if (!data || !level) {
+      this.restart();
+      return;
+    }
+    this.questions.set(this.buildQuiz(data, level.key));
+    this.answers.set(this.questions().map(() => ''));
+    this.results.set([]);
+    this.expanded.set(new Set());
+    this.currentIndex.set(0);
+    this.startedAt = this.now();
+    this.stage.set('quiz');
+  }
+
+  changeLevel(): void {
+    this.results.set([]);
+    this.expanded.set(new Set());
+    this.stage.set('pick-level');
+  }
+
+  restart(): void {
+    this.selectedArena.set(null);
+    this.selectedLevel.set(null);
+    this.rawData.set(null);
+    this.questions.set([]);
+    this.answers.set([]);
+    this.results.set([]);
+    this.expanded.set(new Set());
+    this.currentIndex.set(0);
+    this.stage.set('pick-tech');
+  }
+
+  // ── Display helpers (used by template) ─────────────────────
+  verdictStyle(v: EvalResult['verdict']): VerdictStyle {
+    return this.verdictMap[v] ?? this.verdictMap.partial;
+  }
+
+  ringColor(score: number): string {
+    return scoreColor(score);
+  }
+
+  /** stroke-dashoffset for a 0–10 score on an r=28 ring (circ ≈ 175.93). */
+  ringOffset(score: number): number {
+    const circ = 2 * Math.PI * 28;
+    return circ - (Math.max(0, Math.min(10, score)) / 10) * circ;
+  }
+
+  readonly RING_CIRC = 2 * Math.PI * 28;
+
+  // ── localStorage stats (SSR-safe) ──────────────────────────
+  private loadBest(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const v = Number(localStorage.getItem(BEST_KEY) ?? '0');
+    if (!Number.isNaN(v)) this.bestScore.set(v);
+  }
+
+  totalTaken = signal(0);
+
+  private persistStats(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const score = this.overallScore();
+    const best = Math.max(this.bestScore(), score);
+    this.bestScore.set(best);
+    localStorage.setItem(BEST_KEY, String(best));
+    const taken = Number(localStorage.getItem(TAKEN_KEY) ?? '0') + 1;
+    this.totalTaken.set(taken);
+    localStorage.setItem(TAKEN_KEY, String(taken));
+  }
+
+  isNewBest(): boolean {
+    return this.overallScore() >= this.bestScore() && this.overallScore() > 0;
+  }
+
+  // ── time helpers ───────────────────────────────────────────
+  private now(): number {
+    return isPlatformBrowser(this.platformId) ? Date.now() : 0;
+  }
+
+  private formatElapsed(ms: number): string {
+    const totalSec = Math.max(0, Math.round(ms / 1000));
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+}

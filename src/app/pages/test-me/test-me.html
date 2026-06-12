@@ -1,0 +1,324 @@
+<div class="arena" [class.is-results]="stage() === 'results'">
+  <!-- Ambient animated background -->
+  <div class="arena-bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="arena-inner">
+
+    @switch (stage()) {
+
+      <!-- ════════ STAGE 1 · PICK ARENA ════════ -->
+      @case ('pick-tech') {
+        <header class="stage-head">
+          <span class="kicker">🧪 Test Me</span>
+          <h1 class="stage-title">Enter the <span class="grad">Arena</span></h1>
+          <p class="stage-sub">
+            Pick a battleground. Answer 5 random interview questions from memory —
+            our AI grades each one against an expert answer. No peeking.
+          </p>
+          @if (bestScore() > 0) {
+            <div class="best-chip">🏅 Personal best · <strong>{{ bestScore() }}/10</strong></div>
+          }
+        </header>
+
+        <div class="arena-grid">
+          @for (a of arenas; track a.id; let i = $index) {
+            <button class="arena-card" type="button"
+                    [style.--delay]="(i * 90) + 'ms'"
+                    [style.--accent]="a.accent"
+                    (click)="pickArena(a)">
+              <span class="ac-glow" [style.background]="a.gradient"></span>
+              <span class="ac-icon" [style.background]="a.gradient">{{ a.icon }}</span>
+              <span class="ac-tag">{{ a.tag }}</span>
+              <span class="ac-name">{{ a.name }}</span>
+              <span class="ac-blurb">{{ a.blurb }}</span>
+              <span class="ac-cta">Choose <span class="ac-arrow">→</span></span>
+            </button>
+          }
+        </div>
+      }
+
+      <!-- ════════ STAGE 2 · PICK LEVEL ════════ -->
+      @case ('pick-level') {
+        <header class="stage-head">
+          <button class="back-link" type="button" (click)="restart()">← Change arena</button>
+          <div class="picked-arena">
+            <span class="pa-icon" [style.background]="selectedArena()?.gradient">{{ selectedArena()?.icon }}</span>
+            <div>
+              <span class="pa-name">{{ selectedArena()?.name }}</span>
+              <span class="pa-tag">{{ selectedArena()?.tag }}</span>
+            </div>
+          </div>
+          <h2 class="stage-title sm">How <span class="grad">battle-tested</span> are you?</h2>
+          <p class="stage-sub">Pick the experience level that matches the difficulty you want.</p>
+        </header>
+
+        @if (loadingLevels()) {
+          <div class="loader">
+            <div class="spinner"></div>
+            <p>Loading questions…</p>
+          </div>
+        } @else if (loadError()) {
+          <div class="loader">
+            <p class="err">⚠️ Couldn’t load questions. <button class="link-btn" (click)="pickArena(selectedArena()!)">Retry</button></p>
+          </div>
+        } @else {
+          <div class="level-grid">
+            @for (lvl of levels(); track lvl.key; let i = $index) {
+              <button class="level-card" type="button"
+                      [style.--delay]="(i * 80) + 'ms'"
+                      [style.--accent]="selectedArena()?.accent"
+                      (click)="pickLevel(lvl)">
+                <div class="lc-top">
+                  <span class="lc-label">{{ lvl.label }}</span>
+                  <span class="lc-badge">{{ lvl.badge }}</span>
+                </div>
+                <div class="lc-meter" [attr.data-diff]="lvl.difficulty">
+                  @for (bar of [1,2,3,4]; track bar) {
+                    <span class="bar" [class.on]="bar <= lvl.difficulty"></span>
+                  }
+                </div>
+                <span class="lc-count">{{ lvl.count }} questions in the pool</span>
+                <span class="lc-go">Start 5-question test →</span>
+              </button>
+            }
+          </div>
+        }
+      }
+
+      <!-- ════════ STAGE 3 · QUIZ ════════ -->
+      @case ('quiz') {
+        <div class="quiz-shell">
+          <!-- Top progress bar -->
+          <div class="quiz-top">
+            <button class="back-link" type="button" (click)="changeLevel()">← Levels</button>
+            <div class="quiz-meta">
+              <span class="qm-chip" [style.--accent]="selectedArena()?.accent">
+                {{ selectedArena()?.icon }} {{ selectedArena()?.name }}
+              </span>
+              <span class="qm-chip ghost">{{ selectedLevel()?.label }} · {{ selectedLevel()?.badge }}</span>
+            </div>
+            <span class="qm-counter">{{ currentIndex() + 1 }} / {{ total() }}</span>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="progressPct()"></div>
+          </div>
+
+          <!-- Question card (re-keyed per index → re-triggers slide-in) -->
+          @if (current(); as q) {
+            <div class="q-card" [attr.data-key]="currentIndex()">
+              <div class="q-tags">
+                <span class="q-num">Q{{ currentIndex() + 1 }}</span>
+                <span class="q-module">{{ q.icon }} {{ q.module }}</span>
+              </div>
+              <h3 class="q-text">{{ q.question }}</h3>
+
+              <textarea class="q-input"
+                        rows="6"
+                        [value]="currentAnswer()"
+                        (input)="updateAnswer($any($event.target).value)"
+                        placeholder="Answer as if you're in the interview room. Type what you genuinely remember…"></textarea>
+
+              <div class="q-foot">
+                <span class="q-chars">{{ currentAnswer().length }} chars</span>
+                <div class="q-nav">
+                  <button class="btn-soft" type="button" (click)="prev()" [disabled]="currentIndex() === 0">← Prev</button>
+                  @if (!isLast()) {
+                    <button class="btn-accent" type="button" (click)="next()">Next →</button>
+                  } @else {
+                    <button class="btn-submit" type="button" (click)="submitQuiz()" [disabled]="answeredCount() === 0">
+                      ⚡ Evaluate {{ answeredCount() }}/{{ total() }}
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Question dots -->
+          <div class="dots">
+            @for (q of questions(); track $index; let i = $index) {
+              <button class="dot"
+                      type="button"
+                      [class.active]="i === currentIndex()"
+                      [class.answered]="(answers()[i] ?? '').trim().length > 0"
+                      (click)="goTo(i)"
+                      [attr.aria-label]="'Go to question ' + (i + 1)"></button>
+            }
+          </div>
+
+          @if (!isLast() && allAnswered()) {
+            <button class="btn-submit wide" type="button" (click)="submitQuiz()">
+              ⚡ All answered — Evaluate now
+            </button>
+          }
+        </div>
+      }
+
+      <!-- ════════ STAGE 4 · EVALUATING ════════ -->
+      @case ('evaluating') {
+        <div class="evaluating">
+          <div class="scan-ring">
+            <div class="scan-core">🤖</div>
+            <div class="scan-pulse"></div>
+            <div class="scan-pulse d2"></div>
+          </div>
+          <h2 class="eval-title">AI is grading your answers…</h2>
+          <p class="eval-sub">Comparing each response against the expert ground-truth.</p>
+          <div class="eval-bars">
+            @for (q of questions(); track $index; let i = $index) {
+              <div class="eval-bar" [class.done]="i < evalProgress()" [class.active]="i === evalProgress()">
+                <span class="eb-dot"></span>
+                <span class="eb-label">Question {{ i + 1 }}</span>
+                <span class="eb-state">
+                  @if (i < evalProgress()) { ✓ } @else if (i === evalProgress()) { scanning… } @else { queued }
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ════════ STAGE 5 · RESULTS ════════ -->
+      @case ('results') {
+        <div class="results">
+          @if (isNewBest()) { <div class="confetti-burst" aria-hidden="true">🎉</div> }
+
+          <!-- Hero score -->
+          <div class="score-hero" [style.--rank-color]="ringColor(overallScore())">
+            <div class="sh-glow" aria-hidden="true"></div>
+
+            <div class="sh-main">
+              <div class="big-ring">
+                <svg viewBox="0 0 64 64">
+                  <circle class="ring-bg" cx="32" cy="32" r="28" />
+                  <circle class="ring-fg" cx="32" cy="32" r="28"
+                          [style.stroke]="ringColor(overallScore())"
+                          [style.stroke-dasharray]="RING_CIRC"
+                          [style.stroke-dashoffset]="ringOffset(overallScore())" />
+                </svg>
+                <div class="ring-center">
+                  <span class="ring-score" [style.color]="ringColor(overallScore())">{{ overallScore() }}</span>
+                  <span class="ring-of">/10</span>
+                </div>
+              </div>
+
+              <div class="rank-block">
+                <div class="rank-head">
+                  <span class="rank-emoji">{{ rank().emoji }}</span>
+                  <h2 class="rank-title">{{ rank().title }}</h2>
+                </div>
+                <p class="rank-blurb">{{ rank().blurb }}</p>
+                <div class="result-meta">
+                  <span class="meta-pill">{{ selectedArena()?.icon }} {{ selectedArena()?.name }}</span>
+                  <span class="meta-pill">{{ selectedLevel()?.label }}</span>
+                  @if (elapsedLabel()) { <span class="meta-pill">⏱ {{ elapsedLabel() }}</span> }
+                  @if (isNewBest()) { <span class="meta-pill best">🏅 New best!</span> }
+                </div>
+              </div>
+            </div>
+
+            <!-- Per-question mini chart -->
+            <div class="sh-chart">
+              <span class="shc-label">Per question</span>
+              <div class="shc-bars">
+                @for (q of questions(); track $index; let i = $index) {
+                  @if (results()[i]; as r) {
+                    <div class="shc-col" [style.--delay]="(i * 80) + 'ms'">
+                      <span class="shc-val" [style.color]="ringColor(r.score)">{{ r.score }}</span>
+                      <div class="shc-bar-track">
+                        <div class="shc-bar"
+                             [style.height.%]="r.score * 10"
+                             [style.background]="ringColor(r.score)"></div>
+                      </div>
+                      <span class="shc-idx">Q{{ i + 1 }}</span>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Per-question breakdown -->
+          <h3 class="breakdown-title">Question Breakdown</h3>
+          <div class="breakdown">
+            @for (q of questions(); track $index; let i = $index) {
+              @if (results()[i]; as r) {
+                <div class="rq-card" [class.open]="isExpanded(i)"
+                     [style.--vcolor]="verdictStyle(r.verdict).ring"
+                     [style.--vglow]="verdictStyle(r.verdict).glow"
+                     [style.--delay]="(i * 70) + 'ms'">
+                  <button class="rq-head" type="button" (click)="toggleExpand(i)">
+                    <div class="mini-ring">
+                      <svg viewBox="0 0 64 64">
+                        <circle class="ring-bg" cx="32" cy="32" r="28" />
+                        <circle class="ring-fg" cx="32" cy="32" r="28"
+                                [style.stroke]="ringColor(r.score)"
+                                [style.stroke-dasharray]="RING_CIRC"
+                                [style.stroke-dashoffset]="ringOffset(r.score)" />
+                      </svg>
+                      <span class="mini-score" [style.color]="ringColor(r.score)">{{ r.score }}</span>
+                    </div>
+                    <div class="rq-info">
+                      <span class="rq-module">{{ q.icon }} {{ q.module }}</span>
+                      <span class="rq-q">{{ q.question }}</span>
+                    </div>
+                    <span class="rq-verdict" [style.color]="verdictStyle(r.verdict).text">
+                      {{ verdictStyle(r.verdict).emoji }} {{ verdictStyle(r.verdict).label }}
+                    </span>
+                    <span class="rq-caret">{{ isExpanded(i) ? '▾' : '▸' }}</span>
+                  </button>
+
+                  @if (isExpanded(i)) {
+                    <div class="rq-body">
+                      <div class="fb-block your">
+                        <span class="fb-label">Your answer</span>
+                        <p>{{ (answers()[i] ?? '').trim() || '— (skipped)' }}</p>
+                      </div>
+                      <div class="fb-block ok">
+                        <span class="fb-label">✓ Strengths</span>
+                        <p>{{ r.strengths }}</p>
+                      </div>
+                      @if (r.score < 8) {
+                        <div class="fb-block warn">
+                          <span class="fb-label">△ What's missing</span>
+                          <p>{{ r.missing }}</p>
+                        </div>
+                      }
+                      <div class="fb-block tip">
+                        <span class="fb-label">💡 Tip</span>
+                        <p>{{ r.tip }}</p>
+                      </div>
+                      <div class="fb-block answer">
+                        <span class="fb-label">📘 Expert answer</span>
+                        <p>{{ q.answer }}</p>
+                        @if (q.codeExample) {
+                          <pre class="code"><code>{{ q.codeExample }}</code></pre>
+                        }
+                        @if (q.simpleExample) {
+                          <p class="analogy">💡 {{ q.simpleExample }}</p>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Actions -->
+          <div class="result-actions">
+            <button class="btn-submit" type="button" (click)="retrySameLevel()">🔄 New 5 questions</button>
+            <button class="btn-soft" type="button" (click)="changeLevel()">🎚 Change level</button>
+            <button class="btn-soft" type="button" (click)="restart()">🧪 Pick another arena</button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

@@ -17,5 +17,9 @@ export const routes: Routes = [
     path: 'sql',
     loadComponent: () => import('./pages/sql/sql').then(m => m.SqlComponent)
   },
+  {
+    path: 'test-me',
+    loadComponent: () => import('./pages/test-me/test-me').then(m => m.TestMeComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

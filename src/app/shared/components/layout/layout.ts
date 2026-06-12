@@ -7,6 +7,7 @@ interface NavItem {
   label: string;
   icon: string;
   exact?: boolean;
+  badge?: string;
 }
 
 @Component({
@@ -25,6 +26,7 @@ export class LayoutComponent {
     { path: '/angular', label: 'Angular', icon: '⚡' },
     { path: '/dotnet',  label: '.NET',    icon: '🔷' },
     { path: '/sql',     label: 'SQL',     icon: '🗄️' },
+    { path: '/test-me', label: 'Test Me', icon: '🧪', badge: 'NEW' },
   ];
 
   toggleSidebar(): void {

@@ -58,7 +58,7 @@
   </div>
   <div class="stat-sep"></div>
   <div class="stat">
-    <span class="stat-num">2</span>
+    <span class="stat-num">4</span>
     <span class="stat-lbl">Experience Levels</span>
   </div>
   <div class="stat-sep"></div>
@@ -99,47 +99,50 @@
   </div>
 </section>
 
-<!-- ── AI Teaser ──────────────────────────────────────── -->
+<!-- ── Test Me (LIVE) ─────────────────────────────────── -->
 <section class="ai-section">
   <div class="ai-card">
     <div class="ai-glow"></div>
 
     <div class="ai-left">
-      <span class="ai-badge">Coming Soon</span>
-      <h3 class="ai-title">AI Interview Coach</h3>
+      <span class="ai-badge live"><span class="live-dot"></span> New · Now Live</span>
+      <h3 class="ai-title">🧪 Test Me</h3>
       <p class="ai-desc">
-        Once you've refreshed all topics, practice live Q&amp;A with an AI that knows
-        your weak spots, adapts to your level, and gives real-time feedback.
+        Done reading? Now <strong>prove it</strong>. Pick a tech and level, answer 5 random
+        interview questions from memory, and our AI grades every answer against an
+        expert response — with a score, your strengths, and exactly what you missed.
       </p>
       <div class="ai-features">
-        <div class="ai-feature"><span>🎯</span> Adaptive difficulty</div>
-        <div class="ai-feature"><span>⚡</span> Instant feedback</div>
-        <div class="ai-feature"><span>📈</span> Track your progress</div>
+        <div class="ai-feature"><span>🎯</span> Scored 0–10 per answer</div>
+        <div class="ai-feature"><span>⚡</span> Instant AI feedback</div>
+        <div class="ai-feature"><span>🏅</span> Beat your personal best</div>
       </div>
-      <button class="btn-coming-soon" disabled>Notify Me When Ready</button>
+      <a routerLink="/test-me" class="btn-testme">Start a Test →</a>
     </div>
 
     <div class="ai-right">
       <div class="chat-window">
         <div class="chat-topbar">
           <span class="chat-status-dot"></span>
-          <span class="chat-label">AI Coach Preview</span>
+          <span class="chat-label">Live AI Evaluation</span>
         </div>
         <div class="chat-body">
           <div class="chat-row chat-row--ai">
             <span class="chat-avatar">🤖</span>
-            <div class="chat-bubble">Explain Angular's OnPush change detection strategy.</div>
+            <div class="chat-bubble">What is a BehaviorSubject in RxJS?</div>
           </div>
           <div class="chat-row chat-row--user">
-            <div class="chat-bubble">OnPush only checks when input references change or an event fires...</div>
+            <div class="chat-bubble">It stores the latest value and replays it to new subscribers...</div>
             <span class="chat-avatar">👨‍💻</span>
           </div>
           <div class="chat-row chat-row--ai">
             <span class="chat-avatar">🤖</span>
-            <div class="chat-bubble chat-typing">
-              <span class="type-dot"></span>
-              <span class="type-dot"></span>
-              <span class="type-dot"></span>
+            <div class="score-bubble">
+              <div class="sb-ring"><span class="sb-score">8</span></div>
+              <div class="sb-text">
+                <span class="sb-verdict">✅ Good · 8/10</span>
+                <span class="sb-tip">Mention it requires an initial value.</span>
+              </div>
             </div>
           </div>
         </div>

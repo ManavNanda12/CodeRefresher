@@ -23,6 +23,7 @@
          (click)="closeSidebar()">
         <span class="nav-icon">{{ item.icon }}</span>
         <span class="nav-label">{{ item.label }}</span>
+        @if (item.badge) { <span class="nav-badge">{{ item.badge }}</span> }
       </a>
     }
   </nav>
@@ -49,6 +50,7 @@
          class="header-link">
         <span class="link-icon">{{ item.icon }}</span>
         <span>{{ item.label }}</span>
+        @if (item.badge) { <span class="nav-badge">{{ item.badge }}</span> }
       </a>
     }
   </nav>
@@ -76,7 +78,7 @@
             Your personal interview prep companion.<br>
             Structured. Simple. Free forever.
           </p>
-          <span class="footer-ai-badge">🤖 AI Coach coming soon</span>
+          <a routerLink="/test-me" class="footer-ai-badge live">🧪 Test Me — AI grading is live!</a>
         </div>
 
         <div class="footer-col">

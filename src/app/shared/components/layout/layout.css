@@ -312,6 +312,39 @@
   padding: 0.3rem 0.85rem;
   border-radius: 100px;
   letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.footer-ai-badge.live {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+  transition: background 0.18s, transform 0.18s;
+}
+.footer-ai-badge.live:hover {
+  background: rgba(16, 185, 129, 0.2);
+  transform: translateY(-1px);
+}
+
+/* "NEW" pill on nav items */
+.nav-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  line-height: 1.4;
+  margin-left: 0.1rem;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+  animation: badgePulse 2.4s ease-in-out infinite;
+}
+.sidebar-link .nav-badge { margin-left: auto; }
+
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+  50%      { box-shadow: 0 0 16px rgba(16, 185, 129, 0.75); }
 }
 
 .footer-col {
