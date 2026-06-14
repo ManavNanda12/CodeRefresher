@@ -76,6 +76,36 @@ export class UserService {
       .pipe(catchError(() => of({ success: false, recoveryCode: code })));
   }
 
+  /** Update the email on the existing profile (reuses register's upsert by userId). */
+  changeEmail(email: string): Observable<RegisterResponse> {
+    return this.register(email);
+  }
+
+  /**
+   * Permanently delete the server-side profile (KV) and clear local identity.
+   * Clears cookies regardless of the network result so the device is always logged out.
+   */
+  deleteAccount(): Observable<boolean> {
+    const userId = this.userId();
+    if (!userId) {
+      this.signOut();
+      return of(true);
+    }
+    const recoveryCode = recoveryCodeFor(userId);
+    return this.http
+      .post(`${WORKER_BASE}/api/user/delete`, { userId, recoveryCode })
+      .pipe(
+        map(() => {
+          this.signOut();
+          return true;
+        }),
+        catchError(() => {
+          this.signOut();
+          return of(true);
+        }),
+      );
+  }
+
   /** Restore an existing profile from a recovery code on a new device. */
   recover(recoveryCode: string): Observable<RecoverResponse | null> {
     const code = recoveryCode.trim();

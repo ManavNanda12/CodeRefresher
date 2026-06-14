@@ -15,7 +15,7 @@ function round2(n) {
 }
 
 export async function handleProgressSync(request, env) {
-  const { userId, round } = await request.json();
+  const { userId, email, round } = await request.json();
 
   if (!userId || !round || !Array.isArray(round.questions)) {
     return Response.json({ success: false, error: "Missing or invalid round" }, { status: 400 });
@@ -26,6 +26,10 @@ export async function handleProgressSync(request, env) {
   const userData = existing
     ? JSON.parse(existing)
     : { userId, email: "", arenas: {}, recentRounds: [] };
+
+  // Self-heal: if register never landed, capture the email from the sync so the
+  // user is still reachable. Only fill when empty — never clobber a saved email.
+  if (email && !userData.email) userData.email = email;
 
   userData.arenas = userData.arenas || {};
 

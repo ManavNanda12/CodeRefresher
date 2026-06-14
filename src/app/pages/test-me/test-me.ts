@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
 import { ProgressService, RoundRecord } from '../../core/services/progress.service';
+import { FocusRoundService } from '../../core/services/focus.service';
 import { RefresherData, RefresherItem } from '../../core/models/refresher-item.model';
 import {
   TestMeService,
@@ -15,7 +16,7 @@ import {
   Rank,
 } from '../../services/test-me-service/test-me-service';
 
-type Stage = 'pick-tech' | 'pick-level' | 'quiz' | 'evaluating' | 'results';
+type Stage = 'pick-tech' | 'pick-level' | 'focus-loading' | 'quiz' | 'evaluating' | 'results';
 
 interface Arena {
   id: string;
@@ -94,6 +95,7 @@ export class TestMeComponent {
   private dataService = inject(DataService);
   private testMe = inject(TestMeService);
   private progressService = inject(ProgressService);
+  private focusRound = inject(FocusRoundService);
 
   readonly arenas = ARENAS;
   readonly verdictMap = VERDICT_DISPLAY;
@@ -105,6 +107,10 @@ export class TestMeComponent {
 
   selectedArena = signal<Arena | null>(null);
   selectedLevel = signal<LevelOption | null>(null);
+
+  // Adaptive "Focus Round" state
+  focusMode = signal(false);
+  focusTargets = signal<string[]>([]);
 
   private rawData = signal<RefresherData | null>(null);
 
@@ -170,6 +176,10 @@ export class TestMeComponent {
     });
     this.loadBest();
     this.loadHistory();
+
+    // Launched from the Dashboard's "Focus My Weak Spots"?
+    const focusArena = this.focusRound.consume();
+    if (focusArena) this.startFocus(focusArena);
   }
 
   // ── Stage 1: pick a tech arena ─────────────────────────────
@@ -217,6 +227,89 @@ export class TestMeComponent {
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
     return pool.slice(0, Math.min(QUIZ_SIZE, pool.length));
+  }
+
+  // ── Adaptive "Focus Round" ─────────────────────────────────
+  /** Entry point from the Dashboard: load the arena, then build a weighted quiz. */
+  startFocus(arenaId: string): void {
+    const arena = ARENAS.find(a => a.id === arenaId);
+    if (!arena) return;
+    this.selectedArena.set(arena);
+    this.focusMode.set(true);
+    this.loadError.set(false);
+    this.stage.set('focus-loading');
+    this.dataService.loadData(arena.id).subscribe({
+      next: data => {
+        this.rawData.set(data);
+        this.launchFocusFromData(data, arena.id);
+      },
+      error: () => this.loadError.set(true),
+    });
+  }
+
+  private launchFocusFromData(data: RefresherData, arenaId: string): void {
+    const questions = this.buildFocusQuiz(data, arenaId);
+    if (!questions.length) {
+      this.loadError.set(true);
+      return;
+    }
+    // Synthetic level so results still record under arena + 'focus'.
+    this.selectedLevel.set({ key: 'focus', label: 'Focus Round', badge: 'adaptive', count: questions.length, difficulty: 0 });
+    this.questions.set(questions);
+    this.answers.set(questions.map(() => ''));
+    this.results.set([]);
+    this.expanded.set(new Set());
+    this.currentIndex.set(0);
+    this.startedAt = this.now();
+    this.stage.set('quiz');
+  }
+
+  /**
+   * Pull every question for the arena (all levels) grouped by module, weight each
+   * module by how much it needs work, then weighted-sample QUIZ_SIZE distinct
+   * questions. Untested + weak modules dominate; strong ones rarely appear.
+   */
+  private buildFocusQuiz(data: RefresherData, arenaId: string): QuizQuestion[] {
+    const pools = new Map<string, QuizQuestion[]>();
+    for (const cat of Object.values(data.categories)) {
+      for (const [name, mod] of Object.entries(cat.modules)) {
+        const arr = pools.get(name) ?? [];
+        for (const q of mod.questions) arr.push({ ...q, module: name, icon: mod.icon });
+        pools.set(name, arr);
+      }
+    }
+
+    const stats = this.progressService.getArenaProgress(arenaId)?.modules ?? {};
+    const weightFor = (module: string): number => {
+      const st = stats[module];
+      if (!st || st.tested === 0 || st.avg === null) return 6; // untested
+      if (st.avg < 4) return 8;  // weak
+      if (st.avg < 6) return 5;  // shaky
+      if (st.avg < 8) return 2;  // decent
+      return 1;                  // strong
+    };
+    const weighted = [...pools.keys()].map(module => ({ module, weight: weightFor(module) }));
+
+    const chosen: QuizQuestion[] = [];
+    let guard = 0;
+    while (chosen.length < QUIZ_SIZE && guard < 500) {
+      guard++;
+      const available = weighted.filter(w => (pools.get(w.module)?.length ?? 0) > 0);
+      if (!available.length) break;
+      const total = available.reduce((s, w) => s + w.weight, 0);
+      let r = Math.random() * total;
+      let pick = available[available.length - 1].module;
+      for (const w of available) {
+        r -= w.weight;
+        if (r <= 0) { pick = w.module; break; }
+      }
+      const pool = pools.get(pick)!;
+      const q = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+      chosen.push(q);
+    }
+
+    this.focusTargets.set([...new Set(chosen.map(q => q.module))]);
+    return chosen;
   }
 
   // ── Stage 3: the quiz ──────────────────────────────────────
@@ -318,6 +411,11 @@ export class TestMeComponent {
       this.restart();
       return;
     }
+    // In focus mode, re-roll a fresh adaptive set instead of a fixed level.
+    if (this.focusMode()) {
+      this.launchFocusFromData(data, this.selectedArena()!.id);
+      return;
+    }
     this.questions.set(this.buildQuiz(data, level.key));
     this.answers.set(this.questions().map(() => ''));
     this.results.set([]);
@@ -330,12 +428,16 @@ export class TestMeComponent {
   changeLevel(): void {
     this.results.set([]);
     this.expanded.set(new Set());
+    this.focusMode.set(false);
+    this.focusTargets.set([]);
     this.stage.set('pick-level');
   }
 
   restart(): void {
     this.selectedArena.set(null);
     this.selectedLevel.set(null);
+    this.focusMode.set(false);
+    this.focusTargets.set([]);
     this.rawData.set(null);
     this.questions.set([]);
     this.answers.set([]);

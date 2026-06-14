@@ -8,6 +8,10 @@
 
   <div class="arena-inner">
 
+    @if (user.isKnown()) {
+      <button class="settings-gear" type="button" (click)="openSettings()" aria-label="Settings">⚙️</button>
+    }
+
     <!-- ════ OVERVIEW ════ -->
     @if (view() === 'overview') {
       <div class="stage-head">
@@ -88,7 +92,7 @@
                 </div>
               }
             </div>
-            <a routerLink="/test-me" class="cta-primary wide">🎯 Drill these in Test Me →</a>
+            <button type="button" class="cta-primary wide" (click)="startFocusTopWeak()">🎯 Focus My Weak Spots →</button>
           </div>
         }
 
@@ -193,7 +197,65 @@
         </div>
       </div>
 
-      <a routerLink="/test-me" class="cta-primary wide">🧪 Test {{ meta.name }} again →</a>
+      <div class="detail-cta-row">
+        <button type="button" class="cta-primary" (click)="startFocus(meta.id)">🎯 Focus {{ meta.name }} Weak Spots →</button>
+        <a routerLink="/test-me" class="cta-ghost">🧪 Regular Test Me</a>
+      </div>
+    }
+
+    <!-- ════ SETTINGS PANEL ════ -->
+    @if (settingsOpen()) {
+      <div class="settings-backdrop" (click)="closeSettings()">
+        <div class="settings-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+          <button class="settings-close" type="button" (click)="closeSettings()" aria-label="Close">✕</button>
+          <h2 class="settings-title">⚙️ Settings</h2>
+
+          <div class="settings-block">
+            <span class="settings-label">Email</span>
+            <div class="settings-row">
+              <input class="settings-input" type="email" autocomplete="email"
+                     [value]="emailDraft()"
+                     (input)="onEmailDraft($any($event.target).value)"
+                     placeholder="you@example.com" />
+              <button class="settings-btn" type="button" [disabled]="savingEmail()" (click)="saveEmail()">
+                {{ savingEmail() ? 'Saving…' : 'Save' }}
+              </button>
+            </div>
+            @if (emailError()) { <p class="settings-err">{{ emailError() }}</p> }
+            @if (emailSaved()) { <p class="settings-ok">✓ Email updated</p> }
+          </div>
+
+          <div class="settings-block">
+            <span class="settings-label">Recovery code</span>
+            <div class="settings-row">
+              <code class="settings-code">{{ user.recoveryCode() }}</code>
+              <button class="settings-btn ghost" type="button" (click)="copyRecovery()">
+                {{ copied() ? '✓ Copied' : '📋 Copy' }}
+              </button>
+            </div>
+            <p class="settings-hint">Restores your progress on another device.</p>
+          </div>
+
+          <div class="settings-actions">
+            <button class="settings-signout" type="button" (click)="signOut()">Sign out</button>
+            @if (!confirmingDelete()) {
+              <button class="settings-danger" type="button" (click)="confirmingDelete.set(true)">Delete my data</button>
+            }
+          </div>
+
+          @if (confirmingDelete()) {
+            <div class="settings-confirm">
+              <p>Delete your account and all progress? This can't be undone.</p>
+              <div class="settings-confirm-row">
+                <button class="settings-danger" type="button" [disabled]="deleting()" (click)="deleteAccount()">
+                  {{ deleting() ? 'Deleting…' : 'Yes, delete everything' }}
+                </button>
+                <button class="settings-btn ghost" type="button" (click)="confirmingDelete.set(false)">Cancel</button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
     }
   </div>
 </section>

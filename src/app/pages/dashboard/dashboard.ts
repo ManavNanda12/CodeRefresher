@@ -1,9 +1,10 @@
 import { Component, computed, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
-import { UserService } from '../../core/services/user.service';
+import { UserService, isValidEmail } from '../../core/services/user.service';
+import { FocusRoundService } from '../../core/services/focus.service';
 import {
   ProgressService,
   ArenaProgress,
@@ -58,6 +59,8 @@ interface ModuleRow {
 export class DashboardComponent {
   private platformId = inject(PLATFORM_ID);
   private data = inject(DataService);
+  private router = inject(Router);
+  private focusRound = inject(FocusRoundService);
   readonly user = inject(UserService);
   readonly progress = inject(ProgressService);
 
@@ -67,6 +70,15 @@ export class DashboardComponent {
   selectedId = signal<string | null>(null);
   refreshing = signal(false);
   copied = signal(false);
+
+  // ── settings panel ─────────────────────────────────────────
+  settingsOpen = signal(false);
+  emailDraft = signal('');
+  emailError = signal('');
+  savingEmail = signal(false);
+  emailSaved = signal(false);
+  confirmingDelete = signal(false);
+  deleting = signal(false);
 
   /** Module name → icon, loaded from the arena's data file for the detail view. */
   private moduleIcons = signal<Record<string, string>>({});
@@ -192,6 +204,19 @@ export class DashboardComponent {
     this.scrollTop();
   }
 
+  // ── launch rounds ──────────────────────────────────────────
+  /** Queue an adaptive focus round for an arena and jump into Test Me. */
+  startFocus(arenaId: string): void {
+    this.focusRound.request(arenaId);
+    this.router.navigate(['/test-me']);
+  }
+
+  /** Overview CTA: focus the arena that owns the worst weak spot. */
+  startFocusTopWeak(): void {
+    const top = this.weakSpots()[0];
+    if (top) this.startFocus(top.arena.id);
+  }
+
   // ── recovery code ──────────────────────────────────────────
   copyRecovery(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -199,6 +224,60 @@ export class DashboardComponent {
     navigator.clipboard?.writeText(code).then(() => {
       this.copied.set(true);
       setTimeout(() => this.copied.set(false), 1800);
+    });
+  }
+
+  // ── settings panel ─────────────────────────────────────────
+  openSettings(): void {
+    this.emailDraft.set(this.user.email() ?? '');
+    this.emailError.set('');
+    this.emailSaved.set(false);
+    this.confirmingDelete.set(false);
+    this.settingsOpen.set(true);
+  }
+
+  closeSettings(): void {
+    this.settingsOpen.set(false);
+  }
+
+  onEmailDraft(value: string): void {
+    this.emailDraft.set(value);
+    if (this.emailError()) this.emailError.set('');
+    if (this.emailSaved()) this.emailSaved.set(false);
+  }
+
+  saveEmail(): void {
+    const email = this.emailDraft().trim();
+    if (!isValidEmail(email)) {
+      this.emailError.set('Enter a valid email address.');
+      return;
+    }
+    if (email === this.user.email()) {
+      this.emailSaved.set(true);
+      return;
+    }
+    this.savingEmail.set(true);
+    this.user.changeEmail(email).subscribe(() => {
+      this.savingEmail.set(false);
+      this.emailSaved.set(true);
+    });
+  }
+
+  signOut(): void {
+    this.user.signOut();
+    this.progress.clearLocal();
+    this.settingsOpen.set(false);
+    this.backToOverview();
+  }
+
+  deleteAccount(): void {
+    this.deleting.set(true);
+    this.user.deleteAccount().subscribe(() => {
+      this.progress.clearLocal();
+      this.deleting.set(false);
+      this.settingsOpen.set(false);
+      this.confirmingDelete.set(false);
+      this.backToOverview();
     });
   }
 

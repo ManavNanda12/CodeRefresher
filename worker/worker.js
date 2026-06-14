@@ -10,6 +10,7 @@ import { handleUserRegister } from "./register.js";
 import { handleDashboard } from "./dashboard.js";
 import { handleProgressSync } from "./progress-sync.js";
 import { handleRecover } from "./recover.js";
+import { handleDeleteAccount } from "./delete-account.js";
 import { handleAdminUsers } from "./admin-users.js";
 import { handleUnsubscribe } from "./email-unsubscribe.js";
 
@@ -55,6 +56,9 @@ export default {
     }
     if (p === "/api/user/recover" && method === "POST") {
       return withCors(await handleRecover(request, env));
+    }
+    if (p === "/api/user/delete" && method === "POST") {
+      return withCors(await handleDeleteAccount(request, env));
     }
 
     // ── email outreach ──

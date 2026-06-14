@@ -99,6 +99,24 @@
         }
       }
 
+      <!-- ════════ STAGE 2.5 · FOCUS ROUND LOADING ════════ -->
+      @case ('focus-loading') {
+        <header class="stage-head">
+          <span class="kicker">🎯 Focus Round</span>
+          <h2 class="stage-title sm">Targeting your <span class="grad">weak spots</span></h2>
+        </header>
+        @if (loadError()) {
+          <div class="loader">
+            <p class="err">⚠️ Couldn’t build your focus round. <button class="link-btn" (click)="startFocus(selectedArena()!.id)">Retry</button></p>
+          </div>
+        } @else {
+          <div class="loader">
+            <div class="spinner"></div>
+            <p>Picking the questions you need most…</p>
+          </div>
+        }
+      }
+
       <!-- ════════ STAGE 3 · QUIZ ════════ -->
       @case ('quiz') {
         <div class="quiz-shell">
@@ -109,7 +127,11 @@
               <span class="qm-chip" [style.--accent]="selectedArena()?.accent">
                 {{ selectedArena()?.icon }} {{ selectedArena()?.name }}
               </span>
-              <span class="qm-chip ghost">{{ selectedLevel()?.label }} · {{ selectedLevel()?.badge }}</span>
+              @if (focusMode()) {
+                <span class="qm-chip focus">🎯 Focus Round</span>
+              } @else {
+                <span class="qm-chip ghost">{{ selectedLevel()?.label }} · {{ selectedLevel()?.badge }}</span>
+              }
             </div>
             <span class="qm-counter">{{ currentIndex() + 1 }} / {{ total() }}</span>
           </div>
@@ -117,6 +139,10 @@
           <div class="progress-track">
             <div class="progress-fill" [style.width.%]="progressPct()"></div>
           </div>
+
+          @if (focusMode() && focusTargets().length) {
+            <p class="focus-targets">Targeting: <span>{{ focusTargets().join(' · ') }}</span></p>
+          }
 
           <!-- Question card (re-keyed per index → re-triggers slide-in) -->
           @if (current(); as q) {

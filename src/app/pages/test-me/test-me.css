@@ -345,7 +345,18 @@
   background: rgba(255,255,255,0.05);
   border-color: rgba(255,255,255,0.1);
 }
+.qm-chip.focus {
+  color: #fbbf24;
+  background: rgba(251,191,36,0.13);
+  border-color: rgba(251,191,36,0.4);
+}
 .qm-counter { font-size: 0.85rem; font-weight: 700; color: #64748b; font-variant-numeric: tabular-nums; }
+
+.focus-targets {
+  margin: -1rem 0 1.5rem; text-align: center;
+  font-size: 0.82rem; color: #94a3b8;
+}
+.focus-targets span { color: #fcd34d; font-weight: 600; }
 
 .progress-track {
   height: 6px; border-radius: 4px;

@@ -110,8 +110,10 @@ export class ProgressService {
   private syncRound(round: RoundRecord): void {
     const userId = this.user.userId();
     if (!userId) return; // not onboarded yet — local-only
+    // Send the email too: if register ever failed, the worker fills the gap so the
+    // user stays reachable. The worker only sets it when the record's email is empty.
     this.http
-      .post(`${WORKER_BASE}/api/progress/sync`, { userId, round })
+      .post(`${WORKER_BASE}/api/progress/sync`, { userId, email: this.user.email(), round })
       .pipe(catchError(() => of(null)))
       .subscribe();
   }
@@ -142,6 +144,14 @@ export class ProgressService {
     if (Array.isArray(payload.recentRounds)) {
       this.writeJson(HISTORY_KEY, payload.recentRounds.slice(0, HISTORY_MAX));
     }
+    this.revision.update(v => v + 1);
+  }
+
+  /** Wipe all cached progress + history from localStorage (used by "delete my data"). */
+  clearLocal(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    for (const id of ARENA_IDS) localStorage.removeItem(PROGRESS_KEY(id));
+    localStorage.removeItem(HISTORY_KEY);
     this.revision.update(v => v + 1);
   }
 
