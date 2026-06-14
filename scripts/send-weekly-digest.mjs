@@ -118,10 +118,11 @@ function renderEmail(user, d) {
       const name = ARENA_NAMES[aid] || aid;
       const icon = ARENA_ICONS[aid] || "📦";
       const avg = round1(a.overall.avgScore);
+      const r = a.overall.rounds;
       return `<tr>
-        <td style="padding:8px 0;color:#cbd5e1;font-size:15px">${icon} ${name}</td>
-        <td style="padding:8px 0;text-align:right;font-weight:700;color:${band(avg)};font-size:15px">${avg}/10</td>
-        <td style="padding:8px 0;text-align:right;color:#64748b;font-size:13px">${a.overall.rounds} round${a.overall.rounds === 1 ? "" : "s"}</td>
+        <td style="padding:10px 0;border-top:1px solid #1e2540;font-family:Arial,sans-serif;color:#cbd5e1;font-size:15px">${icon} ${name}</td>
+        <td align="right" style="padding:10px 0;border-top:1px solid #1e2540;font-family:Arial,sans-serif;font-weight:700;color:${band(avg)};font-size:15px">${avg}/10</td>
+        <td align="right" style="padding:10px 0;border-top:1px solid #1e2540;font-family:Arial,sans-serif;color:#64748b;font-size:13px">${r} round${r === 1 ? "" : "s"}</td>
       </tr>`;
     })
     .join("");
@@ -143,34 +144,45 @@ function renderEmail(user, d) {
     ? `Your weekly recap — time to drill ${d.weakest.module}`
     : `Your weekly CodeRefresher recap`;
 
-  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#070d1c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-  <div style="max-width:520px;margin:0 auto;padding:32px 20px">
-    <div style="text-align:center;margin-bottom:24px">
-      <span style="font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a5b4fc">📊 Weekly Recap</span>
-    </div>
-    <div style="background:linear-gradient(160deg,#0d152b,#0a1024);border:1px solid rgba(99,102,241,.28);border-radius:18px;padding:28px 24px">
-      <h1 style="margin:0 0 4px;font-size:22px;color:#f1f5f9">Here's where you stand</h1>
-      <p style="margin:0 0 20px;color:#94a3b8;font-size:14px;line-height:1.5">${weekLine} Total: ${d.totalRounds} rounds.</p>
+  const totalLabel = `${d.totalRounds} round${d.totalRounds === 1 ? "" : "s"}`;
 
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid rgba(148,163,184,.14);border-bottom:1px solid rgba(148,163,184,.14);margin-bottom:22px">
-        ${arenaRows}
+  // Email clients strip <body> backgrounds and CSS gradients, so the layout is
+  // table-based with solid bgcolor attributes + solid hex colors throughout.
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"></head>
+<body style="margin:0;padding:0;background-color:#070d1c;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#070d1c" style="background-color:#070d1c;">
+    <tr><td align="center" style="padding:32px 16px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="520" style="width:520px;max-width:520px;">
+
+        <tr><td align="center" style="padding-bottom:18px;">
+          <span style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#a5b4fc;">📊 Weekly Recap</span>
+        </td></tr>
+
+        <tr><td bgcolor="#0d152b" style="background-color:#0d152b;border:1px solid #2a2f4a;border-radius:16px;padding:28px 24px;">
+          <h1 style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:22px;font-weight:800;color:#f1f5f9;">Here's where you stand</h1>
+          <p style="margin:0 0 18px;font-family:Arial,sans-serif;font-size:14px;line-height:1.5;color:#94a3b8;">${weekLine} Total: ${totalLabel}.</p>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${arenaRows}</table>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 24px;">
+            <tr><td bgcolor="#241f0e" style="background-color:#241f0e;border:1px solid #4a3f1a;border-radius:12px;padding:16px 18px;">${weakLine}</td></tr>
+          </table>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td align="center" bgcolor="#6366f1" style="background-color:#6366f1;border-radius:12px;">
+              <a href="${focusUrl}" style="display:block;padding:14px 20px;font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">🎯 Run a Focus Round →</a>
+            </td></tr>
+          </table>
+        </td></tr>
+
+        <tr><td align="center" style="padding-top:18px;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#475569;">
+          You're getting this because you saved progress on CodeRefresher.<br>
+          <a href="${unsub}" style="color:#64748b;text-decoration:underline;">Unsubscribe</a>
+        </td></tr>
+
       </table>
-
-      <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:12px;padding:16px 18px;margin-bottom:24px">
-        ${weakLine}
-      </div>
-
-      <a href="${focusUrl}" style="display:block;text-align:center;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:14px;border-radius:12px">
-        🎯 Run a Focus Round →
-      </a>
-    </div>
-
-    <p style="text-align:center;color:#475569;font-size:12px;line-height:1.6;margin:20px 0 0">
-      You're getting this because you saved progress on CodeRefresher.<br>
-      <a href="${unsub}" style="color:#64748b;text-decoration:underline">Unsubscribe</a>
-    </p>
-  </div>
+    </td></tr>
+  </table>
 </body></html>`;
 
   const text = [
