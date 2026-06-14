@@ -90,6 +90,7 @@ export class DashboardComponent {
       description:
         'Track every Test Me round, see your readiness per technology, and spot the modules that need work.',
       keywords: 'developer progress dashboard, interview prep tracker, angular dotnet sql readiness',
+      noindex: true, // personalized, gated by onboarding — nothing useful for crawlers
     });
     // Pull the source-of-truth from KV and reconcile into the local cache.
     if (isPlatformBrowser(this.platformId) && this.user.isKnown()) {

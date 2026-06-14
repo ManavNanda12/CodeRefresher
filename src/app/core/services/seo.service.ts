@@ -7,6 +7,8 @@ export interface SeoConfig {
   title: string;
   description: string;
   keywords?: string;
+  /** Personalized/utility pages (e.g. dashboard) set this so crawlers skip them. */
+  noindex?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -17,7 +19,7 @@ export class SeoService {
   private doc      = inject(DOCUMENT);
 
   private readonly SITE_NAME = 'Developer Refresher';
-  private readonly BASE_URL  = 'https://devrefresher.app';
+  private readonly BASE_URL  = 'https://coderefresher.pages.dev';
   private readonly OG_IMAGE  = `${this.BASE_URL}/og-image.png`;
 
   update(config: SeoConfig): void {
@@ -30,6 +32,10 @@ export class SeoService {
     if (config.keywords) {
       this.meta.updateTag({ name: 'keywords', content: config.keywords });
     }
+    this.meta.updateTag({
+      name: 'robots',
+      content: config.noindex ? 'noindex, follow' : 'index, follow',
+    });
 
     // Open Graph
     this.meta.updateTag({ property: 'og:title',       content: fullTitle });
