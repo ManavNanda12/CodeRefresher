@@ -227,13 +227,22 @@ async function main() {
   validateEnv();
   const dryRun = DRY_RUN === "true";
   const users = await fetchUsers();
-  console.log(`Fetched ${users.length} users. provider=${EMAIL_PROVIDER} dryRun=${dryRun}`);
+  console.log(`Fetched ${users.length} users. provider=${EMAIL_PROVIDER || "smtp"} dryRun=${dryRun}`);
 
   let sent = 0, skipped = 0, failed = 0;
   for (const user of users) {
-    if (!user.email || user.unsubscribed) { skipped++; continue; }
+    if (!user.email) { console.log(`skip ${user.userId}: no email on record`); skipped++; continue; }
+    if (user.unsubscribed) { console.log(`skip ${user.email}: unsubscribed`); skipped++; continue; }
     const digest = buildDigest(user);
-    if (!digest) { skipped++; continue; }
+    if (!digest) {
+      const keys = Object.keys(user.arenas || {});
+      const reason = keys.length
+        ? `arenas [${keys.join(", ")}] present but none have overall.rounds — likely pre-fix data; complete a fresh round`
+        : `no arenas synced yet — no completed rounds in KV`;
+      console.log(`skip ${user.email}: ${reason}`);
+      skipped++;
+      continue;
+    }
 
     const mail = renderEmail(user, digest);
     if (dryRun) {
