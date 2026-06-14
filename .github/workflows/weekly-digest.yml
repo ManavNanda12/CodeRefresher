@@ -1,0 +1,43 @@
+name: Weekly Progress Digest
+
+on:
+  schedule:
+    # Mondays 09:00 UTC. Adjust as you like (https://crontab.guru).
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — log recipients, send nothing"
+        type: boolean
+        default: true
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      # CI-only dependency — not added to the app's package.json.
+      - run: npm install --no-save nodemailer@^6
+
+      - name: Send weekly digest
+        run: node scripts/send-weekly-digest.mjs
+        env:
+          WORKER_BASE: ${{ secrets.WORKER_BASE }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          # Optional — set EMAIL_PROVIDER=resend + RESEND_API_KEY to switch transport later.
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          # Scheduled runs send for real; manual runs default to dry-run unless you flip it.
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
