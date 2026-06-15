@@ -2,26 +2,200 @@
   "categories": {
     "0-1": {
       "modules": {
-        "Fundamentals": {
-          "icon": "📚",
+        "C# Basics": {
+          "icon": "🔷",
           "questions": [
             {
-              "question": "What is the difference between .NET Framework and modern .NET (Core / .NET 5+)?",
-              "answer": ".NET Framework is Windows-only, ships with the OS, and supports WinForms, WPF, and ASP.NET Web Forms. Modern .NET (.NET Core, then .NET 5/6/7/8+) is cross-platform (Windows, Linux, macOS), open-source, high-performance, and ships independently. For new projects, always use modern .NET. ASP.NET Core replaced ASP.NET MVC/Web API and runs on all platforms.",
-              "codeExample": "// Modern .NET minimal API (Program.cs — no Startup class needed)\nvar builder = WebApplication.CreateBuilder(args);\nbuilder.Services.AddEndpointsApiExplorer();\nbuilder.Services.AddSwaggerGen();\n\nvar app = builder.Build();\napp.UseSwagger();\napp.UseSwaggerUI();\n\n// Minimal API endpoint — no controller needed\napp.MapGet(\"/users/{id}\", (int id, UserService svc) =>\n    svc.GetById(id) is { } user\n        ? Results.Ok(user)\n        : Results.NotFound());\n\napp.Run();",
-              "simpleExample": ".NET Framework is like an old Windows-only car — powerful but can't leave Windows territory. Modern .NET is like a Tesla — cross-platform, faster, regularly updated, and open-source. For any new project today, use modern .NET. Think .NET 8 or .NET 9 as your starting point."
+              "question": "What is C#?",
+              "answer": "C# is an object oriented programming language developed by Microsoft mainly used for building web applications, APIs, desktop applications, and backend services.",
+              "codeExample": "string name = \"Manav\";",
+              "simpleExample": "C# is the main language we use to write .NET applications."
             },
             {
-              "question": "What is async/await in C# and how does it work?",
-              "answer": "async/await is C#'s syntax for writing asynchronous code that reads like synchronous code. When a method is marked async, it can use await to pause execution at an I/O-bound operation (HTTP call, DB query, file read) without blocking the thread. The thread is freed to do other work while waiting, then resumes when the awaited operation completes. This is critical for building scalable web APIs.",
-              "codeExample": "// Controller using async/await for DB call\n[ApiController, Route(\"api/[controller]\")]\npublic class ProductsController : ControllerBase\n{\n    private readonly AppDbContext _db;\n    public ProductsController(AppDbContext db) => _db = db;\n\n    [HttpGet]\n    public async Task<ActionResult<List<Product>>> GetAll()\n    {\n        var products = await _db.Products\n            .Where(p => p.IsActive)\n            .OrderBy(p => p.Name)\n            .ToListAsync();\n        return Ok(products);\n    }\n}",
-              "simpleExample": "Without async/await: a waiter takes your order, goes to the kitchen, and STANDS THERE staring at the cook until the food is ready — blocking every other customer. With async/await: the waiter takes your order, goes to the kitchen, then serves OTHER tables while your food cooks. When it's ready, they come back and serve you."
+              "question": "What is CLR in .NET?",
+              "answer": "CLR stands for Common Language Runtime. It executes .NET code and handles memory management, exception handling, and garbage collection.",
+              "codeExample": "// CLR executes compiled IL code",
+              "simpleExample": "CLR is like the engine that runs .NET code."
             },
             {
-              "question": "What is LINQ in C# and how is it used?",
-              "answer": "LINQ (Language Integrated Query) is a set of extension methods on IEnumerable<T> and IQueryable<T> that lets you query, filter, transform, and aggregate data using a SQL-like syntax directly in C#. It works on any collection (arrays, lists, DB results via Entity Framework). Key methods: Where, Select, OrderBy, GroupBy, First/FirstOrDefault, Any, All, Count, Sum, Aggregate.",
-              "codeExample": "var employees = new List<Employee> { /* ... */ };\n\n// Method syntax\nvar seniorDevs = employees\n    .Where(e => e.Role == \"Developer\" && e.YearsExp >= 5)\n    .OrderByDescending(e => e.Salary)\n    .Select(e => new { e.Name, e.Salary })\n    .Take(10)\n    .ToList();\n\n// Grouping\nvar byDept = employees\n    .GroupBy(e => e.Department)\n    .Select(g => new {\n        Department = g.Key,\n        AvgSalary = g.Average(e => e.Salary)\n    });",
-              "simpleExample": "Without LINQ, filtering a list means writing a foreach loop with if statements every single time. LINQ gives you reusable 'SQL for collections' — filter with Where, transform with Select, sort with OrderBy, take the first match with First."
+              "question": "What is the difference between value type and reference type?",
+              "answer": "Value types store actual data directly while reference types store memory address pointing to actual object.",
+              "codeExample": "int a = 5; string name = \"test\";",
+              "simpleExample": "int stores value directly, object stores reference."
+            },
+            {
+              "question": "Difference between var and dynamic?",
+              "answer": "var type is decided at compile time while dynamic type is decided at runtime.",
+              "codeExample": "var x = 10; dynamic y = 10;",
+              "simpleExample": "var is fixed after compile, dynamic can change while running."
+            },
+            {
+              "question": "What is boxing and unboxing?",
+              "answer": "Boxing converts value type to object type and unboxing converts object back to value type.",
+              "codeExample": "int a = 10; object obj = a; int b = (int)obj;",
+              "simpleExample": "Wrapping int inside object is boxing."
+            },
+            {
+              "question": "What is method overloading?",
+              "answer": "Method overloading means creating multiple methods with same name but different parameters.",
+              "codeExample": "Add(int a,int b)\nAdd(int a,int b,int c)",
+              "simpleExample": "Same method name but different input."
+            },
+            {
+              "question": "What is method overriding?",
+              "answer": "Method overriding means changing parent class method behavior in child class using virtual and override keywords.",
+              "codeExample": "public override void Show(){}",
+              "simpleExample": "Child class changes parent method behavior."
+            }
+          ]
+        },
+
+        "OOP Concepts": {
+          "icon": "🏗️",
+          "questions": [
+            {
+              "question": "What is encapsulation?",
+              "answer": "Encapsulation means hiding internal data and exposing only required functionality using properties and methods.",
+              "codeExample": "private int age; public int Age { get; set; }",
+              "simpleExample": "Hide data and allow controlled access."
+            },
+            {
+              "question": "What is inheritance?",
+              "answer": "Inheritance allows child class to reuse properties and methods from parent class.",
+              "codeExample": "class Admin : User {}",
+              "simpleExample": "Child class gets parent functionality."
+            },
+            {
+              "question": "What is polymorphism?",
+              "answer": "Polymorphism allows same method to behave differently depending on object or parameters.",
+              "codeExample": "method overloading and method overriding",
+              "simpleExample": "Same method, different behavior."
+            },
+            {
+              "question": "What is abstraction?",
+              "answer": "Abstraction means hiding implementation details and showing only important functionality.",
+              "codeExample": "abstract class Payment {}",
+              "simpleExample": "User sees what action does, not internal logic."
+            },
+            {
+              "question": "Difference between abstract class and interface?",
+              "answer": "Abstract class can have implementation and constructor while interface only defines contract.",
+              "codeExample": "interface IUserService {}",
+              "simpleExample": "Interface defines what to do, abstract can partially implement."
+            },
+            {
+              "question": "Can a class implement multiple interfaces?",
+              "answer": "Yes a class can implement multiple interfaces in C#.",
+              "codeExample": "class User : ILogin, IRegister {}",
+              "simpleExample": "One class can follow multiple contracts."
+            }
+          ]
+        },
+
+        "Collections": {
+          "icon": "📦",
+          "questions": [
+            {
+              "question": "Difference between Array and List?",
+              "answer": "Array has fixed size while List is dynamic and can grow or shrink.",
+              "codeExample": "int[] arr = new int[5]; List<int> list = new();",
+              "simpleExample": "Array fixed, List flexible."
+            },
+            {
+              "question": "What is Dictionary in C#?",
+              "answer": "Dictionary stores data as key value pairs and allows fast lookup using key.",
+              "codeExample": "Dictionary<int,string> users = new();",
+              "simpleExample": "Store like ID and Name together."
+            },
+            {
+              "question": "Difference between IEnumerable and IQueryable?",
+              "answer": "IEnumerable works in memory while IQueryable executes query on database side.",
+              "codeExample": "db.Users.Where(x => x.Id > 1)",
+              "simpleExample": "IQueryable filters in DB, IEnumerable filters after data comes."
+            },
+            {
+              "question": "What is Queue?",
+              "answer": "Queue follows FIFO structure meaning first in first out.",
+              "codeExample": "Queue<int> q = new();",
+              "simpleExample": "First inserted item comes out first."
+            },
+            {
+              "question": "What is Stack?",
+              "answer": "Stack follows LIFO structure meaning last in first out.",
+              "codeExample": "Stack<int> stack = new();",
+              "simpleExample": "Last inserted item comes out first."
+            }
+          ]
+        },
+
+        "Exception Handling": {
+          "icon": "⚠️",
+          "questions": [
+            {
+              "question": "What is exception handling?",
+              "answer": "Exception handling allows application to handle runtime errors without crashing.",
+              "codeExample": "try { } catch(Exception ex) { }",
+              "simpleExample": "Handle errors safely."
+            },
+            {
+              "question": "What is try catch finally?",
+              "answer": "Try contains risky code, catch handles error, finally always executes.",
+              "codeExample": "try{} catch{} finally{}",
+              "simpleExample": "Finally runs whether error happens or not."
+            },
+            {
+              "question": "Difference between throw and throw ex?",
+              "answer": "throw keeps original stack trace while throw ex resets stack trace.",
+              "codeExample": "throw; vs throw ex;",
+              "simpleExample": "Use throw to preserve original error details."
+            },
+            {
+              "question": "Why use finally block?",
+              "answer": "Finally is used for cleanup like closing DB connection or releasing resources.",
+              "codeExample": "finally { connection.Close(); }",
+              "simpleExample": "Always runs at end."
+            },
+            {
+              "question": "How to create custom exception?",
+              "answer": "Create class inheriting Exception class.",
+              "codeExample": "class MyException : Exception {}",
+              "simpleExample": "Create your own custom error."
+            }
+          ]
+        },
+
+        "Delegates & Events": {
+          "icon": "📢",
+          "questions": [
+            {
+              "question": "What is delegate in C#?",
+              "answer": "Delegate is a type safe function pointer that holds reference to methods.",
+              "codeExample": "delegate void Print();",
+              "simpleExample": "Delegate points to a method."
+            },
+            {
+              "question": "What is event in C#?",
+              "answer": "Event allows one class to notify other classes when something happens.",
+              "codeExample": "public event EventHandler OnSave;",
+              "simpleExample": "Button click triggers event."
+            },
+            {
+              "question": "Difference between delegate and event?",
+              "answer": "Delegate can directly call methods while event is used for notifications and restricts direct invocation outside class.",
+              "codeExample": "event EventHandler Submit;",
+              "simpleExample": "Event is safer wrapper around delegate."
+            },
+            {
+              "question": "What is Action delegate?",
+              "answer": "Action is built in delegate that returns no value.",
+              "codeExample": "Action<string> print;",
+              "simpleExample": "Method runs but returns nothing."
+            },
+            {
+              "question": "What is Func delegate?",
+              "answer": "Func is built in delegate that returns a value.",
+              "codeExample": "Func<int,int,int> add;",
+              "simpleExample": "Method takes input and returns result."
             }
           ]
         }
@@ -29,68 +203,986 @@
     },
     "1-2": {
       "modules": {
-        "Core Concepts": {
-          "icon": "🔑",
+        "ASP.NET Core Basics": {
+          "icon": "🌐",
           "questions": [
             {
-              "question": "What is Entity Framework Core and how do you perform basic CRUD operations?",
-              "answer": "Entity Framework Core (EF Core) is .NET's official ORM (Object-Relational Mapper). It maps C# classes (entities) to database tables, lets you write C# LINQ queries instead of SQL, and handles migrations (schema changes). The DbContext is the main class you work with — it represents the database session. EF Core supports SQL Server, PostgreSQL, SQLite, MySQL, and others.",
-              "codeExample": "// 1. Define entity\npublic class Product\n{\n    public int Id { get; set; }\n    public string Name { get; set; } = string.Empty;\n    public decimal Price { get; set; }\n    public bool IsActive { get; set; } = true;\n}\n\n// 2. DbContext\npublic class AppDbContext : DbContext\n{\n    public AppDbContext(DbContextOptions<AppDbContext> opts) : base(opts) {}\n    public DbSet<Product> Products => Set<Product>();\n}\n\n// 3. CRUD in a service\npublic class ProductService(AppDbContext db)\n{\n    public async Task<List<Product>> GetAllAsync() =>\n        await db.Products.Where(p => p.IsActive).ToListAsync();\n\n    public async Task CreateAsync(Product p)\n    {\n        db.Products.Add(p);\n        await db.SaveChangesAsync();\n    }\n}",
-              "simpleExample": "Writing raw SQL in your C# code is like speaking a foreign language every time you need data. EF Core is your translator — you write C# and it generates the SQL for you. You define 'Product' as a class, EF creates the 'Products' table. Migrations track your schema changes like Git tracks code changes."
+              "question": "What is ASP.NET Core?",
+              "answer": "ASP.NET Core is a cross platform framework used to build web applications, REST APIs, and backend services.",
+              "codeExample": "dotnet new webapi",
+              "simpleExample": "Framework used for building backend APIs in .NET."
             },
             {
-              "question": "What are Value Types vs Reference Types in C#?",
-              "answer": "Value types (struct, int, double, bool, DateTime, enum) store their data directly on the stack. Assigning a value type creates a COPY. Reference types (class, string, arrays, interfaces) store a reference (pointer) on the stack to the actual data on the heap. Assigning a reference type copies the reference — both variables point to the same object.",
-              "codeExample": "// Value type — copy on assignment\nint a = 10;\nint b = a;   // b is a copy\nb = 20;      // a is still 10 ✓\n\n// Reference type — reference copied, same object\nvar list1 = new List<int> { 1, 2, 3 };\nvar list2 = list1;  // both point to same list!\nlist2.Add(4);\nConsole.WriteLine(list1.Count);  // 4 — also changed!\n\n// String is a special reference type — immutable\nstring s1 = \"hello\";\nstring s2 = s1;\ns2 += \" world\";  // creates a NEW string — s1 unchanged ✓",
-              "simpleExample": "Value types are like writing a phone number on paper — if you photocopy the paper, you get a completely independent copy. Reference types are like a shared Google Doc — everyone edits the SAME document. Strings are special: every edit creates a new document."
+              "question": "Difference between .NET Framework and ASP.NET Core?",
+              "answer": ".NET Framework mainly runs on Windows while ASP.NET Core is cross platform and works on Windows, Linux, and Mac.",
+              "codeExample": "// .NET Framework vs .NET Core",
+              "simpleExample": ".NET Core works everywhere while old framework mostly Windows."
+            },
+            {
+              "question": "What is Kestrel server?",
+              "answer": "Kestrel is the built in web server in ASP.NET Core used to handle HTTP requests.",
+              "codeExample": "// Kestrel starts automatically",
+              "simpleExample": "Kestrel receives incoming API requests."
+            },
+            {
+              "question": "What is request pipeline in ASP.NET Core?",
+              "answer": "Request pipeline is a sequence of middleware through which every request passes before reaching controller.",
+              "codeExample": "app.UseAuthentication();",
+              "simpleExample": "Request passes multiple steps before API executes."
+            },
+            {
+              "question": "Why is ASP.NET Core faster than older .NET Framework?",
+              "answer": "It has optimized runtime, lightweight pipeline, built in dependency injection, and better performance improvements.",
+              "codeExample": "// Improved runtime optimizations",
+              "simpleExample": "New architecture makes requests faster."
+            }
+          ]
+        },
+
+        "Program.cs": {
+          "icon": "⚙️",
+          "questions": [
+            {
+              "question": "What is Program.cs in ASP.NET Core?",
+              "answer": "Program.cs is the main entry point where services are registered and middleware pipeline is configured.",
+              "codeExample": "var builder = WebApplication.CreateBuilder(args);",
+              "simpleExample": "Application starts execution from Program.cs."
+            },
+            {
+              "question": "What does builder.Services do?",
+              "answer": "builder.Services is used to register services for dependency injection container.",
+              "codeExample": "builder.Services.AddScoped<IUserService, UserService>();",
+              "simpleExample": "Register services so framework can inject them later."
+            },
+            {
+              "question": "What does builder.Build() do?",
+              "answer": "builder.Build creates the application instance after service registration is complete.",
+              "codeExample": "var app = builder.Build();",
+              "simpleExample": "Creates actual application object."
+            },
+            {
+              "question": "What does app.Run() do?",
+              "answer": "app.Run starts the application and begins listening for incoming requests.",
+              "codeExample": "app.Run();",
+              "simpleExample": "Starts web server and waits for requests."
+            },
+            {
+              "question": "Difference between builder.Services and app?",
+              "answer": "builder.Services registers dependencies while app configures request pipeline and middleware.",
+              "codeExample": "builder.Services.AddControllers(); app.UseAuthorization();",
+              "simpleExample": "Services setup dependencies, app handles request flow."
+            },
+            {
+              "question": "Why do we call AddControllers()?",
+              "answer": "AddControllers registers controller support so API endpoints can be created.",
+              "codeExample": "builder.Services.AddControllers();",
+              "simpleExample": "Without it controller APIs will not work."
+            }
+          ]
+        },
+
+        "Middleware": {
+          "icon": "🔄",
+          "questions": [
+            {
+              "question": "What is middleware?",
+              "answer": "Middleware is a component in ASP.NET Core pipeline that processes request and response before reaching controller.",
+              "codeExample": "app.UseAuthentication();",
+              "simpleExample": "Every request passes through middleware first."
+            },
+            {
+              "question": "Why is middleware order important?",
+              "answer": "Middleware executes in sequence and wrong order can break authentication or routing.",
+              "codeExample": "app.UseAuthentication(); app.UseAuthorization();",
+              "simpleExample": "Wrong order means request may fail."
+            },
+            {
+              "question": "Difference between Use, Run, and Map?",
+              "answer": "Use passes request to next middleware, Run ends pipeline, Map branches pipeline based on route.",
+              "codeExample": "app.Use(...); app.Run(...); app.MapGet(...);",
+              "simpleExample": "Use continues, Run stops, Map creates route branch."
+            },
+            {
+              "question": "What does UseRouting() do?",
+              "answer": "UseRouting identifies which endpoint or controller should handle request.",
+              "codeExample": "app.UseRouting();",
+              "simpleExample": "Routing decides which API endpoint will run."
+            },
+            {
+              "question": "Can middleware stop request pipeline?",
+              "answer": "Yes if middleware does not call next delegate then request stops there.",
+              "codeExample": "if(error) return;",
+              "simpleExample": "Middleware can block request from reaching controller."
+            },
+            {
+              "question": "How do you create custom middleware?",
+              "answer": "Create a class with RequestDelegate and Invoke method then register it in pipeline.",
+              "codeExample": "public async Task Invoke(HttpContext context){}",
+              "simpleExample": "Custom middleware adds your own request logic."
+            }
+          ]
+        },
+
+        "Dependency Injection": {
+          "icon": "💉",
+          "questions": [
+            {
+              "question": "What is dependency injection?",
+              "answer": "Dependency injection is a design pattern where framework automatically provides required services instead of manually creating objects.",
+              "codeExample": "builder.Services.AddScoped<IUserService, UserService>();",
+              "simpleExample": "Framework gives service automatically."
+            },
+            {
+              "question": "Why use dependency injection?",
+              "answer": "It reduces tight coupling, improves testability, and makes code reusable.",
+              "codeExample": "public UserController(IUserService service)",
+              "simpleExample": "Controller does not create service manually."
+            },
+            {
+              "question": "What is a dependency?",
+              "answer": "Dependency is any object or service another class needs to work properly.",
+              "codeExample": "IUserService inside controller",
+              "simpleExample": "Controller depends on service."
+            },
+            {
+              "question": "What is constructor injection?",
+              "answer": "Constructor injection means passing dependencies through constructor automatically by framework.",
+              "codeExample": "public UserController(IUserService service)",
+              "simpleExample": "Dependency comes when object is created."
+            },
+            {
+              "question": "What is inversion of control?",
+              "answer": "Inversion of control means object creation responsibility moves from class to framework.",
+              "codeExample": "// framework creates object",
+              "simpleExample": "Framework controls object creation instead of developer."
+            }
+          ]
+        },
+
+        "Service Lifetimes": {
+          "icon": "🧩",
+          "questions": [
+            {
+              "question": "What is Transient lifetime?",
+              "answer": "Transient creates a new instance every time service is requested.",
+              "codeExample": "builder.Services.AddTransient<IUserService, UserService>();",
+              "simpleExample": "New object created every time."
+            },
+            {
+              "question": "What is Scoped lifetime?",
+              "answer": "Scoped creates one instance per request and same instance is reused during request lifecycle.",
+              "codeExample": "builder.Services.AddScoped<IUserService, UserService>();",
+              "simpleExample": "One object per API request."
+            },
+            {
+              "question": "What is Singleton lifetime?",
+              "answer": "Singleton creates one instance for entire application and shares it everywhere.",
+              "codeExample": "builder.Services.AddSingleton<ICacheService, CacheService>();",
+              "simpleExample": "Same object reused for whole app."
+            },
+            {
+              "question": "Why is DbContext usually scoped?",
+              "answer": "DbContext should be scoped because one database context should exist per request to avoid conflicts.",
+              "codeExample": "builder.Services.AddDbContext<AppDbContext>();",
+              "simpleExample": "Each request gets separate database context."
+            },
+            {
+              "question": "What happens if Singleton stores user specific data?",
+              "answer": "Different users may accidentally share same data because singleton is shared globally.",
+              "codeExample": "// dangerous shared state",
+              "simpleExample": "User data can leak between requests."
+            }
+          ]
+        },
+        "Controllers": {
+          "icon": "🎮",
+          "questions": [
+            {
+              "question": "What is a Controller in ASP.NET Core?",
+              "answer": "Controller is a class that handles incoming HTTP requests and returns responses to the client.",
+              "codeExample": "public class UserController : ControllerBase {}",
+              "simpleExample": "Controller receives API request and sends response."
+            },
+            {
+              "question": "What does ApiController attribute do?",
+              "answer": "ApiController enables automatic model validation, better API behavior, and automatic bad request responses.",
+              "codeExample": "[ApiController]",
+              "simpleExample": "Helps framework treat class as API controller."
+            },
+            {
+              "question": "What does Route attribute do?",
+              "answer": "Route attribute defines the URL path through which controller or action can be accessed.",
+              "codeExample": "[Route(\"api/users\")]",
+              "simpleExample": "Defines API endpoint URL."
+            },
+            {
+              "question": "What is ControllerBase?",
+              "answer": "ControllerBase is base class for API controllers and provides helper methods like Ok(), BadRequest(), NotFound().",
+              "codeExample": "public class UserController : ControllerBase",
+              "simpleExample": "Base class used for APIs without views."
+            },
+            {
+              "question": "What is IActionResult?",
+              "answer": "IActionResult allows controller to return different HTTP responses like success, error, or not found.",
+              "codeExample": "return Ok(data);",
+              "simpleExample": "Flexible response type for API methods."
+            },
+            {
+              "question": "Difference between Ok() and BadRequest()?",
+              "answer": "Ok returns success response while BadRequest returns client error when request data is invalid.",
+              "codeExample": "return Ok(); return BadRequest();",
+              "simpleExample": "Ok means success, BadRequest means invalid input."
+            }
+          ]
+        },
+
+        "Routing": {
+          "icon": "🛣️",
+          "questions": [
+            {
+              "question": "What is routing in ASP.NET Core?",
+              "answer": "Routing maps incoming URL requests to correct controller and action methods.",
+              "codeExample": "[Route(\"api/products\")]",
+              "simpleExample": "Routing decides which API method should execute."
+            },
+            {
+              "question": "What is attribute routing?",
+              "answer": "Attribute routing defines routes directly using attributes above controller or methods.",
+              "codeExample": "[HttpGet(\"all\")]",
+              "simpleExample": "Routes are written directly on methods."
+            },
+            {
+              "question": "What is conventional routing?",
+              "answer": "Conventional routing defines route patterns centrally instead of inside controller attributes.",
+              "codeExample": "app.MapControllerRoute()",
+              "simpleExample": "Routes managed from one place."
+            },
+            {
+              "question": "Can multiple routes point to same controller?",
+              "answer": "Yes multiple route attributes can be applied to same controller or action.",
+              "codeExample": "[Route(\"api/users\")][Route(\"api/customers\")]",
+              "simpleExample": "One API method can respond to multiple URLs."
+            },
+            {
+              "question": "What is route parameter?",
+              "answer": "Route parameter allows dynamic values in URL like ID or category.",
+              "codeExample": "[HttpGet(\"{id}\")]",
+              "simpleExample": "Pass values directly inside URL."
+            }
+          ]
+        },
+
+        "HTTP Methods": {
+          "icon": "📡",
+          "questions": [
+            {
+              "question": "What is HTTP GET method?",
+              "answer": "GET method is used to retrieve data from server without modifying anything.",
+              "codeExample": "[HttpGet]",
+              "simpleExample": "Fetch data from API."
+            },
+            {
+              "question": "What is POST method?",
+              "answer": "POST method sends new data to server and usually creates a new record.",
+              "codeExample": "[HttpPost]",
+              "simpleExample": "Send new data to server."
+            },
+            {
+              "question": "What is PUT method?",
+              "answer": "PUT method updates complete existing resource by replacing all fields.",
+              "codeExample": "[HttpPut]",
+              "simpleExample": "Replace entire record."
+            },
+            {
+              "question": "What is PATCH method?",
+              "answer": "PATCH method updates only specific fields instead of replacing entire object.",
+              "codeExample": "[HttpPatch]",
+              "simpleExample": "Update only changed fields."
+            },
+            {
+              "question": "What is DELETE method?",
+              "answer": "DELETE method removes a resource from server or database.",
+              "codeExample": "[HttpDelete]",
+              "simpleExample": "Delete existing record."
+            },
+            {
+              "question": "Difference between PUT and PATCH?",
+              "answer": "PUT replaces full object while PATCH updates only selected properties.",
+              "codeExample": "PUT full object, PATCH partial object",
+              "simpleExample": "PUT = replace everything, PATCH = update only changes."
+            }
+          ]
+        },
+
+        "Model Binding": {
+          "icon": "📥",
+          "questions": [
+            {
+              "question": "What is model binding?",
+              "answer": "Model binding automatically maps incoming request data to controller method parameters or models.",
+              "codeExample": "public IActionResult Save(User user)",
+              "simpleExample": "Framework converts request data into object automatically."
+            },
+            {
+              "question": "What does FromBody do?",
+              "answer": "FromBody tells framework to read data from request body and convert it into object.",
+              "codeExample": "public IActionResult Save([FromBody] User user)",
+              "simpleExample": "Read JSON data sent from frontend."
+            },
+            {
+              "question": "What does FromQuery do?",
+              "answer": "FromQuery reads data from query string parameters in URL.",
+              "codeExample": "public IActionResult Get([FromQuery]int page)",
+              "simpleExample": "Reads values after question mark in URL."
+            },
+            {
+              "question": "What does FromRoute do?",
+              "answer": "FromRoute reads values passed directly inside URL route.",
+              "codeExample": "public IActionResult Get([FromRoute]int id)",
+              "simpleExample": "Reads dynamic route values."
+            },
+            {
+              "question": "Can model binding automatically validate model?",
+              "answer": "Yes with ApiController and validation attributes framework automatically validates model.",
+              "codeExample": "[Required]",
+              "simpleExample": "Framework checks required fields automatically."
+            }
+          ]
+        },
+
+        "Status Codes": {
+          "icon": "📶",
+          "questions": [
+            {
+              "question": "What is HTTP status code 200?",
+              "answer": "Status code 200 means request completed successfully.",
+              "codeExample": "return Ok();",
+              "simpleExample": "Everything worked successfully."
+            },
+            {
+              "question": "What is status code 201?",
+              "answer": "Status code 201 means new resource was created successfully.",
+              "codeExample": "return Created();",
+              "simpleExample": "New record created successfully."
+            },
+            {
+              "question": "What is status code 400?",
+              "answer": "Status code 400 means client sent invalid request data.",
+              "codeExample": "return BadRequest();",
+              "simpleExample": "Something wrong in request."
+            },
+            {
+              "question": "What is status code 401?",
+              "answer": "Status code 401 means user is not authenticated and login is required.",
+              "codeExample": "return Unauthorized();",
+              "simpleExample": "User needs valid token or login."
+            },
+            {
+              "question": "Difference between 401 and 403?",
+              "answer": "401 means user is not authenticated while 403 means user is authenticated but not allowed.",
+              "codeExample": "Unauthorized vs Forbidden",
+              "simpleExample": "401 = no login, 403 = no permission."
+            },
+            {
+              "question": "What is status code 500?",
+              "answer": "Status code 500 means internal server error happened on backend.",
+              "codeExample": "Unhandled exception",
+              "simpleExample": "Backend crashed due to error."
             }
           ]
         }
       }
     },
+
     "2-3": {
       "modules": {
-        "Advanced": {
-          "icon": "🎓",
+        "Entity Framework Core": {
+          "icon": "🗄️",
           "questions": [
             {
-              "question": "What is Dependency Injection in ASP.NET Core and what are the three service lifetimes?",
-              "answer": "ASP.NET Core has a built-in DI container. Services are registered in Program.cs and injected via constructor. Three lifetimes: Singleton (one instance for the entire app lifetime), Scoped (one per HTTP request — use for DbContext), Transient (new instance every time it's requested — use for lightweight, stateless services).",
-              "codeExample": "// Registration in Program.cs\nbuilder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();\nbuilder.Services.AddScoped<IOrderService, OrderService>();\nbuilder.Services.AddTransient<IValidator<OrderDto>, OrderValidator>();\n\n// Primary constructor injection (C# 12 / .NET 8+)\npublic class OrderService(AppDbContext db, IEmailSender email) : IOrderService\n{\n    public async Task PlaceOrderAsync(OrderDto dto)\n    {\n        var order = dto.ToEntity();\n        db.Orders.Add(order);\n        await db.SaveChangesAsync();\n        await email.SendAsync(dto.CustomerEmail, \"Order Confirmed\", $\"Order #{order.Id}\");\n    }\n}",
-              "simpleExample": "Singleton: one coffee machine for the whole office — everyone uses the same one, forever. Scoped: a fresh notepad per meeting — torn up when the meeting ends. Transient: a disposable pen — get a new one every time you ask. DbContext = Scoped, global config = Singleton, validators = Transient."
+              "question": "What is Entity Framework Core?",
+              "answer": "Entity Framework Core is an ORM used in .NET to interact with database using C# classes instead of writing raw SQL queries.",
+              "codeExample": "public class AppDbContext : DbContext {}",
+              "simpleExample": "Write C# code instead of manually writing SQL queries."
             },
             {
-              "question": "What is Middleware in ASP.NET Core and how does the request pipeline work?",
-              "answer": "Middleware is software assembled into a pipeline to handle HTTP requests and responses. Each middleware component can perform operations before and after the next component in the pipeline. Order matters — middleware runs in the order it's added.",
-              "codeExample": "// Program.cs — middleware order matters!\nvar app = builder.Build();\n\napp.UseExceptionHandler(\"/error\");  // 1. Catch errors from all below\napp.UseHttpsRedirection();          // 2. HTTPS redirect\napp.UseStaticFiles();               // 3. Static files\napp.UseRouting();                   // 4. Must be before Auth\napp.UseAuthentication();            // 5. Auth — after Routing\napp.UseAuthorization();\napp.MapControllers();               // 6. Endpoints last\n\n// Custom middleware\napp.Use(async (context, next) => {\n    Console.WriteLine($\"→ {context.Request.Path}\");\n    await next(context);\n    Console.WriteLine($\"← {context.Response.StatusCode}\");\n});",
-              "simpleExample": "The request pipeline is like airport security lines. Your HTTP request passes through checkpoints in ORDER: HTTPS check, static files, routing, authentication, authorization. If you put authorization BEFORE routing, it doesn't know which endpoint you're going to. Order is everything."
+              "question": "What is ORM?",
+              "answer": "ORM stands for Object Relational Mapping and maps database tables to C# classes.",
+              "codeExample": "public DbSet<User> Users { get; set; }",
+              "simpleExample": "Database table becomes C# object."
             },
             {
-              "question": "What are the SOLID principles and how do they apply in .NET?",
-              "answer": "SOLID is an acronym for five design principles: Single Responsibility (a class should have one reason to change), Open/Closed (open for extension, closed for modification), Liskov Substitution (subtypes must be substitutable for base types), Interface Segregation (prefer small focused interfaces), Dependency Inversion (depend on abstractions, not concrete classes).",
-              "codeExample": "// Violating SRP — UserService does too much\npublic class UserService {\n    public User GetUser(int id) { /*...*/ }\n    public void SendEmail(string to, string msg) { /*...*/ }  // ❌ wrong\n}\n\n// Following SOLID\npublic interface IUserRepository { Task<User?> GetByIdAsync(int id); }\npublic interface IEmailService { Task SendAsync(string to, string msg); }\n\npublic class UserService(IUserRepository repo, IEmailService email)\n{\n    public async Task<User> RegisterAsync(RegisterDto dto)\n    {\n        var user = new User(dto.Name, dto.Email);\n        await repo.SaveAsync(user);\n        await email.SendAsync(user.Email, \"Welcome!\");\n        return user;\n    }\n}",
-              "simpleExample": "SOLID is like a well-run kitchen. SRP: each chef has ONE job (pastry, grill, prep). OCP: add new dishes without rewriting existing recipes. DIP: recipes call for 'butter', not a specific brand."
+              "question": "What is DbContext?",
+              "answer": "DbContext is the main class in EF Core used to connect and communicate with database.",
+              "codeExample": "public class AppDbContext : DbContext",
+              "simpleExample": "DbContext is bridge between application and database."
+            },
+            {
+              "question": "What is DbSet?",
+              "answer": "DbSet represents a database table and allows querying and saving data.",
+              "codeExample": "public DbSet<User> Users { get; set; }",
+              "simpleExample": "DbSet works like a table in database."
+            },
+            {
+              "question": "What is migration in EF Core?",
+              "answer": "Migration is used to update database schema when model classes change.",
+              "codeExample": "dotnet ef migrations add InitialCreate",
+              "simpleExample": "Migration updates database structure."
+            },
+            {
+              "question": "What does SaveChanges do?",
+              "answer": "SaveChanges sends all tracked changes to database permanently.",
+              "codeExample": "context.SaveChanges();",
+              "simpleExample": "Actually saves insert, update, delete into database."
+            },
+            {
+              "question": "Why is DbContext scoped?",
+              "answer": "DbContext should be scoped so each request gets separate database connection context.",
+              "codeExample": "builder.Services.AddDbContext<AppDbContext>();",
+              "simpleExample": "Each API request gets separate DB context."
+            }
+          ]
+        },
+
+        "LINQ": {
+          "icon": "🔍",
+          "questions": [
+            {
+              "question": "What is LINQ?",
+              "answer": "LINQ allows querying collections or databases using C# syntax instead of writing loops or SQL manually.",
+              "codeExample": "var users = db.Users.Where(x => x.Age > 18);",
+              "simpleExample": "Filter and query data using C#."
+            },
+            {
+              "question": "What does Where method do in LINQ?",
+              "answer": "Where filters data based on a condition.",
+              "codeExample": "users.Where(x => x.IsActive)",
+              "simpleExample": "Only returns matching records."
+            },
+            {
+              "question": "What does Select do in LINQ?",
+              "answer": "Select projects data into a different shape or selects specific properties.",
+              "codeExample": "users.Select(x => x.Name)",
+              "simpleExample": "Pick only required fields."
+            },
+            {
+              "question": "Difference between FirstOrDefault and SingleOrDefault?",
+              "answer": "FirstOrDefault returns first matching record while SingleOrDefault expects only one matching record and throws error if multiple found.",
+              "codeExample": "users.FirstOrDefault();",
+              "simpleExample": "First gets first match, Single expects exactly one."
+            },
+            {
+              "question": "Difference between IEnumerable and IQueryable?",
+              "answer": "IEnumerable works in memory while IQueryable builds query and executes directly on database.",
+              "codeExample": "IQueryable<User> query = db.Users;",
+              "simpleExample": "IQueryable filters before data comes from DB."
+            },
+            {
+              "question": "What does OrderBy do?",
+              "answer": "OrderBy sorts data in ascending order.",
+              "codeExample": "users.OrderBy(x => x.Name)",
+              "simpleExample": "Sort records alphabetically."
+            },
+            {
+              "question": "Difference between Any and All?",
+              "answer": "Any checks if at least one record matches while All checks if every record matches.",
+              "codeExample": "users.Any(x => x.Active)",
+              "simpleExample": "Any = one match, All = every match."
+            }
+          ]
+        },
+
+        "Repository Pattern": {
+          "icon": "🏛️",
+          "questions": [
+            {
+              "question": "What is Repository Pattern?",
+              "answer": "Repository Pattern separates database logic from business logic by creating separate repository classes.",
+              "codeExample": "public class UserRepository : IUserRepository {}",
+              "simpleExample": "Keep database code separate from controller."
+            },
+            {
+              "question": "Why use Repository Pattern?",
+              "answer": "It improves code organization, testability, and keeps controllers clean.",
+              "codeExample": "controller → service → repository",
+              "simpleExample": "Database logic stays in one place."
+            },
+            {
+              "question": "What layer usually calls repository?",
+              "answer": "Service layer usually calls repository and controller calls service.",
+              "codeExample": "Controller → Service → Repository",
+              "simpleExample": "Controller should not directly handle database logic."
+            },
+            {
+              "question": "Can repository directly use DbContext?",
+              "answer": "Yes repository usually injects DbContext to perform database operations.",
+              "codeExample": "private readonly AppDbContext _context;",
+              "simpleExample": "Repository talks directly to database."
+            },
+            {
+              "question": "What is advantage of using interface with repository?",
+              "answer": "Interface improves testability and allows easy replacement of implementation.",
+              "codeExample": "IUserRepository",
+              "simpleExample": "Can swap implementation easily."
+            }
+          ]
+        },
+
+        "Async Await": {
+          "icon": "⏳",
+          "questions": [
+            {
+              "question": "What is async in C#?",
+              "answer": "Async keyword allows method to run asynchronously without blocking main execution thread.",
+              "codeExample": "public async Task GetUsers(){}",
+              "simpleExample": "Method runs without freezing application."
+            },
+            {
+              "question": "What is await keyword?",
+              "answer": "Await waits for asynchronous operation to complete without blocking thread.",
+              "codeExample": "await _context.Users.ToListAsync();",
+              "simpleExample": "Wait for task to finish while thread remains free."
+            },
+            {
+              "question": "Why use async await?",
+              "answer": "It improves performance by freeing thread while waiting for slow operations like database or API calls.",
+              "codeExample": "await httpClient.GetAsync();",
+              "simpleExample": "Application handles more requests efficiently."
+            },
+            {
+              "question": "Can await be used without async?",
+              "answer": "No await can only be used inside async method.",
+              "codeExample": "async Task Load() { await ... }",
+              "simpleExample": "Await needs async method."
+            },
+            {
+              "question": "Why use ToListAsync instead of ToList?",
+              "answer": "ToListAsync performs database operation asynchronously and avoids blocking request thread.",
+              "codeExample": "await db.Users.ToListAsync();",
+              "simpleExample": "Better for API performance."
+            }
+          ]
+        },
+
+        "Task vs Thread": {
+          "icon": "🧵",
+          "questions": [
+            {
+              "question": "What is Task in C#?",
+              "answer": "Task represents asynchronous operation and is commonly used with async await.",
+              "codeExample": "Task<int> GetData()",
+              "simpleExample": "Task represents work running asynchronously."
+            },
+            {
+              "question": "What is Thread in C#?",
+              "answer": "Thread is an actual execution path managed by operating system.",
+              "codeExample": "Thread thread = new Thread();",
+              "simpleExample": "Thread does actual execution work."
+            },
+            {
+              "question": "Difference between Task and Thread?",
+              "answer": "Thread is low level execution unit while Task is higher level abstraction for asynchronous operations.",
+              "codeExample": "Task.Run(() => {})",
+              "simpleExample": "Task is lightweight wrapper around asynchronous work."
+            },
+            {
+              "question": "Why prefer Task over Thread?",
+              "answer": "Task uses thread pool internally and is more efficient than manually creating threads.",
+              "codeExample": "await Task.Delay(1000);",
+              "simpleExample": "Task manages resources better."
+            },
+            {
+              "question": "Does async await create new thread?",
+              "answer": "Not always, async await mainly frees current thread while waiting and may reuse thread pool.",
+              "codeExample": "await SomeMethod();",
+              "simpleExample": "Async does not automatically mean new thread."
+            }
+          ]
+        },
+        "Authentication": {
+          "icon": "🔐",
+          "questions": [
+            {
+              "question": "What is authentication?",
+              "answer": "Authentication is the process of verifying who the user is before allowing access to the application.",
+              "codeExample": "app.UseAuthentication();",
+              "simpleExample": "System checks whether user is valid or not."
+            },
+            {
+              "question": "Why do we need authentication in APIs?",
+              "answer": "Authentication ensures only valid users can access protected APIs and prevents unauthorized access.",
+              "codeExample": "[Authorize]",
+              "simpleExample": "Only logged in users can use API."
+            },
+            {
+              "question": "What are common authentication methods?",
+              "answer": "Common methods are JWT token, cookies, OAuth, API keys, and session based authentication.",
+              "codeExample": "Bearer Token Authentication",
+              "simpleExample": "Different ways to verify user identity."
+            },
+            {
+              "question": "What is Bearer token?",
+              "answer": "Bearer token is an access token sent in HTTP Authorization header to prove user identity.",
+              "codeExample": "Authorization: Bearer token_here",
+              "simpleExample": "Frontend sends token with every request."
+            },
+            {
+              "question": "What middleware handles authentication?",
+              "answer": "UseAuthentication middleware validates incoming token or authentication method before request reaches controller.",
+              "codeExample": "app.UseAuthentication();",
+              "simpleExample": "Middleware checks if user is valid."
+            }
+          ]
+        },
+
+        "JWT Token": {
+          "icon": "🪪",
+          "questions": [
+            {
+              "question": "What is JWT?",
+              "answer": "JWT stands for JSON Web Token and is used to securely transfer user identity information between client and server.",
+              "codeExample": "GenerateToken(user)",
+              "simpleExample": "Token proves user is already logged in."
+            },
+            {
+              "question": "What are the three parts of JWT?",
+              "answer": "JWT has Header, Payload, and Signature parts separated by dots.",
+              "codeExample": "header.payload.signature",
+              "simpleExample": "JWT contains info plus security signature."
+            },
+            {
+              "question": "What is payload in JWT?",
+              "answer": "Payload stores user related information like user ID, role, or email.",
+              "codeExample": "claims.Add(new Claim(\"id\",\"1\"));",
+              "simpleExample": "Stores user details inside token."
+            },
+            {
+              "question": "What is JWT signature?",
+              "answer": "Signature ensures token was not modified and verifies authenticity using secret key.",
+              "codeExample": "new SymmetricSecurityKey(key)",
+              "simpleExample": "Protects token from tampering."
+            },
+            {
+              "question": "Where is JWT usually stored?",
+              "answer": "JWT is commonly stored in localStorage, sessionStorage, or secure HTTP cookies.",
+              "codeExample": "localStorage.setItem('token', value)",
+              "simpleExample": "Frontend stores token after login."
+            },
+            {
+              "question": "What happens when JWT expires?",
+              "answer": "When token expires server rejects request and user usually needs refresh token or re-login.",
+              "codeExample": "TokenValidationParameters",
+              "simpleExample": "Expired token means login again."
+            }
+          ]
+        },
+
+        "Authorization": {
+          "icon": "🛡️",
+          "questions": [
+            {
+              "question": "What is authorization?",
+              "answer": "Authorization decides what authenticated user is allowed to access inside application.",
+              "codeExample": "app.UseAuthorization();",
+              "simpleExample": "Checks what user can do after login."
+            },
+            {
+              "question": "Difference between authentication and authorization?",
+              "answer": "Authentication checks who user is while authorization checks what user is allowed to access.",
+              "codeExample": "UseAuthentication + UseAuthorization",
+              "simpleExample": "Login first, permission check second."
+            },
+            {
+              "question": "What does Authorize attribute do?",
+              "answer": "Authorize attribute protects controller or action so only authenticated users can access it.",
+              "codeExample": "[Authorize]",
+              "simpleExample": "Blocks access for unauthenticated users."
+            },
+            {
+              "question": "What is role based authorization?",
+              "answer": "Role based authorization allows access only to users having specific roles like Admin or User.",
+              "codeExample": "[Authorize(Roles=\"Admin\")]",
+              "simpleExample": "Only admins can access this API."
+            },
+            {
+              "question": "Why must UseAuthentication come before UseAuthorization?",
+              "answer": "Authentication must run first because authorization needs authenticated user information to check permissions.",
+              "codeExample": "app.UseAuthentication(); app.UseAuthorization();",
+              "simpleExample": "Need login check before permission check."
+            }
+          ]
+        },
+
+        "Logging": {
+          "icon": "📝",
+          "questions": [
+            {
+              "question": "Why is logging important?",
+              "answer": "Logging helps track application behavior, debug errors, and monitor issues in production.",
+              "codeExample": "_logger.LogInformation(\"User created\");",
+              "simpleExample": "Helps understand what happened inside app."
+            },
+            {
+              "question": "What is ILogger in ASP.NET Core?",
+              "answer": "ILogger is built in logging service used to log information, warnings, and errors.",
+              "codeExample": "private readonly ILogger<UserService> _logger;",
+              "simpleExample": "Built in service for writing logs."
+            },
+            {
+              "question": "Different types of logs?",
+              "answer": "Common log types are Information, Warning, Error, Debug, and Critical.",
+              "codeExample": "_logger.LogError(ex.Message);",
+              "simpleExample": "Different log levels based on severity."
+            },
+            {
+              "question": "Where can logs be stored?",
+              "answer": "Logs can be stored in console, text files, database, cloud services, or monitoring systems.",
+              "codeExample": "builder.Logging.AddConsole();",
+              "simpleExample": "Logs can be stored in many places."
+            },
+            {
+              "question": "Why log exceptions?",
+              "answer": "Logging exceptions helps identify bugs and understand what caused application failure.",
+              "codeExample": "_logger.LogError(ex, \"Error occurred\");",
+              "simpleExample": "Know why backend crashed."
+            }
+          ]
+        },
+
+        "Global Exception Handling": {
+          "icon": "🚨",
+          "questions": [
+            {
+              "question": "What is global exception handling?",
+              "answer": "Global exception handling catches unhandled exceptions in one central place instead of writing try catch everywhere.",
+              "codeExample": "app.UseExceptionHandler();",
+              "simpleExample": "Handle all backend errors from one place."
+            },
+            {
+              "question": "Why avoid try catch in every controller?",
+              "answer": "Repeating try catch everywhere creates duplicate code and makes application harder to maintain.",
+              "codeExample": "Custom exception middleware",
+              "simpleExample": "One central error handler is cleaner."
+            },
+            {
+              "question": "How can middleware handle exceptions globally?",
+              "answer": "Custom middleware catches exceptions before response is sent and returns standard error response.",
+              "codeExample": "try { await _next(context); } catch(Exception ex){}",
+              "simpleExample": "Middleware catches all unexpected errors."
+            },
+            {
+              "question": "What status code is returned for unhandled exception?",
+              "answer": "Unhandled exceptions usually return HTTP status code 500 internal server error.",
+              "codeExample": "context.Response.StatusCode = 500;",
+              "simpleExample": "Backend error usually returns 500."
+            },
+            {
+              "question": "Why return standard error response format?",
+              "answer": "Standard format helps frontend consistently handle errors and makes debugging easier.",
+              "codeExample": "return new { message = \"Something went wrong\" }",
+              "simpleExample": "Frontend always gets predictable error structure."
             }
           ]
         }
       }
     },
+
     "4+": {
       "modules": {
-        "Expert": {
-          "icon": "🏆",
+        "Background Services": {
+          "icon": "🔁",
           "questions": [
             {
-              "question": "What are common Design Patterns used in .NET and C#?",
-              "answer": "Key patterns: Repository (abstracts data access behind an interface), Unit of Work (groups multiple DB operations into one transaction), Factory (creates objects without exposing creation logic), Strategy (swap algorithms at runtime via interfaces), Observer (event-driven updates — C# events/delegates), Options Pattern (.NET's way of loading strongly-typed config from appsettings.json).",
-              "codeExample": "// Repository Pattern\npublic interface IProductRepository {\n    Task<IEnumerable<Product>> GetAllAsync();\n    Task AddAsync(Product product);\n}\n\n// Strategy Pattern — swap tax calculation logic\npublic interface ITaxStrategy { decimal Calculate(decimal amount); }\npublic class UsTaxStrategy : ITaxStrategy { public decimal Calculate(decimal a) => a * 0.08m; }\npublic class EuTaxStrategy : ITaxStrategy { public decimal Calculate(decimal a) => a * 0.20m; }\n\n// Options Pattern — strongly typed config\npublic record SmtpOptions(string Host, int Port, string ApiKey);\nbuilder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(\"Smtp\"));",
-              "simpleExample": "Repository: put a 'librarian' between your code and the database. Strategy: a GPS app has multiple 'route strategies' (fastest, shortest, no tolls) — you switch without rewriting. Options pattern: instead of magic strings, you get a typed class with intellisense."
+              "question": "What is BackgroundService in ASP.NET Core?",
+              "answer": "BackgroundService allows code to run continuously in background without waiting for API requests.",
+              "codeExample": "public class Worker : BackgroundService {}",
+              "simpleExample": "Runs tasks even when no API request comes."
             },
             {
-              "question": "What is the difference between IEnumerable, IQueryable, and when should you use each?",
-              "answer": "IEnumerable<T> loads data into memory, then filters/transforms in C# (client-side). IQueryable<T> builds an expression tree that is translated into SQL and executed on the database server, only bringing back the needed data. Always use IQueryable for EF Core queries so that WHERE clauses, ordering, and pagination happen in the database.",
-              "codeExample": "// ❌ IEnumerable — loads ALL rows into RAM first!\npublic IEnumerable<User> GetActiveUsers() =>\n    _db.Users.AsEnumerable().Where(u => u.IsActive); // filter in C#\n\n// ✅ IQueryable — SQL: SELECT * FROM Users WHERE IsActive = 1\npublic IQueryable<User> GetActiveUsers() =>\n    _db.Users.Where(u => u.IsActive); // SQL WHERE clause\n\n// Composing queries — each Where adds to the SQL\npublic async Task<List<UserDto>> SearchAsync(string name, int page)\n{\n    IQueryable<User> query = _db.Users.Where(u => u.IsActive);\n    if (!string.IsNullOrEmpty(name))\n        query = query.Where(u => u.Name.Contains(name));\n\n    return await query\n        .OrderBy(u => u.Name)\n        .Skip((page - 1) * 20).Take(20)\n        .Select(u => new UserDto(u.Id, u.Name))\n        .ToListAsync(); // executes HERE\n}",
-              "simpleExample": "IEnumerable is like moving your entire filing cabinet to your desk to find one document. IQueryable is like telling the filing room clerk what you need — they find it at the source. For database queries, ALWAYS use IQueryable and only call ToList() at the very end."
+              "question": "When do we use BackgroundService?",
+              "answer": "It is used for scheduled jobs, email sending, queue processing, and long running tasks.",
+              "codeExample": "protected override async Task ExecuteAsync()",
+              "simpleExample": "Useful for automatic tasks running in background."
+            },
+            {
+              "question": "How do we register BackgroundService?",
+              "answer": "Register it using AddHostedService inside Program.cs.",
+              "codeExample": "builder.Services.AddHostedService<EmailWorker>();",
+              "simpleExample": "Register worker service during startup."
+            },
+            {
+              "question": "Can BackgroundService access database?",
+              "answer": "Yes but scoped services should be created carefully using IServiceScopeFactory.",
+              "codeExample": "using var scope = _scopeFactory.CreateScope();",
+              "simpleExample": "Background worker can access DB safely with scope."
+            },
+            {
+              "question": "Difference between API request and BackgroundService?",
+              "answer": "API runs when user sends request while BackgroundService runs independently in background.",
+              "codeExample": "// API vs worker service",
+              "simpleExample": "API waits for user, worker runs automatically."
+            }
+          ]
+        },
+
+        "Caching": {
+          "icon": "⚡",
+          "questions": [
+            {
+              "question": "What is caching?",
+              "answer": "Caching stores frequently used data temporarily so application can return results faster without hitting database repeatedly.",
+              "codeExample": "_cache.Set(\"users\", data);",
+              "simpleExample": "Store repeated data temporarily for faster response."
+            },
+            {
+              "question": "Why use caching?",
+              "answer": "Caching improves performance and reduces unnecessary database calls.",
+              "codeExample": "builder.Services.AddMemoryCache();",
+              "simpleExample": "Avoid calling DB every time."
+            },
+            {
+              "question": "What is MemoryCache?",
+              "answer": "MemoryCache stores temporary data directly inside application memory.",
+              "codeExample": "IMemoryCache cache",
+              "simpleExample": "Cache stored in server RAM."
+            },
+            {
+              "question": "When should caching be avoided?",
+              "answer": "Caching should be avoided when data changes very frequently or must always remain real time.",
+              "codeExample": "// avoid caching frequently changing data",
+              "simpleExample": "Do not cache constantly changing values."
+            },
+            {
+              "question": "What is cache expiration?",
+              "answer": "Cache expiration automatically removes cached data after configured time limit.",
+              "codeExample": "AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)",
+              "simpleExample": "Cached data automatically disappears after time."
+            }
+          ]
+        },
+
+        "Swagger": {
+          "icon": "📚",
+          "questions": [
+            {
+              "question": "What is Swagger?",
+              "answer": "Swagger is a tool used to document APIs and test endpoints directly from browser.",
+              "codeExample": "builder.Services.AddSwaggerGen();",
+              "simpleExample": "Interactive API testing interface."
+            },
+            {
+              "question": "Why use Swagger in API development?",
+              "answer": "Swagger helps developers understand endpoints, request models, and test APIs easily.",
+              "codeExample": "app.UseSwaggerUI();",
+              "simpleExample": "Frontend team can test APIs easily."
+            },
+            {
+              "question": "How do you enable Swagger?",
+              "answer": "Enable it by adding AddSwaggerGen service and UseSwagger middleware.",
+              "codeExample": "builder.Services.AddSwaggerGen();",
+              "simpleExample": "Register service then enable middleware."
+            },
+            {
+              "question": "Can Swagger test secured APIs?",
+              "answer": "Yes Swagger supports JWT authentication and secured endpoint testing.",
+              "codeExample": "AddSecurityDefinition()",
+              "simpleExample": "Swagger can send Bearer token."
+            }
+          ]
+        },
+
+        "API Versioning": {
+          "icon": "🔢",
+          "questions": [
+            {
+              "question": "What is API versioning?",
+              "answer": "API versioning allows multiple versions of same API to exist without breaking old clients.",
+              "codeExample": "/api/v1/users",
+              "simpleExample": "Old frontend keeps working after API changes."
+            },
+            {
+              "question": "Why do we need API versioning?",
+              "answer": "It allows backend changes without forcing all existing clients to update immediately.",
+              "codeExample": "v1, v2 endpoints",
+              "simpleExample": "New changes do not break old apps."
+            },
+            {
+              "question": "How can API version be passed?",
+              "answer": "Version can be passed through URL, headers, or query parameters.",
+              "codeExample": "/api/v2/products",
+              "simpleExample": "Version tells which API logic to use."
+            },
+            {
+              "question": "What happens if API versioning is not used?",
+              "answer": "Frontend applications may break when backend changes response structure.",
+              "codeExample": "// response contract changes",
+              "simpleExample": "Old apps stop working after backend updates."
+            }
+          ]
+        },
+
+        "Unit Testing": {
+          "icon": "🧪",
+          "questions": [
+            {
+              "question": "What is unit testing?",
+              "answer": "Unit testing checks individual methods or components independently to verify expected behavior.",
+              "codeExample": "[Fact] public void TestMethod(){}",
+              "simpleExample": "Test one method separately."
+            },
+            {
+              "question": "Why do we write unit tests?",
+              "answer": "Unit tests help catch bugs early and ensure code changes do not break existing functionality.",
+              "codeExample": "Assert.Equal(expected, result)",
+              "simpleExample": "Verify code still works after changes."
+            },
+            {
+              "question": "What is mocking in unit testing?",
+              "answer": "Mocking creates fake dependencies so method can be tested without real database or services.",
+              "codeExample": "Mock<IUserRepository>",
+              "simpleExample": "Create fake service for testing."
+            },
+            {
+              "question": "Why mock dependencies?",
+              "answer": "Mocking isolates method logic and avoids calling real external systems during testing.",
+              "codeExample": "var mockRepo = new Mock<IRepo>();",
+              "simpleExample": "Test logic without real DB."
+            }
+          ]
+        },
+
+        "Performance Optimization": {
+          "icon": "📈",
+          "questions": [
+            {
+              "question": "How do you optimize API performance?",
+              "answer": "Optimize by using async methods, caching, proper indexing, pagination, and reducing unnecessary database queries.",
+              "codeExample": "await db.Users.ToListAsync();",
+              "simpleExample": "Reduce slow operations and improve response time."
+            },
+            {
+              "question": "Why use pagination in APIs?",
+              "answer": "Pagination avoids returning huge datasets and improves API speed and memory usage.",
+              "codeExample": "Skip(10).Take(10)",
+              "simpleExample": "Return small chunks instead of everything."
+            },
+            {
+              "question": "Why avoid unnecessary database calls?",
+              "answer": "Repeated database calls increase latency and reduce backend performance.",
+              "codeExample": "Use cache instead of repeated queries",
+              "simpleExample": "Less DB calls means faster API."
+            },
+            {
+              "question": "How can indexes improve performance?",
+              "answer": "Indexes allow database to find data faster instead of scanning entire table.",
+              "codeExample": "CREATE INDEX IX_User_Email",
+              "simpleExample": "Database searches become faster."
+            },
+            {
+              "question": "Why use async for database calls?",
+              "answer": "Async frees request thread while waiting for database so server can handle more users.",
+              "codeExample": "await context.Users.ToListAsync();",
+              "simpleExample": "Improves scalability under high traffic."
             }
           ]
         }
