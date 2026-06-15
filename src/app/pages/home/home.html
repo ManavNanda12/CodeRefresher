@@ -1,16 +1,25 @@
+<!-- ── Click-burst particles (global overlay) ──────────── -->
+<div class="spark-layer" aria-hidden="true">
+  @for (s of sparks(); track s.id) {
+    <span class="spark" [style.left.px]="s.x" [style.top.px]="s.y"
+          [style.--dx.px]="s.dx" [style.--dy.px]="s.dy">{{ s.emoji }}</span>
+  }
+</div>
+
 <!-- ── Hero ────────────────────────────────────────────── -->
-<section class="hero">
+<section class="hero" (mousemove)="onHeroMove($event)" (click)="burst($event)">
   <div class="hero-bg">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
     <div class="grid-overlay"></div>
+    <div class="hero-spot"></div>
   </div>
 
   <div class="hero-content">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      Interview Ready · Real Questions · Real Code
+      Learn · Test · Track · Improve
     </div>
 
     <h1 class="hero-headline">
@@ -19,14 +28,16 @@
     </h1>
 
     <p class="hero-sub">
-      Structured Q&amp;A for Angular, .NET, SQL and more — organized by experience
-      level, with code examples and simple analogies so concepts actually stick.
+      More than flashcards — refresh structured Q&amp;A, prove it with AI-graded quizzes,
+      and watch a smart dashboard turn your weak spots into your strengths.
     </p>
 
     <div class="hero-actions">
       <a routerLink="/angular" class="btn-primary">Start Refreshing →</a>
-      <a routerLink="/sql" class="btn-ghost">Browse All Topics</a>
+      <a routerLink="/test-me" class="btn-ghost">🧪 Try Test Me</a>
     </div>
+
+    <p class="hero-hint">✨ psst — click anywhere up here</p>
 
     <!-- Floating Code Preview -->
     <div class="code-preview">
@@ -37,10 +48,10 @@
         <span class="code-filename">interview-prep.ts</span>
       </div>
       <pre class="code-body"><code><span class="tk-kw">const</span> topics = [<span class="tk-str">'Angular'</span>, <span class="tk-str">'.NET'</span>, <span class="tk-str">'SQL'</span>];
-<span class="tk-kw">const</span> levels = [<span class="tk-str">'0–2 years'</span>, <span class="tk-str">'2–4 years'</span>];
 
-<span class="tk-kw">await</span> <span class="tk-fn">prepareForInterview</span>(topics, levels);
-<span class="tk-cmt">// ✓ Ready for any dev interview</span></code></pre>
+<span class="tk-kw">await</span> <span class="tk-fn">testMe</span>(topics);   <span class="tk-cmt">// AI grades you 0–10</span>
+<span class="tk-fn">trackProgress</span>();     <span class="tk-cmt">// dashboard + weak spots</span>
+<span class="tk-cmt">// ✓ interview-ready</span></code></pre>
     </div>
   </div>
 </section>
@@ -48,17 +59,17 @@
 <!-- ── Stats ──────────────────────────────────────────── -->
 <div class="stats-bar">
   <div class="stat">
-    <span class="stat-num">45+</span>
+    <span class="stat-num">{{ statQuestions() }}+</span>
     <span class="stat-lbl">Questions</span>
   </div>
   <div class="stat-sep"></div>
   <div class="stat">
-    <span class="stat-num">3</span>
+    <span class="stat-num">{{ statTech() }}</span>
     <span class="stat-lbl">Technologies</span>
   </div>
   <div class="stat-sep"></div>
   <div class="stat">
-    <span class="stat-num">4</span>
+    <span class="stat-num">{{ statLevels() }}</span>
     <span class="stat-lbl">Experience Levels</span>
   </div>
   <div class="stat-sep"></div>
@@ -68,9 +79,20 @@
   </div>
 </div>
 
+<!-- ── Journey ribbon ─────────────────────────────────── -->
+<div class="journey reveal">
+  @for (step of journey; track step.label; let last = $last) {
+    <div class="journey-step" [style.--j-delay]="$index * 90 + 'ms'">
+      <span class="journey-icon">{{ step.icon }}</span>
+      <span class="journey-label">{{ step.label }}</span>
+    </div>
+    @if (!last) { <span class="journey-arrow">→</span> }
+  }
+</div>
+
 <!-- ── Topics ─────────────────────────────────────────── -->
 <section class="topics-section">
-  <div class="section-header">
+  <div class="section-header reveal">
     <span class="section-eyebrow">What's Inside</span>
     <h2 class="section-title">Pick Your Topic</h2>
     <p class="section-sub">Bite-sized questions with answers, code examples, and simple analogies</p>
@@ -99,13 +121,34 @@
   </div>
 </section>
 
+<!-- ── Everything you get ─────────────────────────────── -->
+<section class="features-section">
+  <div class="section-header reveal">
+    <span class="section-eyebrow">The Full Loop</span>
+    <h2 class="section-title">Everything you need to get interview-ready</h2>
+    <p class="section-sub">A complete prep system — not just questions, but practice, tracking, and a plan that adapts to you.</p>
+  </div>
+
+  <div class="features-grid">
+    @for (f of features; track f.title) {
+      <div class="feature-card reveal" [style.--card-delay]="$index * 70 + 'ms'"
+           (mousemove)="tilt($event)" (mouseleave)="resetTilt($event)">
+        <div class="feature-icon">{{ f.icon }}</div>
+        <span class="feature-tag">{{ f.tag }}</span>
+        <h3 class="feature-title">{{ f.title }}</h3>
+        <p class="feature-desc">{{ f.desc }}</p>
+      </div>
+    }
+  </div>
+</section>
+
 <!-- ── Test Me (LIVE) ─────────────────────────────────── -->
 <section class="ai-section">
-  <div class="ai-card">
+  <div class="ai-card reveal">
     <div class="ai-glow"></div>
 
     <div class="ai-left">
-      <span class="ai-badge live"><span class="live-dot"></span> New · Now Live</span>
+      <span class="ai-badge live"><span class="live-dot"></span> Live · AI-Powered</span>
       <h3 class="ai-title">🧪 Test Me</h3>
       <p class="ai-desc">
         Done reading? Now <strong>prove it</strong>. Pick a tech and level, answer 5 random
@@ -147,6 +190,57 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Dashboard peek ─────────────────────────────────── -->
+<section class="peek-section">
+  <div class="peek-card reveal">
+    <div class="peek-right">
+      <span class="ai-badge">📊 Your Dashboard</span>
+      <h3 class="ai-title">See your readiness at a glance</h3>
+      <p class="ai-desc">
+        Every round feeds a live dashboard — readiness rings per technology, a
+        colour-coded module heatmap, and your top weak spots. Then hit
+        <strong>“Focus My Weak Spots”</strong> for a round that targets exactly what needs work.
+      </p>
+      <a routerLink="/dashboard" class="btn-primary">Open Dashboard →</a>
+    </div>
+
+    <div class="peek-left" aria-hidden="true">
+      <div class="peek-rings">
+        <div class="peek-ring">
+          <div class="pr-dial" style="--p:76%;--c:#34d399"><span>7.6</span></div>
+          <span class="pr-name">⚡ Angular</span>
+        </div>
+        <div class="peek-ring">
+          <div class="pr-dial" style="--p:41%;--c:#fbbf24"><span>4.1</span></div>
+          <span class="pr-name">🔷 .NET</span>
+        </div>
+        <div class="peek-ring">
+          <div class="pr-dial dim" style="--p:0%;--c:#475569"><span>—</span></div>
+          <span class="pr-name">🗄️ SQL</span>
+        </div>
+      </div>
+      <div class="peek-heat">
+        <div class="ph-row"><span>Directives</span><div class="ph-bar"><i style="width:82%;background:#34d399"></i></div></div>
+        <div class="ph-row"><span>Services &amp; DI</span><div class="ph-bar"><i style="width:71%;background:#34d399"></i></div></div>
+        <div class="ph-row"><span>RxJS Operators</span><div class="ph-bar"><i style="width:32%;background:#f87171"></i></div></div>
+        <div class="ph-row"><span>Change Detection</span><div class="ph-bar"><i style="width:28%;background:#f87171"></i></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ──────────────────────────────────────── -->
+<section class="cta-band" (click)="burst($event)">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Your next interview starts here.</h2>
+    <p class="cta-sub">Free forever. No sign-up to browse. Just pick a topic and go.</p>
+    <div class="hero-actions">
+      <a routerLink="/angular" class="btn-primary">Start Refreshing →</a>
+      <a routerLink="/test-me" class="btn-ghost">🧪 Take a Test</a>
     </div>
   </div>
 </section>

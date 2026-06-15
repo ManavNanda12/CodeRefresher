@@ -13,10 +13,69 @@ body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
                'Helvetica Neue', Arial, sans-serif;
-  background-color: #f1f5f9;
-  color: #1e293b;
+  background-color: var(--arena-bg);
+  color: var(--arena-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── Arena theme tokens (shared game-world palette) ─────────────── */
+:root {
+  --arena-bg: #070d1c;
+  --arena-panel: rgba(255, 255, 255, 0.03);
+  --arena-panel-2: rgba(255, 255, 255, 0.05);
+  --arena-border: rgba(148, 163, 184, 0.16);
+  --arena-indigo: #6366f1;
+  --arena-purple: #c084fc;
+  --arena-sky: #0ea5e9;
+  --arena-text: #f1f5f9;
+  --arena-soft: #cbd5e1;
+  --arena-muted: #94a3b8;
+  --arena-dim: #64748b;
+}
+
+/* Light theme ("daylight arena") — opt-in; flips the tokens above. */
+html[data-theme="light"] {
+  --arena-bg: #eef2f7;
+  --arena-panel: #ffffff;
+  --arena-panel-2: #f8fafc;
+  --arena-border: #dbe3ec;
+  --arena-text: #0f172a;
+  --arena-soft: #334155;
+  --arena-muted: #5b6677;
+  --arena-dim: #8895a7;
+}
+/* Tone the immersive background for light surfaces */
+html[data-theme="light"] .arena-bg-fx .orb { opacity: 0.16; }
+html[data-theme="light"] .arena-bg-fx .grid-overlay {
+  background-image:
+    linear-gradient(rgba(15,23,42,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,23,42,0.045) 1px, transparent 1px);
+}
+
+/* Reusable immersive background — drop <div class="arena-bg-fx"> inside a
+   position:relative dark stage. Shared by Test Me, Dashboard & tech pages. */
+.arena-bg-fx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.arena-bg-fx .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.4; }
+.arena-bg-fx .orb-1 { width: 480px; height: 480px; background: radial-gradient(circle, var(--arena-indigo), transparent 70%); top: -140px; left: -120px; animation: arenaDrift 11s ease-in-out infinite; }
+.arena-bg-fx .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, var(--arena-purple), transparent 70%); top: 40px; right: -100px; animation: arenaDrift 14s ease-in-out infinite reverse; }
+.arena-bg-fx .orb-3 { width: 360px; height: 360px; background: radial-gradient(circle, var(--arena-sky), transparent 70%); bottom: -120px; left: 40%; animation: arenaDrift 10s ease-in-out infinite 2s; }
+.arena-bg-fx .grid-overlay {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse at center, #000 35%, transparent 80%);
+}
+@keyframes arenaDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(28px, -30px) scale(1.07); }
+  66%      { transform: translate(-20px, 22px) scale(0.93); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-bg-fx .orb { animation: none; }
 }
 
 /* ─── Scrollbars ─────────────────────────────────────────────────── */

@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
 import { ProgressService, RoundRecord } from '../../core/services/progress.service';
+import { GameService } from '../../core/services/game.service';
 import { FocusRoundService } from '../../core/services/focus.service';
 import { RefresherData, RefresherItem } from '../../core/models/refresher-item.model';
 import {
@@ -96,6 +97,10 @@ export class TestMeComponent {
   private testMe = inject(TestMeService);
   private progressService = inject(ProgressService);
   private focusRound = inject(FocusRoundService);
+  private game = inject(GameService);
+
+  /** XP earned on the round just finished (shown on the results screen). */
+  xpEarned = signal(0);
 
   readonly arenas = ARENAS;
   readonly verdictMap = VERDICT_DISPLAY;
@@ -111,6 +116,7 @@ export class TestMeComponent {
   // Adaptive "Focus Round" state
   focusMode = signal(false);
   focusTargets = signal<string[]>([]);
+  private focusModule: string | null = null;
 
   private rawData = signal<RefresherData | null>(null);
 
@@ -177,9 +183,9 @@ export class TestMeComponent {
     this.loadBest();
     this.loadHistory();
 
-    // Launched from the Dashboard's "Focus My Weak Spots"?
-    const focusArena = this.focusRound.consume();
-    if (focusArena) this.startFocus(focusArena);
+    // Launched from a "Focus My Weak Spots" / "Test Yourself" challenge?
+    const focus = this.focusRound.consume();
+    if (focus) this.startFocus(focus.arena, focus.module);
   }
 
   // ── Stage 1: pick a tech arena ─────────────────────────────
@@ -231,9 +237,10 @@ export class TestMeComponent {
 
   // ── Adaptive "Focus Round" ─────────────────────────────────
   /** Entry point from the Dashboard: load the arena, then build a weighted quiz. */
-  startFocus(arenaId: string): void {
+  startFocus(arenaId: string, module?: string): void {
     const arena = ARENAS.find(a => a.id === arenaId);
     if (!arena) return;
+    this.focusModule = module ?? null;
     this.selectedArena.set(arena);
     this.focusMode.set(true);
     this.loadError.set(false);
@@ -248,7 +255,7 @@ export class TestMeComponent {
   }
 
   private launchFocusFromData(data: RefresherData, arenaId: string): void {
-    const questions = this.buildFocusQuiz(data, arenaId);
+    const questions = this.buildFocusQuiz(data, arenaId, this.focusModule);
     if (!questions.length) {
       this.loadError.set(true);
       return;
@@ -269,7 +276,22 @@ export class TestMeComponent {
    * module by how much it needs work, then weighted-sample QUIZ_SIZE distinct
    * questions. Untested + weak modules dominate; strong ones rarely appear.
    */
-  private buildFocusQuiz(data: RefresherData, arenaId: string): QuizQuestion[] {
+  private buildFocusQuiz(data: RefresherData, arenaId: string, targetModule?: string | null): QuizQuestion[] {
+    // Module-targeted challenge ("you cleared X — prove it"): pull only that module.
+    if (targetModule) {
+      const pool: QuizQuestion[] = [];
+      for (const cat of Object.values(data.categories)) {
+        const mod = cat.modules[targetModule];
+        if (mod) for (const q of mod.questions) pool.push({ ...q, module: targetModule, icon: mod.icon });
+      }
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      this.focusTargets.set([targetModule]);
+      return pool.slice(0, Math.min(QUIZ_SIZE, pool.length));
+    }
+
     const pools = new Map<string, QuizQuestion[]>();
     for (const cat of Object.values(data.categories)) {
       for (const [name, mod] of Object.entries(cat.modules)) {
@@ -438,6 +460,7 @@ export class TestMeComponent {
     this.selectedLevel.set(null);
     this.focusMode.set(false);
     this.focusTargets.set([]);
+    this.focusModule = null;
     this.rawData.set(null);
     this.questions.set([]);
     this.answers.set([]);
@@ -541,6 +564,11 @@ export class TestMeComponent {
       })),
     };
     this.progressService.recordRound(round);
+
+    // Award XP for the effort (sum of per-answer scores) — may trigger a level-up.
+    const xp = Math.round(results.reduce((s, r) => s + r.score, 0));
+    this.xpEarned.set(xp);
+    this.game.awardXp(xp);
   }
 
   // ── time helpers ───────────────────────────────────────────

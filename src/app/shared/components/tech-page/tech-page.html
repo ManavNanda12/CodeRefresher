@@ -1,101 +1,123 @@
-<div class="tech-page">
-
-  <!-- ── Hero Header ─────────────────────────────────── -->
-  <header class="page-hero" [style.background]="techMeta().gradient">
-    <div class="hero-pattern"></div>
-    <div class="hero-content">
-      <div class="hero-icon-wrap">
-        <span class="hero-icon">{{ techMeta().icon }}</span>
-      </div>
-      <div class="hero-text">
-        <span class="hero-tag">{{ techMeta().tag }}</span>
-        <h1 class="hero-title">{{ title() }}</h1>
-        <p class="hero-subtitle">
-          @if (loading()) {
-            Loading questions…
-          } @else {
-            {{ totalCount() }} questions across 4 experience levels
-          }
-        </p>
-      </div>
-    </div>
-  </header>
-
-  <!-- ── Year Tabs ──────────────────────────────────── -->
-  <div class="tabs-section">
-    <div class="tabs-pill" role="tablist" aria-label="Experience level">
-      @for (tab of tabs(); track tab.key) {
-        <button
-          class="tab-btn"
-          role="tab"
-          [class.active]="activeTab() === tab.key"
-          [attr.aria-selected]="activeTab() === tab.key"
-          (click)="setTab(tab.key)">
-          <span class="tab-label">{{ tab.label }}</span>
-          <span class="tab-chip">{{ tabCounts()[tab.key] || 0 }}</span>
-        </button>
-      }
-    </div>
+<div class="tech-arena" [style.--accent]="techMeta().accent">
+  <div class="arena-bg-fx">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
   </div>
 
-  <!-- ── Module Filter Pills ───────────────────────── -->
-  @if (!loading() && currentModules().length > 0) {
-    <div class="modules-section">
-      <div class="modules-row" role="group" aria-label="Topic modules">
+  <div class="tech-inner">
 
-        <button
-          class="module-pill"
-          [class.active]="activeModule() === null"
-          (click)="setModule(null)">
-          <span class="module-icon">🗂️</span>
-          <span class="module-name">All Topics</span>
-          <span class="module-count">{{ tabCounts()[activeTab()] || 0 }}</span>
-        </button>
+    <!-- ── Arena header ──────────────────────────────── -->
+    <header class="arena-head">
+      <div class="ah-icon" [style.background]="techMeta().gradient">{{ techMeta().icon }}</div>
+      <div class="ah-text">
+        <span class="ah-tag">{{ techMeta().tag }} · Arena</span>
+        <h1 class="ah-title">{{ title() }}</h1>
+        <p class="ah-sub">
+          @if (loading()) { Entering the arena… }
+          @else { {{ totalCount() }} challenges · {{ arenaMastered() }} mastered }
+        </p>
+      </div>
+      @if (!loading()) {
+        <div class="ah-progress">
+          <div class="ah-ring" [style.--p]="arenaProgressPct() + '%'">
+            <span>{{ arenaProgressPct() }}%</span>
+          </div>
+          <span class="ah-ring-lbl">Arena cleared</span>
+        </div>
+      }
+    </header>
 
-        @for (mod of currentModules(); track mod; let i = $index) {
-          <button
-            class="module-pill"
-            [class.active]="activeModule() === mod"
-            [style.--pill-delay]="(i * 60) + 'ms'"
-            (click)="setModule(mod)">
-            <span class="module-icon">{{ getModuleIcon(mod) }}</span>
-            <span class="module-name">{{ mod }}</span>
-            <span class="module-count">{{ getModuleCount(mod) }}</span>
+    <!-- ── Tier tabs ─────────────────────────────────── -->
+    <div class="tabs-section">
+      <div class="tabs-pill" role="tablist" aria-label="Difficulty tier">
+        @for (tab of tabs(); track tab.key) {
+          <button class="tab-btn" role="tab"
+                  [class.active]="activeTab() === tab.key"
+                  [attr.aria-selected]="activeTab() === tab.key"
+                  (click)="setTab(tab.key)">
+            <span class="tab-label">{{ tab.label }}</span>
+            <span class="tab-chip">{{ tabCounts()[tab.key] || 0 }}</span>
           </button>
         }
-
       </div>
     </div>
-  }
 
-  <!-- ── Loading ────────────────────────────────────── -->
-  @if (loading()) {
-    <div class="loading-wrap">
-      <div class="skeleton-grid">
-        @for (_ of [1,2,3,4]; track $index) {
-          <div class="skeleton-card">
-            <div class="sk-line sk-line--title"></div>
-            <div class="sk-line sk-line--body"></div>
-            <div class="sk-line sk-line--body short"></div>
+    <!-- ── Arena (module) selector ───────────────────── -->
+    @if (!loading() && currentModules().length > 0) {
+      <div class="modules-section">
+        <div class="modules-row" role="group" aria-label="Topic arenas">
+          <button class="module-pill" [class.active]="activeModule() === null" (click)="setModule(null)">
+            <span class="module-icon">🗂️</span>
+            <span class="module-name">All Topics</span>
+            <span class="module-count">{{ tabMastered() }}/{{ tabCounts()[activeTab()] || 0 }}</span>
+          </button>
+
+          @for (mod of currentModules(); track mod; let i = $index) {
+            <button class="module-pill" [class.active]="activeModule() === mod"
+                    [class.cleared]="moduleMastered(mod) === getModuleCount(mod) && getModuleCount(mod) > 0"
+                    [style.--pill-delay]="(i * 60) + 'ms'"
+                    (click)="setModule(mod)">
+              <span class="module-icon">{{ getModuleIcon(mod) }}</span>
+              <span class="module-name">{{ mod }}</span>
+              <span class="module-count">{{ moduleMastered(mod) }}/{{ getModuleCount(mod) }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── Loading ───────────────────────────────────── -->
+    @if (loading()) {
+      <div class="loading-wrap">
+        <div class="skeleton-grid">
+          @for (_ of [1,2,3,4]; track $index) {
+            <div class="skeleton-card">
+              <div class="sk-line sk-line--title"></div>
+              <div class="sk-line sk-line--body"></div>
+              <div class="sk-line sk-line--body short"></div>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <!-- ── Challenge cards ─────────────────────────── -->
+      <div class="cards-grid">
+        @for (item of currentItems(); track item.question; let idx = $index) {
+          <app-card
+            [item]="item"
+            [index]="idx + 1"
+            [arena]="tech()"
+            [tier]="tierFor()"
+            [style.--delay]="cardDelay(idx)" />
+        } @empty {
+          <div class="empty-state">
+            <span class="empty-icon">📭</span>
+            <p>No challenges found for this arena.</p>
           </div>
         }
       </div>
-    </div>
-  } @else {
-    <!-- ── Cards Grid ──────────────────────────────── -->
-    <div class="cards-grid">
-      @for (item of currentItems(); track item.question; let idx = $index) {
-        <app-card
-          [item]="item"
-          [index]="idx + 1"
-          [style.--delay]="cardDelay(idx)" />
-      } @empty {
-        <div class="empty-state">
-          <span class="empty-icon">📭</span>
-          <p>No questions found for this module.</p>
+    }
+
+  </div>
+
+  <!-- ── Module-cleared challenge ──────────────────── -->
+  @if (challengeModule(); as mod) {
+    <div class="challenge-backdrop" (click)="dismissChallenge()">
+      <div class="challenge-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="challenge-glow"></div>
+        <span class="challenge-emoji">⚔️</span>
+        <h2 class="challenge-title">You cleared {{ mod }}!</h2>
+        <p class="challenge-msg">
+          Reading it is one thing, champion — but the arena doesn't care what you've read.
+          Can you defend it under fire? <strong>Prove it.</strong>
+        </p>
+        <div class="challenge-actions">
+          <button class="challenge-go" type="button" (click)="acceptChallenge()">⚡ Test Yourself</button>
+          <button class="challenge-skip" type="button" (click)="dismissChallenge()">Maybe later</button>
         </div>
-      }
+      </div>
     </div>
   }
-
 </div>

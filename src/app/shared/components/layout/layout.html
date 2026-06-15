@@ -1,6 +1,9 @@
 <!-- One-time email onboarding (self-triggers on /test-me & /dashboard) -->
 <app-onboarding-modal />
 
+<!-- Global game juice: level-up crate + achievement toast -->
+<app-game-events />
+
 <!-- Sidebar Overlay (mobile) -->
 <div class="sidebar-overlay"
      [class.active]="sidebarOpen()"
@@ -16,6 +19,12 @@
     </div>
     <button class="close-btn" (click)="closeSidebar()" aria-label="Close sidebar">&#10005;</button>
   </div>
+
+  <a routerLink="/dashboard" class="hud hud--mobile" (click)="closeSidebar()">
+    @if (game.streak() > 0) { <span class="hud-streak">🔥 {{ game.streak() }}</span> }
+    <span class="hud-level">Lv {{ game.level() }}</span>
+    <span class="hud-xp"><span class="hud-xp-fill" [style.width.%]="game.levelProgress() * 100"></span></span>
+  </a>
 
   <nav class="sidebar-nav">
     @for (item of navItems; track item.path) {
@@ -57,6 +66,22 @@
       </a>
     }
   </nav>
+
+  <!-- Theme toggle (always visible) -->
+  <button class="theme-toggle" type="button" (click)="theme.toggle()"
+          [attr.aria-label]="theme.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+          [title]="theme.theme() === 'dark' ? 'Light mode' : 'Dark mode'">
+    {{ theme.theme() === 'dark' ? '☀️' : '🌙' }}
+  </button>
+
+  <!-- Game HUD (desktop) -->
+  <a routerLink="/dashboard" class="hud" [title]="'Level ' + game.level() + ' · ' + game.xp() + ' XP'">
+    @if (game.streak() > 0) {
+      <span class="hud-streak">🔥 {{ game.streak() }}</span>
+    }
+    <span class="hud-level">Lv {{ game.level() }}</span>
+    <span class="hud-xp"><span class="hud-xp-fill" [style.width.%]="game.levelProgress() * 100"></span></span>
+  </a>
 
   <!-- Hamburger — hidden above 768px via CSS -->
   <button class="hamburger-btn" (click)="toggleSidebar()" aria-label="Open navigation menu">

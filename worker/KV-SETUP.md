@@ -60,6 +60,20 @@ untouched. Only two handlers need to change; `register.js` is an optional harden
 > formula (`cr_` + first 8 hex of the UUID) **must stay identical** to the client's
 > `recoveryCodeFor()` in `user.service.ts`, or restore lookups won't match.
 
+### Later additions (already wired in `worker/worker.js`)
+
+| File | Route | Purpose |
+|------|-------|---------|
+| `delete-account.js` | POST `/api/user/delete` | Delete a user (recovery-code authorized) |
+| `admin-users.js` | GET `/api/admin/users` | Email export (Bearer `ADMIN_SECRET`) |
+| `email-unsubscribe.js` | GET `/api/email/unsubscribe` | One-click opt-out |
+| `game-sync.js` | POST `/api/game/sync` · GET `/api/game/load` | Arena game state (XP/mastery/streak) under `user.game` |
+
+> **KV write budget:** the free tier allows ~1,000 writes/day. Game state is
+> **batched on the client** (debounced ~6s + flush on tab-hide) and stored inside
+> the existing `user:{id}` record — so it adds no new key and rarely adds a write
+> beyond the normal round sync. Storage is a non-issue (~1–2 KB/user vs 1 GB).
+
 ---
 
 ## 4. Deploy & smoke-test

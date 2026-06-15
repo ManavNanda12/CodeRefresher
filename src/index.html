@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <title>Developer Refresher — Master Dev Interviews</title>
   <base href="/">
+
+  <!-- Apply saved theme before paint (no light→dark flash) -->
+  <script>try{if(localStorage.getItem('cr:theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Primary Meta -->
@@ -40,6 +43,9 @@
 
   <!-- Sitemap reference -->
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+
+  <!-- No-JS fallback: never keep scroll-reveal content hidden -->
+  <noscript><style>.reveal{opacity:1 !important;}</style></noscript>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -2,6 +2,9 @@ import { Component, HostListener, inject, signal, PLATFORM_ID } from '@angular/c
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { OnboardingModalComponent } from '../onboarding-modal/onboarding-modal';
+import { GameEventsComponent } from '../game-events/game-events';
+import { GameService } from '../../../core/services/game.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 interface NavItem {
   path: string;
@@ -13,12 +16,14 @@ interface NavItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterLink, RouterLinkActive, OnboardingModalComponent],
+  imports: [RouterLink, RouterLinkActive, OnboardingModalComponent, GameEventsComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })
 export class LayoutComponent {
   private platformId = inject(PLATFORM_ID);
+  readonly game = inject(GameService);
+  readonly theme = inject(ThemeService);
 
   sidebarOpen = signal(false);
 

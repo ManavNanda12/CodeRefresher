@@ -259,6 +259,7 @@
                   <span class="meta-pill">{{ selectedArena()?.icon }} {{ selectedArena()?.name }}</span>
                   <span class="meta-pill">{{ selectedLevel()?.label }}</span>
                   @if (elapsedLabel()) { <span class="meta-pill">⏱ {{ elapsedLabel() }}</span> }
+                  @if (xpEarned() > 0) { <span class="meta-pill xp">⚡ +{{ xpEarned() }} XP</span> }
                   @if (isNewBest()) { <span class="meta-pill best">🏅 New best!</span> }
                 </div>
               </div>

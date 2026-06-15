@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
 import { UserService, isValidEmail } from '../../core/services/user.service';
+import { GameService, ACHIEVEMENTS } from '../../core/services/game.service';
 import { FocusRoundService } from '../../core/services/focus.service';
 import {
   ProgressService,
@@ -63,8 +64,15 @@ export class DashboardComponent {
   private focusRound = inject(FocusRoundService);
   readonly user = inject(UserService);
   readonly progress = inject(ProgressService);
+  readonly game = inject(GameService);
 
   readonly arenaMetas = ARENA_META;
+
+  /** Achievements with their unlocked state, for the dashboard grid. */
+  readonly achievements = computed(() => {
+    const have = new Set(this.game.unlocked());
+    return ACHIEVEMENTS.map(a => ({ ...a, done: have.has(a.id) }));
+  });
 
   view = signal<'overview' | 'arena'>('overview');
   selectedId = signal<string | null>(null);

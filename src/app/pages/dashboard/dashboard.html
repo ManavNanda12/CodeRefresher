@@ -25,6 +25,36 @@
         </p>
       </div>
 
+      <!-- ── Arena rank (level + streak + achievements) — always shown ── -->
+      <div class="panel game-panel">
+        <div class="gp-top">
+          <div class="gp-level">
+            <span class="gp-level-num">{{ game.level() }}</span>
+            <span class="gp-level-lbl">Level</span>
+          </div>
+          <div class="gp-bar-wrap">
+            <div class="gp-bar-meta">
+              <span>⚡ {{ game.xp() }} XP</span>
+              <span>{{ game.xpIntoLevel() }} / {{ game.xpForLevel() }} to Lv {{ game.level() + 1 }}</span>
+            </div>
+            <div class="gp-bar"><span class="gp-bar-fill" [style.width.%]="game.levelProgress() * 100"></span></div>
+          </div>
+          <div class="gp-streak" [class.cold]="game.streak() === 0">
+            <span class="gp-streak-num">🔥 {{ game.streak() }}</span>
+            <span class="gp-streak-lbl">day streak</span>
+          </div>
+        </div>
+
+        <div class="gp-ach">
+          @for (a of achievements(); track a.id) {
+            <div class="ach-chip" [class.locked]="!a.done" [title]="a.title + ' — ' + a.desc">
+              <span class="ach-chip-icon">{{ a.done ? a.icon : '🔒' }}</span>
+              <span class="ach-chip-title">{{ a.title }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
       @if (!hasAnyData()) {
         <!-- empty state -->
         <div class="empty-card">

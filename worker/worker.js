@@ -13,6 +13,8 @@ import { handleRecover } from "./recover.js";
 import { handleDeleteAccount } from "./delete-account.js";
 import { handleAdminUsers } from "./admin-users.js";
 import { handleUnsubscribe } from "./email-unsubscribe.js";
+import { handleGameSync, handleGameLoad } from "./game-sync.js";
+import { rateLimited, tooMany } from "./rate-limit.js";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -46,6 +48,7 @@ export default {
 
     // ── progress + user endpoints ──
     if (p === "/api/user/register" && method === "POST") {
+      if (await rateLimited(request, env, "register", 20)) return withCors(tooMany());
       return withCors(await handleUserRegister(request, env));
     }
     if (p === "/api/progress/dashboard" && method === "GET") {
@@ -55,10 +58,20 @@ export default {
       return withCors(await handleProgressSync(request, env));
     }
     if (p === "/api/user/recover" && method === "POST") {
+      if (await rateLimited(request, env, "recover", 30)) return withCors(tooMany());
       return withCors(await handleRecover(request, env));
     }
     if (p === "/api/user/delete" && method === "POST") {
+      if (await rateLimited(request, env, "delete", 10)) return withCors(tooMany());
       return withCors(await handleDeleteAccount(request, env));
+    }
+
+    // ── arena game state ──
+    if (p === "/api/game/sync" && method === "POST") {
+      return withCors(await handleGameSync(request, env));
+    }
+    if (p === "/api/game/load" && method === "GET") {
+      return withCors(await handleGameLoad(url, env));
     }
 
     // ── email outreach ──

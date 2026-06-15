@@ -1,22 +1,42 @@
-<article class="card" [class.is-open]="expanded()">
+<article class="card" [class.is-open]="expanded()" [class.mastered]="mastered()">
 
-  <!-- ── Question trigger ──────────────────────────── -->
-  <button class="card-trigger"
-          (click)="toggle()"
-          [attr.aria-expanded]="expanded()"
-          aria-controls="card-body-{{ index() }}">
-    <div class="trigger-inner">
+  <!-- ── Header row: question trigger · master toggle · chevron ── -->
+  <div class="card-head">
+    <button class="card-trigger"
+            (click)="toggle()"
+            [attr.aria-expanded]="expanded()"
+            aria-controls="card-body-{{ index() }}">
       <span class="q-index">#{{ index() }}</span>
-      <span class="question-text">{{ item().question }}</span>
-    </div>
-    <span class="chevron" [class.rotated]="expanded()">
+      <span class="q-col">
+        <span class="question-text">{{ item().question }}</span>
+        @if (tier(); as t) {
+          <span class="q-meta">
+            <span class="tier-badge" [style.--tier]="t.color">{{ t.label }}</span>
+            <span class="xp-badge">⚡ {{ t.xp }} XP</span>
+            @if (mastered()) { <span class="done-badge">✓ Mastered</span> }
+          </span>
+        }
+      </span>
+    </button>
+
+    <button class="master-btn"
+            [class.on]="mastered()"
+            (click)="toggleMaster($event)"
+            [attr.aria-pressed]="mastered()"
+            [title]="mastered() ? 'Mastered — click to undo' : 'Mark as mastered'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </button>
+
+    <button class="chevron-btn" [class.rotated]="expanded()" (click)="toggle()" aria-label="Toggle answer">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2.5"
-           stroke-linecap="round" stroke-linejoin="round">
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
-    </span>
-  </button>
+    </button>
+  </div>
 
   <!-- ── Animated body ──────────────────────────────── -->
   <div class="body-anim" [class.open]="expanded()" [id]="'card-body-' + index()">
@@ -69,6 +89,11 @@
           </header>
           <p class="section-content simple-text">{{ item().simpleExample }}</p>
         </section>
+
+        <!-- Master CTA -->
+        <button class="master-cta" [class.on]="mastered()" (click)="toggleMaster($event)">
+          @if (mastered()) { ✓ Mastered — nice work } @else { Mark as Mastered ⚡ +{{ tier()?.xp ?? 10 }} XP }
+        </button>
 
       </div>
     </div>

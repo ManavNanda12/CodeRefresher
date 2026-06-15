@@ -1,156 +1,130 @@
-# Developer Refresher
+# CodeRefresher 🏟️
 
-A personal knowledge base and interview prep app built with **Angular 22**. Browse structured Q&A for Angular, .NET, and SQL — organized by experience level, with code examples and simple analogies so concepts actually stick.
+An interview-prep **arena** built with **Angular 22**. Don't just *read* about Angular, .NET & SQL — **refresh** structured Q&A, **test** yourself against an AI examiner, **track** your readiness on a live dashboard, and **level up** as you clear the gaps.
 
-> AI Interview Coach coming soon — once you've refreshed the topics, practice live Q&A with an AI that adapts to your level.
-
----
-
-## Features
-
-- **Homepage** — animated hero, tech overview cards, stats, and AI coach teaser
-- **Angular / .NET / SQL pages** — questions split by 0–2 years and 2–4 years experience
-- **Expandable cards** — smooth CSS grid-trick animation, syntax-highlighted code blocks, copy-to-clipboard
-- **Responsive layout** — desktop topbar with nav links; mobile hamburger → slide-in sidebar
-- **Staggered entrance animations** — cards fly in with cascading delay via CSS custom properties
-- **View Transitions API** — smooth fade+slide between pages
-- **Skeleton loading** — shimmer placeholders while JSON data loads
-- **Footer** — roadmap (AWS, React, Python, Docker) and AI coach teaser
+> Learn → Test → Track → Improve. A complete, gamified prep loop — free forever, no sign-up to browse.
 
 ---
 
-## Tech Stack
+## ✨ Features
+
+### 📚 Structured Q&A ("Arenas")
+Curated interview questions for **Angular**, **.NET / ASP.NET Core**, and **SQL**, split by experience tier (0–1 / 1–2 / 2–3 / 4+ years). Every question ships with a detailed answer, a syntax-highlighted **code example**, and a plain-English **analogy** so concepts actually stick. Each card is a **challenge card** — difficulty tier, XP value, and a **"Master ✓"** toggle.
+
+### 🧪 Test Me — AI-graded mock interview
+Pick a tech + level, answer **5 random questions from memory**, and a large language model grades each answer **0–10 against an expert response** — returning a verdict, your **strengths**, **what you missed**, and a **tip**. Results screen shows an overall score ring, a rank, a per-question breakdown, and XP earned.
+
+### 📊 Smart Dashboard
+Every round feeds a live, **cross-device** dashboard:
+- **Readiness rings** per technology
+- A colour-coded **module heatmap** (strong → weak → untested)
+- Your top **weak spots** and **recent rounds**
+- A copyable **recovery code** to restore progress on any device (no password)
+
+### 🎯 Adaptive Focus Rounds
+One tap builds a quiz **weighted toward your weakest and untested modules** — drill exactly what needs work. Clear a whole module and a **"test yourself"** challenge fires a focus round on it.
+
+### 🕹️ Arena gamification
+- **XP & levels** (earned by mastering questions + finishing rounds)
+- A **daily streak 🔥** and **achievements**
+- A BGMI-style **level-up crate** animation + achievement toasts
+- A live **HUD** (level · XP bar · streak) in the header
+
+### 📬 Weekly progress emails
+An opt-out **weekly digest** (GitHub Actions cron + SMTP) emails each user their progress recap, weakest module, and a nudge to keep the streak alive.
+
+### 🎨 Light / Dark theme
+A signature dark **arena** theme with an opt-in **daylight** mode (browse surfaces flip to light; immersive game surfaces stay dark by design). Choice is persisted, with no flash on load.
+
+---
+
+## 🧱 Tech Stack
 
 | Layer | Choice |
 |---|---|
-| Framework | Angular 22 (standalone components, no NgModule) |
-| Reactivity | Signals (`signal`, `computed`, `input.required`) |
-| Data loading | `HttpClient` + `toObservable` + `switchMap` + `takeUntilDestroyed` |
-| Routing | Angular Router with lazy-loaded routes + `withViewTransitions()` |
-| Styling | Plain CSS (custom properties, CSS grid, `@keyframes`) |
-| UI library | Bootstrap 5 (CSS utilities only) |
-| Fonts | Inter (UI) + Fira Code (code blocks) via Google Fonts |
-| Build | Angular CLI 22 / esbuild |
-| Testing | Vitest |
+| Framework | Angular 22 (standalone components, **SSR** for SEO) |
+| Reactivity | Signals (`signal`, `computed`, `effect`, `afterNextRender`) |
+| Routing | Lazy routes + `withViewTransitions()` |
+| Styling | Plain CSS — custom-property design tokens, `color-mix()`, keyframe animations |
+| Backend | **Cloudflare Worker** + **Workers KV** (progress, game state, users) |
+| AI grading | LLM via the Worker (`/api/evaluate`) |
+| Email | **GitHub Actions** cron + `nodemailer` (SMTP), transport-swappable to Resend |
+| Persistence | Cookie (identity) + localStorage (fast cache) + KV (source of truth) |
 
 ---
 
-## Project Structure
+## 🗂️ Architecture
 
 ```
-src/
-├── app/
-│   ├── core/
-│   │   ├── models/
-│   │   │   └── refresher-item.model.ts   # RefresherItem + RefresherData interfaces
-│   │   └── services/
-│   │       └── data.service.ts           # HttpClient JSON loader
-│   ├── pages/
-│   │   ├── home/                         # Landing page
-│   │   ├── angular/                      # Angular Q&A page
-│   │   ├── dotnet/                       # .NET Q&A page
-│   │   └── sql/                          # SQL Q&A page
-│   ├── shared/
-│   │   └── components/
-│   │       ├── card/                     # Expandable question card
-│   │       ├── layout/                   # Header + sidebar + footer shell
-│   │       └── tech-page/               # Reusable topic page (hero + tabs + cards)
-│   ├── app.routes.ts
-│   ├── app.config.ts
-│   ├── app.ts
-│   └── app.html
-├── styles.css                            # Global styles + view-transition animations
-└── index.html                            # Google Fonts loaded here
+Browser (Angular SSR)
+  ├─ cookie: opaque userId + email (identity)
+  ├─ localStorage: progress + game state (instant, offline-first cache)
+  └─ HTTPS → Cloudflare Worker
+                ├─ /api/evaluate              → AI grades a Test Me answer
+                ├─ /api/user/register|recover|delete
+                ├─ /api/progress/sync|dashboard   → per-module stats + history
+                ├─ /api/game/sync|load            → XP / mastery / streak (batched writes)
+                ├─ /api/admin/users               → email export (Bearer secret)
+                └─ /api/email/unsubscribe
+                        │
+                        └─ Workers KV  (user:{id} = profile + progress + game)
 
-public/
-└── data/
-    ├── angular.json                      # Angular Q&A data
-    ├── dotnet.json                       # .NET Q&A data
-    └── sql.json                          # SQL Q&A data
+GitHub Actions (weekly cron) → scripts/send-weekly-digest.mjs → SMTP → users
 ```
 
----
-
-## Adding a New Technology
-
-To add a new topic (e.g. AWS):
-
-1. **Add data** — create `public/data/aws.json` following the same shape:
-   ```json
-   {
-     "categories": {
-       "0-2": [ { "question": "...", "answer": "...", "codeExample": "...", "simpleExample": "..." } ],
-       "2-4": [ ... ]
-     }
-   }
-   ```
-
-2. **Add a page** — create `src/app/pages/aws/aws.ts`:
-   ```typescript
-   @Component({ imports: [TechPageComponent], template: `<app-tech-page tech="aws" title="AWS" />` })
-   export class AwsComponent {}
-   ```
-
-3. **Add a route** in `app.routes.ts`:
-   ```typescript
-   { path: 'aws', loadComponent: () => import('./pages/aws/aws').then(m => m.AwsComponent) }
-   ```
-
-4. **Add nav item** in `layout.ts`:
-   ```typescript
-   { path: '/aws', label: 'AWS', icon: '☁️' }
-   ```
-
-5. **Add tech metadata** in `tech-page.ts` (`TECH_META` record) for the hero gradient and icon.
-
-That's it — no other changes needed.
+**Offline-first:** writes hit localStorage instantly, then sync to KV (game writes are **debounced** to respect KV's free-tier write budget). On load, KV is merged back so any device stays in sync.
 
 ---
 
-## Getting Started
+## 📁 Project Structure
+
+```
+src/app/
+  core/services/        data · seo · user · progress · game · theme · focus
+  shared/components/     layout (header HUD + footer) · card (challenge card)
+                         · tech-page (arena) · onboarding-modal · game-events
+                         (level-up crate + toasts)
+  pages/                 home · angular · dotnet · sql · test-me · dashboard
+public/data/             angular.json · dotnet.json · sql.json   (Q&A content)
+worker/                  Worker endpoint reference files + KV/EMAIL setup docs
+scripts/                 send-weekly-digest.mjs
+.github/workflows/       weekly-digest.yml
+```
+
+Adding a new tech arena: drop a `public/data/{tech}.json`, a thin page wrapper, a route, a nav item, and a `TECH_META` entry. (See `worker/KV-SETUP.md` and `worker/EMAIL-SETUP.md` for backend setup.)
+
+---
+
+## 🚀 Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server
-npm start
-# → http://localhost:4200
-
-# Production build
-npm run build
+npm start            # dev server → http://localhost:4200
+npm run build        # production (SSR) build
 ```
+
+### Backend (Cloudflare)
+1. Create a KV namespace `CODEREFRESHER_PROGRESS`, bind it as `PROGRESS_KV`.
+2. Deploy the Worker with the routes in `worker/worker.js` (keep your `GROK_API_KEY`, set `ADMIN_SECRET`).
+3. For weekly emails, add the GitHub Actions secrets listed in `worker/EMAIL-SETUP.md`.
+
+Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP.md`](worker/EMAIL-SETUP.md)
 
 ---
 
-## Data Format
+## 🗺️ Roadmap
 
-Each JSON file in `public/data/` must follow this shape:
-
-```typescript
-interface RefresherData {
-  categories: {
-    "0-2": RefresherItem[];
-    "2-4": RefresherItem[];
-  }
-}
-
-interface RefresherItem {
-  question: string;      // The interview question
-  answer: string;        // Detailed explanation
-  codeExample: string;   // Code snippet (shown in dark theme block)
-  simpleExample: string; // Plain-English analogy
-}
-```
+- [x] AI-graded Test Me
+- [x] Smart dashboard + cross-device sync
+- [x] Adaptive focus rounds
+- [x] Arena gamification (XP / streak / achievements / level-up)
+- [x] Weekly email digest
+- [x] Light / dark theme
+- [ ] More arenas (React, Python, AWS, Docker) & deeper question banks
+- [ ] Daily Challenge
+- [ ] AI-generated questions & follow-up probing
+- [ ] Leaderboard
 
 ---
 
-## Roadmap
-
-- [ ] AWS / Cloud page
-- [ ] React page
-- [ ] Python page
-- [ ] Docker / Kubernetes page
-- [ ] AI Interview Coach (live Q&A with adaptive difficulty)
-- [ ] Progress tracking (mark questions as reviewed)
-- [ ] Search across all topics
+Built by [Manav Nanda](https://manav-personal-portfolio.pages.dev/) · Made for developers, by developers.

@@ -2,6 +2,19 @@
    DASHBOARD · arena-themed progress hub
    ════════════════════════════════════════════════════════════ */
 
+/* The dashboard is part of the dark "arena cockpit" — pin the tokens so it stays
+   dark even when the rest of the site is in light mode. */
+:host {
+  --arena-bg: #070d1c;
+  --arena-panel: rgba(255, 255, 255, 0.03);
+  --arena-panel-2: rgba(255, 255, 255, 0.05);
+  --arena-border: rgba(148, 163, 184, 0.16);
+  --arena-text: #f1f5f9;
+  --arena-soft: #cbd5e1;
+  --arena-muted: #94a3b8;
+  --arena-dim: #64748b;
+}
+
 .arena {
   position: relative;
   min-height: calc(100vh - 64px);
@@ -192,6 +205,39 @@
 .split-item b { color: #e2e8f0; }
 .split-item.dim { color: #64748b; }
 .split-empty { color: #64748b; font-size: 0.85rem; }
+
+/* ── game panel (arena rank) ────────────────────────────────── */
+.game-panel { background: linear-gradient(160deg, rgba(99,102,241,0.08), rgba(255,255,255,0.02)); }
+.gp-top { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.25rem; }
+.gp-level { flex-shrink: 0; text-align: center; }
+.gp-level-num {
+  display: block; font-size: 2.4rem; font-weight: 900; line-height: 1;
+  background: linear-gradient(135deg, #a5b4fc, #c084fc); -webkit-background-clip: text;
+  background-clip: text; -webkit-text-fill-color: transparent;
+}
+.gp-level-lbl { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--arena-dim); }
+.gp-bar-wrap { flex: 1; min-width: 0; }
+.gp-bar-meta { display: flex; justify-content: space-between; font-size: 0.76rem; color: var(--arena-muted); margin-bottom: 0.4rem; }
+.gp-bar { height: 10px; border-radius: 100px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.gp-bar-fill { display: block; height: 100%; border-radius: 100px; background: linear-gradient(90deg, #6366f1, #c084fc); transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+.gp-streak { flex-shrink: 0; text-align: center; }
+.gp-streak-num { display: block; font-size: 1.3rem; font-weight: 800; color: #fb923c; }
+.gp-streak.cold .gp-streak-num { color: var(--arena-dim); filter: grayscale(1); }
+.gp-streak-lbl { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--arena-dim); }
+
+.gp-ach { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-top: 1.1rem; border-top: 1px solid rgba(148,163,184,0.12); }
+.ach-chip {
+  display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0.7rem; border-radius: 100px;
+  background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: #fcd34d;
+  font-size: 0.76rem; font-weight: 700;
+}
+.ach-chip.locked { background: rgba(255,255,255,0.03); border-color: var(--arena-border); color: var(--arena-dim); }
+.ach-chip-icon { font-size: 0.9rem; }
+
+@media (max-width: 640px) {
+  .gp-top { flex-wrap: wrap; gap: 1rem; }
+  .gp-bar-wrap { order: 3; flex-basis: 100%; }
+}
 
 /* ── settings panel ─────────────────────────────────────────── */
 .settings-gear {

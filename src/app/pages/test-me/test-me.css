@@ -635,6 +635,11 @@
   background: rgba(251,191,36,0.1);
   border-color: rgba(251,191,36,0.3);
 }
+.meta-pill.xp {
+  color: #c4b5fd;
+  background: rgba(139,92,246,0.14);
+  border-color: rgba(139,92,246,0.34);
+}
 
 /* Per-question mini bar chart */
 .sh-chart {

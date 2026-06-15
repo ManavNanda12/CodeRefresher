@@ -1,0 +1,44 @@
+<!-- ── Level-up crate ─────────────────────────────────── -->
+@if (game.justLeveledUp(); as lvl) {
+  <div class="lvl-backdrop" (click)="closeLevelUp()">
+    <div class="lvl-card" [class.opened]="opened()" (click)="$event.stopPropagation()">
+      <div class="lvl-rays"></div>
+
+      <div class="crate">
+        <div class="crate-glow"></div>
+        <div class="crate-base"></div>
+        <div class="crate-lid"></div>
+        <div class="crate-burst">
+          @for (s of [1,2,3,4,5,6,7,8]; track s) {
+            <span class="burst-particle" [style.--i]="s"></span>
+          }
+        </div>
+      </div>
+
+      <p class="lvl-kicker">⚡ Level Up!</p>
+
+      <div class="lvl-numbers">
+        <span class="lvl-old">{{ lvl.from }}</span>
+        <span class="lvl-arrow">→</span>
+        <span class="lvl-new">{{ lvl.to }}</span>
+      </div>
+
+      <div class="lvl-bar"><span class="lvl-bar-fill"></span></div>
+
+      <p class="lvl-msg">You're getting dangerous. Keep clearing the arena.</p>
+      <button class="lvl-claim" type="button" (click)="closeLevelUp()">Claim ⚡</button>
+    </div>
+  </div>
+}
+
+<!-- ── Achievement toast ──────────────────────────────── -->
+@if (game.justUnlocked(); as a) {
+  <button class="ach-toast" type="button" (click)="game.dismissUnlock()">
+    <span class="ach-icon">{{ a.icon }}</span>
+    <span class="ach-text">
+      <span class="ach-label">Achievement Unlocked</span>
+      <span class="ach-name">{{ a.title }}</span>
+      <span class="ach-desc">{{ a.desc }}</span>
+    </span>
+  </button>
+}
