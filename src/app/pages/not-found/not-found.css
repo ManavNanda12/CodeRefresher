@@ -1,0 +1,65 @@
+.nf-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 2rem 1rem;
+}
+
+.nf-card {
+  text-align: center;
+  max-width: 540px;
+}
+
+.nf-code {
+  font-size: clamp(4rem, 14vw, 8rem);
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, #c3002f 0%, #ff4857 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nf-title {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.nf-sub {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1.75rem;
+}
+
+.nf-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.3rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.nf-btn:hover {
+  transform: translateY(-2px);
+}
+
+.nf-btn-primary {
+  color: #fff;
+  background: linear-gradient(135deg, #c3002f 0%, #ff4857 100%);
+}
+
+.nf-btn-ghost {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}

@@ -1,0 +1,10 @@
+# Guarantee crawlers always receive the correct content types, regardless of
+# any future routing changes.
+
+/sitemap.xml
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=3600

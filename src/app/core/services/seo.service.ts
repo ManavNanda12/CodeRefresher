@@ -24,7 +24,7 @@ export class SeoService {
 
   update(config: SeoConfig): void {
     const fullTitle = `${config.title} | ${this.SITE_NAME}`;
-    const url       = `${this.BASE_URL}${this.router.url}`;
+    const url       = `${this.BASE_URL}${this.canonicalPath()}`;
 
     // Drop any page-specific structured data from the previous route.
     this.clearDynamicJsonLd();
@@ -60,6 +60,16 @@ export class SeoService {
   /** Absolute URL for a path on the canonical domain. */
   siteUrl(path = ''): string {
     return `${this.BASE_URL}${path}`;
+  }
+
+  /**
+   * Canonical path for the current route: lowercased, with query string and
+   * fragment dropped. Prevents `/Angular`, `/angular?x=1` or `/angular#top`
+   * from emitting a different canonical than the one indexed (`/angular`).
+   */
+  private canonicalPath(): string {
+    const path = this.router.url.split(/[?#]/)[0];
+    return path === '/' ? '/' : path.toLowerCase().replace(/\/+$/, '');
   }
 
   /**

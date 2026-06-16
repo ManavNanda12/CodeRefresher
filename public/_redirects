@@ -1,0 +1,20 @@
+# Cloudflare Pages redirects. Processed before static-asset matching.
+# Force the canonical lowercase casing for known sections with a clean 301,
+# so crawlers that discovered a mixed-case URL get a proper redirect instead
+# of a client-side soft redirect to the homepage.
+#
+# Do NOT add a catch-all "/* /index.html 200" rule here: it would serve a 200
+# HTML shell for every unknown URL (soft 404) and re-create the redirect/404
+# problems in Search Console. Unmatched routes intentionally fall through to
+# the static /404.html, which Cloudflare serves with a real HTTP 404.
+
+/Angular      /angular      301
+/Dotnet       /dotnet       301
+/DotNet       /dotnet       301
+/DOTNET       /dotnet       301
+/Sql          /sql          301
+/SQL          /sql          301
+/Test-Me      /test-me      301
+/Test-me      /test-me      301
+/Dashboard    /dashboard    301
+/Leaderboard  /leaderboard  301

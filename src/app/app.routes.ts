@@ -29,5 +29,11 @@ export const routes: Routes = [
     path: 'leaderboard',
     loadComponent: () => import('./pages/leaderboard/leaderboard').then(m => m.LeaderboardComponent)
   },
-  { path: '**', redirectTo: '' }
+  // No redirect-to-home: unknown URLs must resolve to a real "not found" page,
+  // not a soft redirect (which Google reports as a redirect error). The hard
+  // HTTP 404 status for crawlers comes from the static /404.html on Cloudflare.
+  {
+    path: '**',
+    loadComponent: () => import('./pages/not-found/not-found').then(m => m.NotFoundComponent)
+  }
 ];
