@@ -150,12 +150,18 @@
 }
 :host-context([data-theme="light"]) .app-header { box-shadow: 0 2px 14px rgba(2,6,23,0.07); }
 :host-context([data-theme="light"]) .header-title { color: #0f172a; }
+/* hover text was white → invisible on the light hover background; darken it */
+:host-context([data-theme="light"]) .header-link:hover,
+:host-context([data-theme="light"]) .sidebar-link:hover { color: #1e293b; }
+:host-context([data-theme="light"]) .hamburger-btn { color: #475569; }
+:host-context([data-theme="light"]) .hamburger-btn:hover { background: #f1f5f9; color: #1e293b; }
 :host-context([data-theme="light"]) .theme-toggle,
 :host-context([data-theme="light"]) .hud { background: #f1f5f9; border-color: #e2e8f0; }
 :host-context([data-theme="light"]) .theme-toggle:hover { background: #e2e8f0; }
 :host-context([data-theme="light"]) .hud-level { color: #6366f1; }
 :host-context([data-theme="light"]) .hud-xp { background: #e2e8f0; }
 :host-context([data-theme="light"]) .footer-brand-name { color: #0f172a; }
+:host-context([data-theme="light"]) .footer-nav-link:hover { color: #0f172a; }
 :host-context([data-theme="light"]) .creator-name { color: #f1f5f9; }
 /* keep the creator "card" dark in light mode — reads as an accent badge */
 :host-context([data-theme="light"]) .creator-card { background: #0f172a; border-color: rgba(255,255,255,0.1); }
@@ -580,6 +586,9 @@
 }
 
 .footer-top-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.8rem;
   color: #475569;
   text-decoration: none;
@@ -590,13 +599,20 @@
   cursor: pointer;
   font-family: inherit;
 }
+.bt-arrow { display: inline-block; transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.footer-top-link:hover .bt-arrow { animation: btBob 0.7s ease-in-out infinite; }
+@keyframes btBob {
+  0%, 100% { transform: translateY(-1px); }
+  50%      { transform: translateY(-5px); }
+}
+@media (prefers-reduced-motion: reduce) { .footer-top-link:hover .bt-arrow { animation: none; } }
 
 .footer-top-link:hover {
   color: #94a3b8;
 }
 
 @media (max-width: 768px) {
-  .app-header { padding: 0 1rem; }
+  .app-header { padding: 0 1rem; gap: 0.6rem; }
   .footer-row { grid-template-columns: 1fr; gap: 1.5rem; }
   .footer-inner { padding: 1.5rem 1.25rem 1rem; }
   .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.5rem; }

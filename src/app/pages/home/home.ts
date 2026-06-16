@@ -166,6 +166,7 @@ export class HomeComponent {
     { icon: '🧪', title: 'AI Test Me', desc: 'Answer from memory and our AI grades every answer 0–10 against an expert response, with your strengths, gaps and a tip.', tag: 'Practice' },
     { icon: '📊', title: 'Smart Dashboard', desc: 'Readiness rings per technology, a module heatmap, your weak spots and recent rounds — progress at a glance.', tag: 'Track' },
     { icon: '🎯', title: 'Adaptive Focus Rounds', desc: 'One tap builds a quiz weighted toward your weakest and untested modules. Drill exactly what needs work.', tag: 'Improve' },
+    { icon: '🏆', title: 'Leaderboard', desc: 'Earn XP, climb the arena and see how you rank against everyone else — by XP, tests taken and best score.', tag: 'Compete' },
     { icon: '📬', title: 'Weekly Recap Emails', desc: 'A Monday email with your progress, your softest spot and a nudge to keep the momentum going.', tag: 'Stay sharp' },
     { icon: '🔁', title: 'Cross-Device Sync', desc: 'Progress is saved to the cloud and restored on any device with a recovery code — no password required.', tag: 'Anywhere' },
   ];

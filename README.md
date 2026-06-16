@@ -30,6 +30,9 @@ One tap builds a quiz **weighted toward your weakest and untested modules** — 
 - A BGMI-style **level-up crate** animation + achievement toasts
 - A live **HUD** (level · XP bar · streak) in the header
 
+### 🏆 Leaderboard
+Climb the arena: three ranked boards — **Top Rank** (XP), **Most Tests**, and **Best Score** — with an animated **top-3 podium**, your own row highlighted, and a friendly display name (set yours, or a generated alias). Built **scale-safe**: one cached KV key holds the top 20 per board, updated incrementally, so reads stay O(1) no matter how many users join.
+
 ### 📬 Weekly progress emails
 An opt-out **weekly digest** (GitHub Actions cron + SMTP) emails each user their progress recap, weakest module, and a nudge to keep the streak alive.
 
@@ -42,7 +45,8 @@ A signature dark **arena** theme with an opt-in **daylight** mode (browse surfac
 
 | Layer | Choice |
 |---|---|
-| Framework | Angular 22 (standalone components, **SSR** for SEO) |
+| Framework | Angular 22 (standalone components, **SSR**) |
+| SEO | Per-page meta + canonical, OG/Twitter cards, `robots.txt` + `sitemap.xml`, `WebSite`/`WebApplication` + per-page `FAQPage`/`BreadcrumbList` JSON-LD, `noindex` on private pages |
 | Reactivity | Signals (`signal`, `computed`, `effect`, `afterNextRender`) |
 | Routing | Lazy routes + `withViewTransitions()` |
 | Styling | Plain CSS — custom-property design tokens, `color-mix()`, keyframe animations |
@@ -64,10 +68,11 @@ Browser (Angular SSR)
                 ├─ /api/user/register|recover|delete
                 ├─ /api/progress/sync|dashboard   → per-module stats + history
                 ├─ /api/game/sync|load            → XP / mastery / streak (batched writes)
+                ├─ /api/leaderboard               → cached top-20 boards (O(1) read)
                 ├─ /api/admin/users               → email export (Bearer secret)
                 └─ /api/email/unsubscribe
                         │
-                        └─ Workers KV  (user:{id} = profile + progress + game)
+                        └─ Workers KV  (user:{id} = profile + progress + game · leaderboard = cached boards)
 
 GitHub Actions (weekly cron) → scripts/send-weekly-digest.mjs → SMTP → users
 ```
@@ -80,11 +85,11 @@ GitHub Actions (weekly cron) → scripts/send-weekly-digest.mjs → SMTP → use
 
 ```
 src/app/
-  core/services/        data · seo · user · progress · game · theme · focus
+  core/services/        data · seo · user · progress · game · theme · focus · leaderboard
   shared/components/     layout (header HUD + footer) · card (challenge card)
                          · tech-page (arena) · onboarding-modal · game-events
                          (level-up crate + toasts)
-  pages/                 home · angular · dotnet · sql · test-me · dashboard
+  pages/                 home · angular · dotnet · sql · test-me · dashboard · leaderboard
 public/data/             angular.json · dotnet.json · sql.json   (Q&A content)
 worker/                  Worker endpoint reference files + KV/EMAIL setup docs
 scripts/                 send-weekly-digest.mjs
@@ -118,12 +123,13 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] Smart dashboard + cross-device sync
 - [x] Adaptive focus rounds
 - [x] Arena gamification (XP / streak / achievements / level-up)
+- [x] Leaderboard (XP / tests / best score)
 - [x] Weekly email digest
 - [x] Light / dark theme
 - [ ] More arenas (React, Python, AWS, Docker) & deeper question banks
 - [ ] Daily Challenge
 - [ ] AI-generated questions & follow-up probing
-- [ ] Leaderboard
+- [ ] Spaced repetition for mastered questions
 
 ---
 

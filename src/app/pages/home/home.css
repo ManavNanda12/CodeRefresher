@@ -733,8 +733,10 @@
 
 /* Features grid */
 .features-section { padding: 1.5rem 2.5rem 4rem; max-width: 1200px; margin: 0 auto; }
-.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.4rem; }
+/* Flex (not grid) so the last row centers its leftover card instead of orphaning it left. */
+.features-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.4rem; }
 .feature-card {
+  flex: 1 1 300px; max-width: 360px;
   position: relative; background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02));
   border: 1px solid var(--arena-border); border-radius: 18px; padding: 1.75rem;
   transform: perspective(900px) translateY(var(--lift, 0)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
@@ -810,6 +812,7 @@
 
 @media (max-width: 768px) {
   .features-section { padding: 1rem 1.25rem 3rem; }
+  .features-grid { grid-template-columns: 1fr; }
   .peek-section { padding: 0 1.25rem 3rem; }
   .peek-card { padding: 2rem; }
   .cta-title { font-size: 1.7rem; }
