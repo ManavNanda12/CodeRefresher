@@ -2,26 +2,190 @@
   "categories": {
     "0-1": {
       "modules": {
-        "Fundamentals": {
-          "icon": "📚",
+        "SQL Basics": {
+          "icon": "📘",
           "questions": [
             {
-              "question": "What are the different types of JOINs in SQL?",
-              "answer": "SQL JOINs combine rows from two or more tables based on a related column. INNER JOIN: returns only rows where there is a match in BOTH tables. LEFT JOIN (LEFT OUTER): returns all rows from the left table, and matched rows from the right (NULLs where no match). RIGHT JOIN: opposite of LEFT JOIN. FULL OUTER JOIN: returns all rows from both tables, NULLs where no match. CROSS JOIN: every row of left multiplied by every row of right (Cartesian product).",
-              "codeExample": "-- INNER JOIN — only customers who have orders\nSELECT c.Name, o.Amount\nFROM Customers c\nINNER JOIN Orders o ON c.Id = o.CustomerId;\n\n-- LEFT JOIN — ALL customers, NULLs for those with no orders\nSELECT c.Name, o.Amount\nFROM Customers c\nLEFT JOIN Orders o ON c.Id = o.CustomerId;\n\n-- Anti-join — customers with NO orders\nSELECT c.Name\nFROM Customers c\nLEFT JOIN Orders o ON c.Id = o.CustomerId\nWHERE o.CustomerId IS NULL;",
-              "simpleExample": "Imagine two lists: 'Employees' and 'Departments'. INNER JOIN: only show employees who HAVE a department — no department, no row. LEFT JOIN: show ALL employees, and their department if they have one (NULL if they don't)."
+              "question": "What is SQL?",
+              "answer": "SQL (Structured Query Language) is a standard language used to communicate with relational databases. It allows you to create, read, update, and delete data stored in tables.",
+              "codeExample": "SELECT * FROM employees;",
+              "simpleExample": "SQL is like giving instructions to a librarian — you tell them what book (data) you want, and they fetch it for you."
+            },
+            {
+              "question": "What is a Database?",
+              "answer": "A Database is an organized collection of structured data stored electronically. A relational database stores data in tables with rows and columns.",
+              "codeExample": "CREATE DATABASE company_db;",
+              "simpleExample": "A database is like a filing cabinet. Each drawer is a table, each folder is a row, and each label is a column."
+            },
+            {
+              "question": "What is a Table in SQL?",
+              "answer": "A Table is a collection of related data organized in rows (records) and columns (fields). Each table represents a specific entity like employees, products, or orders.",
+              "codeExample": "CREATE TABLE employees (\n  id INT PRIMARY KEY,\n  name VARCHAR(100),\n  department VARCHAR(50),\n  salary DECIMAL(10,2)\n);",
+              "simpleExample": "A table is like a spreadsheet — columns are headers (name, salary) and rows are individual records."
+            },
+            {
+              "question": "What is a Primary Key?",
+              "answer": "A Primary Key is a column (or combination of columns) that uniquely identifies each row in a table. It cannot contain NULL values and must be unique.",
+              "codeExample": "CREATE TABLE users (\n  user_id INT PRIMARY KEY,\n  email VARCHAR(255) UNIQUE,\n  name VARCHAR(100)\n);",
+              "simpleExample": "A Primary Key is like an Aadhaar number — no two people can have the same one."
+            },
+            {
+              "question": "What is a Foreign Key?",
+              "answer": "A Foreign Key is a column that creates a relationship between two tables. It references the Primary Key of another table to enforce referential integrity.",
+              "codeExample": "CREATE TABLE orders (\n  order_id INT PRIMARY KEY,\n  customer_id INT,\n  amount DECIMAL(10,2),\n  FOREIGN KEY (customer_id) REFERENCES customers(customer_id)\n);",
+              "simpleExample": "A Foreign Key is like a reference letter — it points to someone (row) in another table."
+            },
+            {
+              "question": "What is the difference between DELETE, TRUNCATE, and DROP?",
+              "answer": "DELETE removes specific rows and can use WHERE clause. TRUNCATE removes all rows but keeps the table structure. DROP removes the entire table including its structure.",
+              "codeExample": "DELETE FROM employees WHERE department = 'HR';\nTRUNCATE TABLE temp_logs;\nDROP TABLE old_records;",
+              "simpleExample": "DELETE = erase specific pages from a notebook. TRUNCATE = tear out all pages but keep the notebook. DROP = throw the entire notebook away."
             },
             {
               "question": "What is the difference between WHERE and HAVING?",
-              "answer": "WHERE filters rows BEFORE grouping — it applies to individual rows and cannot use aggregate functions (SUM, COUNT, AVG). HAVING filters groups AFTER the GROUP BY clause — it can use aggregate functions. Rule of thumb: WHERE filters individual rows; HAVING filters the grouped results.",
-              "codeExample": "-- WHERE filters before grouping, HAVING filters after\nSELECT CustomerId, COUNT(*) as OrderCount, SUM(Amount) as Total\nFROM Orders\nWHERE OrderDate >= '2024-01-01'    -- rows filtered here\nGROUP BY CustomerId\nHAVING COUNT(*) >= 5               -- groups filtered here\nORDER BY Total DESC;\n\n-- ❌ Wrong — can't use aggregate in WHERE\n-- WHERE COUNT(*) > 5 causes an error!\n-- ✅ Correct — use HAVING for aggregates",
-              "simpleExample": "WHERE is the bouncer at the door — it decides which INDIVIDUAL PEOPLE get in before the party. HAVING is the manager at closing time — they look at the groups that formed and decide which GROUP stays based on how many people are in it."
+              "answer": "WHERE filters rows before grouping. HAVING filters groups after the GROUP BY clause is applied. HAVING is used with aggregate functions.",
+              "codeExample": "-- WHERE: filter rows\nSELECT * FROM employees WHERE salary > 50000;\n\n-- HAVING: filter groups\nSELECT department, AVG(salary)\nFROM employees\nGROUP BY department\nHAVING AVG(salary) > 60000;",
+              "simpleExample": "WHERE filters individual students. HAVING filters entire classrooms based on average marks."
             },
             {
-              "question": "What are SQL Indexes and how do they improve performance?",
-              "answer": "An index is a data structure (B-tree by default) that allows the database engine to find rows without scanning the entire table. Without an index, a query does a 'full table scan' (reads every row). With an index on the searched column, it's like looking up a book in a library index — jump directly to the data. Indexes speed up reads but slightly slow down writes (INSERT/UPDATE/DELETE must also update the index).",
-              "codeExample": "-- Simple index on a frequently queried column\nCREATE INDEX IX_Orders_CustomerId ON Orders(CustomerId);\n\n-- Composite index — good for queries filtering both columns\nCREATE INDEX IX_Orders_Status_Date ON Orders(Status, OrderDate DESC);\n\n-- Unique index — enforces uniqueness AND provides index benefit\nCREATE UNIQUE INDEX UX_Users_Email ON Users(Email);\n\n-- An index DOES help this:\nSELECT * FROM Orders WHERE CustomerId = 42;\n-- An index does NOT help this (leading wildcard):\nSELECT * FROM Users WHERE Email LIKE '%@gmail.com'; -- full scan",
-              "simpleExample": "Imagine a phone book with 1 million entries. Without an index: you read every entry to find 'John Smith'. WITH an index on LastName: you flip to 'S', jump to 'Smith', done in seconds. Cost: the index takes up space and needs updating on every insert."
+              "question": "What is NULL in SQL?",
+              "answer": "NULL represents a missing or unknown value. It is not the same as zero or an empty string. NULL comparisons require IS NULL or IS NOT NULL.",
+              "codeExample": "SELECT * FROM employees WHERE phone IS NULL;\nSELECT * FROM employees WHERE phone IS NOT NULL;\n\n-- This will NOT work as expected:\n-- SELECT * FROM employees WHERE phone = NULL;",
+              "simpleExample": "NULL means 'I don't know the value' — not zero, not blank, just unknown."
+            }
+          ]
+        },
+        "CRUD Operations": {
+          "icon": "✏️",
+          "questions": [
+            {
+              "question": "What are CRUD Operations?",
+              "answer": "CRUD stands for Create (INSERT), Read (SELECT), Update (UPDATE), and Delete (DELETE) — the four basic operations on database data.",
+              "codeExample": "-- Create\nINSERT INTO employees (name, salary) VALUES ('Manav', 75000);\n\n-- Read\nSELECT * FROM employees;\n\n-- Update\nUPDATE employees SET salary = 80000 WHERE name = 'Manav';\n\n-- Delete\nDELETE FROM employees WHERE name = 'Manav';",
+              "simpleExample": "CRUD covers everything you can do with data: add it, view it, change it, or remove it."
+            },
+            {
+              "question": "What is the SELECT statement?",
+              "answer": "SELECT retrieves data from one or more tables. It can return specific columns, filtered rows, sorted results, and aggregated data.",
+              "codeExample": "SELECT name, salary\nFROM employees\nWHERE department = 'Engineering'\nORDER BY salary DESC;",
+              "simpleExample": "SELECT is like asking a question: 'Show me all engineers sorted by salary.'"
+            },
+            {
+              "question": "What is the INSERT statement?",
+              "answer": "INSERT adds new rows into a table.",
+              "codeExample": "-- Single row\nINSERT INTO products (name, price) VALUES ('Laptop', 75000);\n\n-- Multiple rows\nINSERT INTO products (name, price) VALUES\n  ('Mouse', 500),\n  ('Keyboard', 1200),\n  ('Monitor', 15000);",
+              "simpleExample": "INSERT is like adding a new contact to your phone."
+            },
+            {
+              "question": "What is the UPDATE statement?",
+              "answer": "UPDATE modifies existing rows in a table. Always use a WHERE clause to avoid updating all rows accidentally.",
+              "codeExample": "UPDATE employees\nSET salary = salary * 1.10\nWHERE department = 'Engineering';",
+              "simpleExample": "UPDATE is like editing a saved contact's phone number."
+            },
+            {
+              "question": "What is the difference between DISTINCT and GROUP BY?",
+              "answer": "DISTINCT removes duplicate rows from the result. GROUP BY groups rows for aggregate calculations like COUNT, SUM, AVG.",
+              "codeExample": "-- DISTINCT: unique departments\nSELECT DISTINCT department FROM employees;\n\n-- GROUP BY: count per department\nSELECT department, COUNT(*) AS headcount\nFROM employees\nGROUP BY department;",
+              "simpleExample": "DISTINCT says 'show me unique values.' GROUP BY says 'group them and calculate something.'"
+            }
+          ]
+        },
+        "Filtering & Sorting": {
+          "icon": "🔍",
+          "questions": [
+            {
+              "question": "What is the WHERE clause?",
+              "answer": "WHERE filters rows based on a condition. Only rows that satisfy the condition are included in the result.",
+              "codeExample": "SELECT * FROM products WHERE price > 1000;\nSELECT * FROM employees WHERE department = 'HR' AND salary > 50000;",
+              "simpleExample": "WHERE is like a filter on an e-commerce site — show only products above ₹1000."
+            },
+            {
+              "question": "What is ORDER BY?",
+              "answer": "ORDER BY sorts the result set by one or more columns. Default is ascending (ASC). Use DESC for descending.",
+              "codeExample": "SELECT name, salary FROM employees\nORDER BY salary DESC;\n\nSELECT * FROM products\nORDER BY category ASC, price DESC;",
+              "simpleExample": "ORDER BY is like sorting search results by price — low to high or high to low."
+            },
+            {
+              "question": "What is LIKE operator?",
+              "answer": "LIKE is used for pattern matching in WHERE clause. % matches any sequence of characters. _ matches exactly one character.",
+              "codeExample": "-- Names starting with 'A'\nSELECT * FROM employees WHERE name LIKE 'A%';\n\n-- Names ending with 'kumar'\nSELECT * FROM employees WHERE name LIKE '%kumar';\n\n-- Exactly 5-letter names\nSELECT * FROM employees WHERE name LIKE '_____';",
+              "simpleExample": "LIKE is like using wildcard search — 'A%' finds Amit, Anita, Arjun."
+            },
+            {
+              "question": "What is the IN operator?",
+              "answer": "IN allows matching a column against a list of values instead of writing multiple OR conditions.",
+              "codeExample": "-- Instead of:\nSELECT * FROM employees WHERE dept = 'HR' OR dept = 'IT' OR dept = 'Finance';\n\n-- Use IN:\nSELECT * FROM employees WHERE dept IN ('HR', 'IT', 'Finance');",
+              "simpleExample": "IN is a shorthand for 'match any of these values.'"
+            },
+            {
+              "question": "What is BETWEEN operator?",
+              "answer": "BETWEEN filters values within a range (inclusive of both endpoints).",
+              "codeExample": "SELECT * FROM employees WHERE salary BETWEEN 40000 AND 80000;\nSELECT * FROM orders WHERE order_date BETWEEN '2024-01-01' AND '2024-12-31';",
+              "simpleExample": "BETWEEN is like saying 'give me everything from 40K to 80K, including both.'"
+            }
+          ]
+        },
+        "Aggregate Functions": {
+          "icon": "📊",
+          "questions": [
+            {
+              "question": "What are Aggregate Functions?",
+              "answer": "Aggregate Functions perform calculations on a set of values and return a single result. Common ones are COUNT, SUM, AVG, MIN, and MAX.",
+              "codeExample": "SELECT COUNT(*) AS total_employees FROM employees;\nSELECT AVG(salary) AS avg_salary FROM employees;\nSELECT MAX(salary) AS highest_salary FROM employees;\nSELECT SUM(amount) AS total_sales FROM orders;",
+              "simpleExample": "Aggregate functions answer questions like 'how many?', 'what's the total?', 'what's the average?'"
+            },
+            {
+              "question": "What is GROUP BY?",
+              "answer": "GROUP BY groups rows sharing the same value in specified columns and is used with aggregate functions to get per-group results.",
+              "codeExample": "SELECT department, COUNT(*) AS headcount, AVG(salary) AS avg_salary\nFROM employees\nGROUP BY department;",
+              "simpleExample": "GROUP BY is like organizing students by class and then counting how many are in each."
+            },
+            {
+              "question": "What is the difference between COUNT(*) and COUNT(column)?",
+              "answer": "COUNT(*) counts all rows including those with NULL values. COUNT(column) counts only rows where that specific column is NOT NULL.",
+              "codeExample": "-- Counts all rows (including NULLs)\nSELECT COUNT(*) FROM employees;\n\n-- Counts only rows where phone is not NULL\nSELECT COUNT(phone) FROM employees;",
+              "simpleExample": "COUNT(*) counts everyone. COUNT(phone) counts only those who have a phone number."
+            },
+            {
+              "question": "Can you use WHERE with aggregate functions?",
+              "answer": "No. WHERE cannot filter on aggregate results. Use HAVING to filter after GROUP BY. WHERE filters rows before aggregation, HAVING filters groups after.",
+              "codeExample": "-- ❌ This will fail:\n-- SELECT department FROM employees WHERE COUNT(*) > 5 GROUP BY department;\n\n-- ✅ Correct:\nSELECT department, COUNT(*) AS cnt\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5;",
+              "simpleExample": "WHERE works before grouping, HAVING works after grouping."
+            }
+          ]
+        },
+        "Data Types & Constraints": {
+          "icon": "🔒",
+          "questions": [
+            {
+              "question": "What are common SQL Data Types?",
+              "answer": "Common data types include INT (whole numbers), VARCHAR (variable-length text), DECIMAL (precise numbers), DATE (dates), BOOLEAN (true/false), and TEXT (long text).",
+              "codeExample": "CREATE TABLE products (\n  id INT,\n  name VARCHAR(100),\n  price DECIMAL(10,2),\n  is_active BOOLEAN,\n  created_at DATE,\n  description TEXT\n);",
+              "simpleExample": "Data types define what kind of value a column can hold — number, text, date, etc."
+            },
+            {
+              "question": "What are Constraints in SQL?",
+              "answer": "Constraints are rules applied to columns to enforce data integrity. Common constraints are PRIMARY KEY, FOREIGN KEY, NOT NULL, UNIQUE, CHECK, and DEFAULT.",
+              "codeExample": "CREATE TABLE employees (\n  id INT PRIMARY KEY,\n  email VARCHAR(255) UNIQUE NOT NULL,\n  name VARCHAR(100) NOT NULL,\n  age INT CHECK (age >= 18),\n  status VARCHAR(20) DEFAULT 'active'\n);",
+              "simpleExample": "Constraints are like rules on a form — 'this field is required', 'this must be unique.'"
+            },
+            {
+              "question": "What is the UNIQUE constraint?",
+              "answer": "UNIQUE ensures that all values in a column are different. Unlike PRIMARY KEY, a table can have multiple UNIQUE columns, and UNIQUE allows one NULL (in most databases).",
+              "codeExample": "CREATE TABLE users (\n  id INT PRIMARY KEY,\n  email VARCHAR(255) UNIQUE,\n  phone VARCHAR(15) UNIQUE\n);",
+              "simpleExample": "No two users can have the same email or phone number."
+            },
+            {
+              "question": "What is the DEFAULT constraint?",
+              "answer": "DEFAULT provides a fallback value when no value is supplied during INSERT.",
+              "codeExample": "CREATE TABLE orders (\n  id INT PRIMARY KEY,\n  status VARCHAR(20) DEFAULT 'pending',\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);",
+              "simpleExample": "If you don't specify a status, it automatically becomes 'pending.'"
+            },
+            {
+              "question": "What is the CHECK constraint?",
+              "answer": "CHECK ensures that values in a column satisfy a specific condition.",
+              "codeExample": "CREATE TABLE employees (\n  id INT PRIMARY KEY,\n  age INT CHECK (age >= 18 AND age <= 65),\n  salary DECIMAL(10,2) CHECK (salary > 0)\n);",
+              "simpleExample": "CHECK is like form validation — 'age must be 18 or above.'"
             }
           ]
         }
@@ -29,20 +193,164 @@
     },
     "1-2": {
       "modules": {
-        "Core Concepts": {
-          "icon": "🔑",
+        "Joins": {
+          "icon": "🔗",
           "questions": [
             {
-              "question": "What are aggregate functions and GROUP BY in SQL?",
-              "answer": "Aggregate functions perform calculations on a set of rows and return a single value per group. Common functions: COUNT(*) counts rows, SUM(col) totals a numeric column, AVG(col) calculates the average, MIN/MAX returns the smallest/largest value. GROUP BY divides result rows into groups — the aggregate is applied to each group separately.",
-              "codeExample": "-- Basic aggregates\nSELECT \n    COUNT(*) AS TotalOrders,\n    SUM(Amount) AS Revenue,\n    AVG(Amount) AS AvgOrderValue,\n    MAX(Amount) AS LargestOrder\nFROM Orders\nWHERE OrderDate >= '2024-01-01';\n\n-- GROUP BY — aggregates per group\nSELECT \n    Region,\n    COUNT(*) AS OrderCount,\n    SUM(Amount) AS MonthlyRevenue\nFROM Orders\nGROUP BY Region\nORDER BY MonthlyRevenue DESC;",
-              "simpleExample": "GROUP BY is like sorting your receipts into separate envelopes by month. Once sorted, you can count the receipts per envelope (COUNT), add up the totals (SUM), or find the biggest purchase (MAX)."
+              "question": "What is a JOIN in SQL?",
+              "answer": "A JOIN combines rows from two or more tables based on a related column. It is used to retrieve data spread across multiple tables.",
+              "codeExample": "SELECT e.name, d.department_name\nFROM employees e\nJOIN departments d ON e.department_id = d.id;",
+              "simpleExample": "JOIN is like connecting two spreadsheets — match employees with their department names."
             },
             {
-              "question": "How does NULL work in SQL and how should you handle it?",
-              "answer": "NULL in SQL represents the absence of a value (unknown). NULL is NOT equal to anything — not even NULL. SQL uses three-valued logic (TRUE, FALSE, UNKNOWN). Any comparison with NULL (=, <>, <, >) returns UNKNOWN, not TRUE or FALSE. Use IS NULL or IS NOT NULL to check for NULLs. Functions like COALESCE, ISNULL, NULLIF help handle NULLs safely.",
-              "codeExample": "-- NULL comparisons (all return UNKNOWN, not TRUE/FALSE)\nSELECT * FROM Users WHERE Phone = NULL;   -- ❌ returns 0 rows\n\n-- ✅ Correct way to check for NULL\nSELECT * FROM Users WHERE Phone IS NULL;\n\n-- COALESCE — returns first non-NULL value\nSELECT Name,\n    COALESCE(Phone, MobilePhone, 'No phone') AS ContactNumber\nFROM Users;\n\n-- NULLIF — returns NULL if two values are equal (avoid divide by zero)\nSELECT Revenue / NULLIF(OrderCount, 0) AS AvgRevenue FROM Summary;",
-              "simpleExample": "NULL means 'I don't know'. Is NULL = NULL? SQL says: 'I don't know if two unknowns are the same.' So WHERE Phone = NULL NEVER matches — use WHERE Phone IS NULL. COALESCE is your 'use this if that is missing' tool."
+              "question": "What is INNER JOIN?",
+              "answer": "INNER JOIN returns only the rows that have matching values in both tables. Non-matching rows are excluded.",
+              "codeExample": "SELECT o.order_id, c.name\nFROM orders o\nINNER JOIN customers c ON o.customer_id = c.id;",
+              "simpleExample": "Only customers who have placed orders will appear. No order = not shown."
+            },
+            {
+              "question": "What is LEFT JOIN?",
+              "answer": "LEFT JOIN returns all rows from the left table and matched rows from the right table. Unmatched right-side rows appear as NULL.",
+              "codeExample": "SELECT e.name, d.department_name\nFROM employees e\nLEFT JOIN departments d ON e.department_id = d.id;",
+              "simpleExample": "Show all employees even if they haven't been assigned a department yet."
+            },
+            {
+              "question": "What is RIGHT JOIN?",
+              "answer": "RIGHT JOIN returns all rows from the right table and matched rows from the left table. Unmatched left-side rows appear as NULL.",
+              "codeExample": "SELECT e.name, d.department_name\nFROM employees e\nRIGHT JOIN departments d ON e.department_id = d.id;",
+              "simpleExample": "Show all departments even if no employees are assigned to them."
+            },
+            {
+              "question": "What is FULL OUTER JOIN?",
+              "answer": "FULL OUTER JOIN returns all rows from both tables. Where there is no match, NULLs fill in for the missing side.",
+              "codeExample": "SELECT e.name, d.department_name\nFROM employees e\nFULL OUTER JOIN departments d ON e.department_id = d.id;",
+              "simpleExample": "Show all employees AND all departments — even if they don't match each other."
+            },
+            {
+              "question": "What is a CROSS JOIN?",
+              "answer": "CROSS JOIN produces a Cartesian product — every row from the first table is paired with every row from the second table.",
+              "codeExample": "SELECT color.name, size.label\nFROM colors color\nCROSS JOIN sizes size;",
+              "simpleExample": "3 colors × 4 sizes = 12 combinations. Useful for generating all possible pairs."
+            },
+            {
+              "question": "What is a SELF JOIN?",
+              "answer": "A SELF JOIN joins a table to itself. Commonly used for hierarchical data like employees and their managers.",
+              "codeExample": "SELECT e.name AS employee, m.name AS manager\nFROM employees e\nLEFT JOIN employees m ON e.manager_id = m.id;",
+              "simpleExample": "Finding each employee's manager from the same employees table."
+            },
+            {
+              "question": "Difference between JOIN and Subquery for the same result?",
+              "answer": "JOINs are generally more readable and can be better optimized by the database engine. Subqueries are useful when you need a single value or a filtered set. Performance depends on the query optimizer and data size.",
+              "codeExample": "-- JOIN approach\nSELECT e.name FROM employees e\nJOIN departments d ON e.dept_id = d.id\nWHERE d.name = 'Engineering';\n\n-- Subquery approach\nSELECT name FROM employees\nWHERE dept_id = (SELECT id FROM departments WHERE name = 'Engineering');",
+              "simpleExample": "Both reach the same destination — JOINs take the highway, subqueries take the shortcut."
+            }
+          ]
+        },
+        "Subqueries": {
+          "icon": "🪆",
+          "questions": [
+            {
+              "question": "What is a Subquery?",
+              "answer": "A Subquery is a query nested inside another query. It can be used in SELECT, FROM, WHERE, or HAVING clauses.",
+              "codeExample": "SELECT name, salary\nFROM employees\nWHERE salary > (SELECT AVG(salary) FROM employees);",
+              "simpleExample": "A subquery is a question inside a question — 'Show employees earning more than the average salary.'"
+            },
+            {
+              "question": "What is a Correlated Subquery?",
+              "answer": "A Correlated Subquery references columns from the outer query and executes once for each row of the outer query.",
+              "codeExample": "SELECT e.name, e.salary, e.department_id\nFROM employees e\nWHERE e.salary > (\n  SELECT AVG(e2.salary)\n  FROM employees e2\n  WHERE e2.department_id = e.department_id\n);",
+              "simpleExample": "Find employees who earn more than the average salary in their own department."
+            },
+            {
+              "question": "What is the difference between IN and EXISTS?",
+              "answer": "IN checks if a value matches any value in a list or subquery result. EXISTS checks if the subquery returns at least one row. EXISTS can be faster for large datasets because it stops as soon as it finds a match.",
+              "codeExample": "-- IN\nSELECT * FROM customers\nWHERE id IN (SELECT customer_id FROM orders);\n\n-- EXISTS\nSELECT * FROM customers c\nWHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);",
+              "simpleExample": "IN checks the full list. EXISTS stops at the first match — like asking 'does at least one order exist?'"
+            },
+            {
+              "question": "Can Subqueries be used in SELECT clause?",
+              "answer": "Yes. A scalar subquery in the SELECT clause returns one value per row, often used to add calculated columns.",
+              "codeExample": "SELECT\n  name,\n  salary,\n  (SELECT AVG(salary) FROM employees) AS company_avg,\n  salary - (SELECT AVG(salary) FROM employees) AS diff_from_avg\nFROM employees;",
+              "simpleExample": "Adding a column that shows each employee's salary compared to the company average."
+            }
+          ]
+        },
+        "Indexes": {
+          "icon": "⚡",
+          "questions": [
+            {
+              "question": "What is an Index in SQL?",
+              "answer": "An Index is a data structure that speeds up data retrieval by allowing the database to find rows quickly without scanning the entire table.",
+              "codeExample": "CREATE INDEX idx_employee_name ON employees(name);\nCREATE INDEX idx_order_date ON orders(order_date);",
+              "simpleExample": "An index is like a book's table of contents — instead of reading every page, jump directly to what you need."
+            },
+            {
+              "question": "What is a Composite Index?",
+              "answer": "A Composite Index is an index on multiple columns. The column order matters — the index is most effective when queries filter by columns in the same order.",
+              "codeExample": "CREATE INDEX idx_dept_salary\nON employees(department, salary);\n\n-- ✅ Uses index (left-most prefix)\nSELECT * FROM employees WHERE department = 'IT';\n\n-- ✅ Uses index (both columns)\nSELECT * FROM employees WHERE department = 'IT' AND salary > 50000;\n\n-- ❌ May not use index efficiently\nSELECT * FROM employees WHERE salary > 50000;",
+              "simpleExample": "A phone book indexed by (last_name, first_name) — searching by last name is fast, searching only by first name is not."
+            },
+            {
+              "question": "When should you NOT create an Index?",
+              "answer": "Indexes should be avoided on small tables, columns with very few unique values (low cardinality), columns that are frequently updated, and temporary or staging tables.",
+              "codeExample": "-- ❌ Bad index: low cardinality\nCREATE INDEX idx_gender ON employees(gender);\n\n-- ✅ Good index: high cardinality, frequently searched\nCREATE INDEX idx_email ON employees(email);",
+              "simpleExample": "Indexing a column with only 'M' or 'F' values is like adding a table of contents to a two-page book."
+            },
+            {
+              "question": "What is the performance tradeoff of Indexes?",
+              "answer": "Indexes speed up SELECT queries but slow down INSERT, UPDATE, and DELETE because the index must also be updated. They also consume additional storage space.",
+              "simpleExample": "More indexes = faster reads but slower writes. Choose wisely based on your workload."
+            }
+          ]
+        },
+        "Views": {
+          "icon": "👁️",
+          "questions": [
+            {
+              "question": "What is a View in SQL?",
+              "answer": "A View is a virtual table defined by a SQL query. It does not store data itself but provides a reusable and simplified way to access complex query results.",
+              "codeExample": "CREATE VIEW active_employees AS\nSELECT id, name, department, salary\nFROM employees\nWHERE status = 'active';",
+              "simpleExample": "A view is like a saved filter — instead of writing the same complex query repeatedly, save it as a view."
+            },
+            {
+              "question": "What is the difference between a View and a Table?",
+              "answer": "A Table stores actual data on disk. A View is a saved query that dynamically fetches data from underlying tables when accessed. Views do not store data themselves.",
+              "simpleExample": "A table is like a physical notebook. A view is like a window looking into the notebook with a filter applied."
+            },
+            {
+              "question": "Can you UPDATE data through a View?",
+              "answer": "Simple views on a single table without aggregations, DISTINCT, or GROUP BY are usually updatable. Complex views with JOINs or aggregations are generally read-only.",
+              "codeExample": "-- ✅ Updatable (simple single-table view)\nUPDATE active_employees SET salary = 80000 WHERE id = 1;\n\n-- ❌ Not updatable (has JOIN or aggregate)\n-- Views with GROUP BY, DISTINCT, or multiple tables cannot be updated directly.",
+              "simpleExample": "Simple views let you edit through the window. Complex views are view-only."
+            },
+            {
+              "question": "What is a Materialized View?",
+              "answer": "A Materialized View stores the query result physically on disk. It is faster to read than a regular view but must be refreshed to reflect updated data.",
+              "codeExample": "-- PostgreSQL syntax\nCREATE MATERIALIZED VIEW sales_summary AS\nSELECT product_id, SUM(amount) AS total\nFROM orders\nGROUP BY product_id;\n\n-- Refresh when needed\nREFRESH MATERIALIZED VIEW sales_summary;",
+              "simpleExample": "A materialized view is like a printed report — fast to read but needs reprinting when data changes."
+            }
+          ]
+        },
+        "Set Operations": {
+          "icon": "➕",
+          "questions": [
+            {
+              "question": "What is UNION in SQL?",
+              "answer": "UNION combines results from two or more SELECT statements and removes duplicate rows. Both queries must have the same number and compatible types of columns.",
+              "codeExample": "SELECT name FROM employees\nUNION\nSELECT name FROM contractors;",
+              "simpleExample": "UNION merges two lists and removes duplicates — like combining two guest lists into one."
+            },
+            {
+              "question": "What is the difference between UNION and UNION ALL?",
+              "answer": "UNION removes duplicates from the combined result (slower). UNION ALL keeps all rows including duplicates (faster).",
+              "codeExample": "-- Removes duplicates\nSELECT city FROM customers UNION SELECT city FROM suppliers;\n\n-- Keeps all rows\nSELECT city FROM customers UNION ALL SELECT city FROM suppliers;",
+              "simpleExample": "UNION = unique guests only. UNION ALL = everyone, even if their name appears twice."
+            },
+            {
+              "question": "What are INTERSECT and EXCEPT?",
+              "answer": "INTERSECT returns rows common to both queries. EXCEPT returns rows from the first query that are not in the second.",
+              "codeExample": "-- Common customers in both tables\nSELECT email FROM online_customers\nINTERSECT\nSELECT email FROM store_customers;\n\n-- Online customers who never visited the store\nSELECT email FROM online_customers\nEXCEPT\nSELECT email FROM store_customers;",
+              "simpleExample": "INTERSECT = people on both lists. EXCEPT = people only on the first list."
             }
           ]
         }
@@ -50,26 +358,168 @@
     },
     "2-3": {
       "modules": {
-        "Advanced": {
-          "icon": "🎓",
+        "Window Functions": {
+          "icon": "🪟",
           "questions": [
             {
-              "question": "What are Window Functions in SQL and how are they different from GROUP BY?",
-              "answer": "Window functions perform calculations across a set of rows related to the current row WITHOUT collapsing rows like GROUP BY does. You get the aggregate result PLUS the original row. Syntax: FUNCTION() OVER (PARTITION BY col ORDER BY col). Key window functions: ROW_NUMBER, RANK/DENSE_RANK, LAG/LEAD, FIRST_VALUE/LAST_VALUE, and running totals with SUM() OVER.",
-              "codeExample": "-- ROW_NUMBER — unique rank per partition\nSELECT \n    SalesRep, Region, Amount,\n    ROW_NUMBER() OVER (PARTITION BY Region ORDER BY Amount DESC) AS RankInRegion\nFROM Sales;\n\n-- Running total per region\nSELECT \n    SalesRep, Region, Amount,\n    SUM(Amount) OVER (PARTITION BY Region ORDER BY OrderDate\n        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS RunningTotal\nFROM Sales;\n\n-- LAG — compare current row to previous row\nSELECT OrderDate, TotalRevenue,\n    LAG(TotalRevenue, 1) OVER (ORDER BY OrderDate) AS PrevDayRevenue,\n    TotalRevenue - LAG(TotalRevenue, 1) OVER (ORDER BY OrderDate) AS Change\nFROM DailySales;",
-              "simpleExample": "GROUP BY collapses all the sales rows for each region into ONE summary row. Window functions keep every individual row but ADD a new column showing the aggregate for the group. LAG is like saying 'what was last month's value?' without a self-join."
+              "question": "What is a Window Function?",
+              "answer": "A Window Function performs calculations across a set of rows related to the current row without collapsing them into a single output row like GROUP BY does.",
+              "codeExample": "SELECT\n  name,\n  department,\n  salary,\n  AVG(salary) OVER (PARTITION BY department) AS dept_avg\nFROM employees;",
+              "simpleExample": "Show each employee alongside their department's average salary — without losing individual rows."
             },
             {
-              "question": "What are Common Table Expressions (CTEs) and when should you use them?",
-              "answer": "A CTE (WITH clause) is a named temporary result set that you can reference in a SELECT, INSERT, UPDATE, or DELETE statement. CTEs improve readability by breaking complex queries into named, reusable steps. Recursive CTEs can traverse hierarchical data (org charts, trees).",
-              "codeExample": "-- Simple CTE — improves readability\nWITH ActiveCustomers AS (\n    SELECT Id, Name, Email\n    FROM Customers\n    WHERE IsActive = 1\n),\nHighValueOrders AS (\n    SELECT CustomerId, SUM(Amount) AS TotalSpend\n    FROM Orders\n    GROUP BY CustomerId\n    HAVING SUM(Amount) > 1000\n)\nSELECT ac.Name, hvo.TotalSpend\nFROM ActiveCustomers ac\nINNER JOIN HighValueOrders hvo ON ac.Id = hvo.CustomerId;\n\n-- Recursive CTE — traverse org hierarchy\nWITH OrgHierarchy AS (\n    SELECT Id, Name, ManagerId, 0 AS Level\n    FROM Employees WHERE ManagerId IS NULL\n    UNION ALL\n    SELECT e.Id, e.Name, e.ManagerId, oh.Level + 1\n    FROM Employees e\n    INNER JOIN OrgHierarchy oh ON e.ManagerId = oh.Id\n)\nSELECT REPLICATE('  ', Level) + Name, Level FROM OrgHierarchy;",
-              "simpleExample": "A CTE is like defining a named formula in a spreadsheet before using it. Instead of copy-pasting the same complex subquery 3 times, define it once and reference the name. Recursive CTEs are for tree structures — start with the root (CEO), keep joining employees to their manager."
+              "question": "What is the difference between GROUP BY and Window Functions?",
+              "answer": "GROUP BY collapses rows into summary groups. Window Functions retain all individual rows while adding calculated columns over a defined window.",
+              "codeExample": "-- GROUP BY: 1 row per department\nSELECT department, AVG(salary) FROM employees GROUP BY department;\n\n-- Window: all rows preserved + department avg\nSELECT name, department, salary,\n  AVG(salary) OVER (PARTITION BY department) AS dept_avg\nFROM employees;",
+              "simpleExample": "GROUP BY gives a class average. Window Functions give each student's mark alongside the class average."
             },
             {
-              "question": "How does query optimization work and what tools can you use?",
-              "answer": "Query optimization involves writing queries that the engine can execute efficiently. Key tools: EXPLAIN/EXPLAIN ANALYZE (PostgreSQL), SET STATISTICS IO ON + Execution Plan (SQL Server). Look for: Table Scan (bad — add index), Index Seek (good). Key practices: avoid SELECT *, use appropriate indexes, avoid functions on indexed columns in WHERE, avoid N+1 query patterns.",
-              "codeExample": "-- SQL Server: check execution plan and I/O stats\nSET STATISTICS IO ON;\n\n-- ❌ Function on indexed column breaks the index\nSELECT * FROM Orders WHERE YEAR(OrderDate) = 2024;\n-- ✅ Rewrite to use index on OrderDate\nSELECT * FROM Orders\nWHERE OrderDate >= '2024-01-01' AND OrderDate < '2025-01-01';\n\n-- ❌ N+1 problem — 1 query for orders + 1 per order for customer\n-- SELECT * FROM Orders; then SELECT * FROM Customers WHERE Id = @id\n\n-- ✅ Use JOIN instead\nSELECT o.Id, o.Amount, c.Name\nFROM Orders o\nINNER JOIN Customers c ON o.CustomerId = c.Id;",
-              "simpleExample": "SELECT * is like packing your entire house for a weekend trip — bring only what you need. A function in WHERE (YEAR(OrderDate) = 2024) is like arriving at the GPS destination then walking 2km — rewrite so the GPS (index) gets you to the exact spot. N+1 queries are 1000 trips to the grocery store for 1 item each."
+              "question": "What is ROW_NUMBER()?",
+              "answer": "ROW_NUMBER() assigns a unique sequential number to each row within a partition. No ties — each row gets a distinct number.",
+              "codeExample": "SELECT\n  name, department, salary,\n  ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn\nFROM employees;",
+              "simpleExample": "Numbering employees 1, 2, 3 within each department by salary."
+            },
+            {
+              "question": "What is the difference between ROW_NUMBER, RANK, and DENSE_RANK?",
+              "answer": "ROW_NUMBER gives unique sequential numbers (no ties). RANK skips numbers after ties. DENSE_RANK does not skip numbers after ties.",
+              "codeExample": "-- Salaries: 90K, 80K, 80K, 70K\n-- ROW_NUMBER: 1, 2, 3, 4\n-- RANK:       1, 2, 2, 4   (skips 3)\n-- DENSE_RANK: 1, 2, 2, 3   (no skip)",
+              "simpleExample": "RANK is like Olympic medals with gaps (Gold, Silver, Silver, no Bronze, 4th). DENSE_RANK has no gaps."
+            },
+            {
+              "question": "What is PARTITION BY in Window Functions?",
+              "answer": "PARTITION BY divides rows into groups (partitions) and the window function is applied independently within each partition.",
+              "codeExample": "SELECT name, department, salary,\n  RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_rank\nFROM employees;",
+              "simpleExample": "PARTITION BY department = rank employees separately within each department."
+            },
+            {
+              "question": "What are LAG() and LEAD()?",
+              "answer": "LAG() accesses the previous row's value and LEAD() accesses the next row's value within the window, useful for comparisons and trend analysis.",
+              "codeExample": "SELECT\n  month,\n  revenue,\n  LAG(revenue) OVER (ORDER BY month) AS prev_month,\n  revenue - LAG(revenue) OVER (ORDER BY month) AS growth\nFROM monthly_sales;",
+              "simpleExample": "LAG looks backward (last month's revenue). LEAD looks forward (next month's revenue)."
+            },
+            {
+              "question": "What are NTILE() and cumulative SUM()?",
+              "answer": "NTILE(n) divides rows into n roughly equal buckets. Cumulative SUM uses ROWS BETWEEN to calculate running totals.",
+              "codeExample": "-- Divide into quartiles\nSELECT name, salary,\n  NTILE(4) OVER (ORDER BY salary DESC) AS quartile\nFROM employees;\n\n-- Running total\nSELECT order_date, amount,\n  SUM(amount) OVER (ORDER BY order_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total\nFROM orders;",
+              "simpleExample": "NTILE splits into buckets (top 25%, next 25%...). Running SUM keeps a running total."
+            }
+          ]
+        },
+        "Transactions & ACID": {
+          "icon": "🏦",
+          "questions": [
+            {
+              "question": "What is a Transaction?",
+              "answer": "A Transaction is a sequence of SQL operations executed as a single unit. Either all operations succeed (COMMIT) or none of them take effect (ROLLBACK).",
+              "codeExample": "BEGIN TRANSACTION;\n\nUPDATE accounts SET balance = balance - 5000 WHERE id = 1;\nUPDATE accounts SET balance = balance + 5000 WHERE id = 2;\n\nCOMMIT;\n-- If any step fails: ROLLBACK;",
+              "simpleExample": "A bank transfer: debit one account and credit another — both must succeed or neither should."
+            },
+            {
+              "question": "What is ACID?",
+              "answer": "ACID stands for Atomicity (all or nothing), Consistency (valid state before and after), Isolation (concurrent transactions don't interfere), and Durability (committed data survives crashes).",
+              "simpleExample": "ACID guarantees that database transactions are reliable — like a bank promising your money is safe."
+            },
+            {
+              "question": "What is the difference between COMMIT and ROLLBACK?",
+              "answer": "COMMIT saves all changes made during the transaction permanently. ROLLBACK undoes all changes and restores the database to the state before the transaction started.",
+              "codeExample": "BEGIN;\nDELETE FROM orders WHERE status = 'cancelled';\n-- Oops, wrong condition!\nROLLBACK;  -- Nothing was deleted\n\nBEGIN;\nDELETE FROM orders WHERE status = 'cancelled' AND year = 2022;\nCOMMIT;  -- Changes saved permanently",
+              "simpleExample": "COMMIT = save your game. ROLLBACK = reload last save."
+            },
+            {
+              "question": "What is a SAVEPOINT?",
+              "answer": "A SAVEPOINT creates a named checkpoint within a transaction. You can ROLLBACK to a specific savepoint without undoing the entire transaction.",
+              "codeExample": "BEGIN;\nINSERT INTO orders VALUES (1, 'Laptop', 75000);\nSAVEPOINT sp1;\nINSERT INTO orders VALUES (2, 'Mouse', 500);\n-- Undo only the mouse insert\nROLLBACK TO sp1;\nCOMMIT; -- Only laptop order is saved",
+              "simpleExample": "A savepoint is like a checkpoint in a video game — go back to it without restarting the entire level."
+            },
+            {
+              "question": "What are Isolation Levels?",
+              "answer": "Isolation Levels define how much one transaction can see changes made by other concurrent transactions. Levels from lowest to highest: READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, SERIALIZABLE.",
+              "codeExample": "SET TRANSACTION ISOLATION LEVEL READ COMMITTED;\n\n-- READ UNCOMMITTED: can see uncommitted changes (dirty reads)\n-- READ COMMITTED: sees only committed data\n-- REPEATABLE READ: consistent reads within transaction\n-- SERIALIZABLE: full isolation, slowest",
+              "simpleExample": "Higher isolation = more protection from other transactions but slower performance."
+            }
+          ]
+        },
+        "Stored Procedures & Functions": {
+          "icon": "⚙️",
+          "questions": [
+            {
+              "question": "What is a Stored Procedure?",
+              "answer": "A Stored Procedure is a reusable set of SQL statements stored on the database server. It can accept parameters, perform logic, and execute multiple operations.",
+              "codeExample": "CREATE PROCEDURE get_employees_by_dept(\n  IN dept_name VARCHAR(50)\n)\nBEGIN\n  SELECT * FROM employees WHERE department = dept_name;\nEND;\n\n-- Call it\nCALL get_employees_by_dept('Engineering');",
+              "simpleExample": "A stored procedure is like a saved recipe — call it by name instead of writing the steps every time."
+            },
+            {
+              "question": "What is the difference between a Stored Procedure and a Function?",
+              "answer": "Functions must return a value and can be used in SELECT statements. Procedures may or may not return values and are called with CALL/EXEC. Functions cannot modify data in most databases.",
+              "codeExample": "-- Function: returns a value, usable in SELECT\nCREATE FUNCTION get_tax(price DECIMAL)\nRETURNS DECIMAL\nBEGIN\n  RETURN price * 0.18;\nEND;\n\nSELECT name, price, get_tax(price) AS tax FROM products;\n\n-- Procedure: performs actions\nCALL update_employee_status(101, 'inactive');",
+              "simpleExample": "Function = calculator (give input, get output). Procedure = a task (do these steps)."
+            },
+            {
+              "question": "What is a Trigger?",
+              "answer": "A Trigger is a stored procedure that automatically executes when a specific event (INSERT, UPDATE, DELETE) occurs on a table.",
+              "codeExample": "CREATE TRIGGER log_salary_change\nAFTER UPDATE ON employees\nFOR EACH ROW\nBEGIN\n  IF OLD.salary <> NEW.salary THEN\n    INSERT INTO salary_audit (emp_id, old_salary, new_salary, changed_at)\n    VALUES (NEW.id, OLD.salary, NEW.salary, NOW());\n  END IF;\nEND;",
+              "simpleExample": "A trigger is like a security camera — it automatically records activity when something happens."
+            },
+            {
+              "question": "When should you avoid Triggers?",
+              "answer": "Triggers add hidden logic that makes debugging difficult. They can cause cascading effects, reduce performance on high-volume tables, and make data flow hard to trace.",
+              "simpleExample": "Too many triggers = too many hidden actions happening behind the scenes."
+            }
+          ]
+        },
+        "Normalization": {
+          "icon": "🧩",
+          "questions": [
+            {
+              "question": "What is Normalization?",
+              "answer": "Normalization is the process of organizing database tables to reduce data redundancy and improve data integrity by dividing large tables into smaller related ones.",
+              "simpleExample": "Instead of storing department name in every employee row, create a separate departments table and link them."
+            },
+            {
+              "question": "What is First Normal Form (1NF)?",
+              "answer": "1NF requires that each column contains only atomic (single) values — no lists, arrays, or repeating groups in a single cell.",
+              "codeExample": "-- ❌ Violates 1NF (multi-valued column)\n| name  | phones                  |\n| Manav | 9876543210, 9123456789  |\n\n-- ✅ 1NF compliant\n| name  | phone      |\n| Manav | 9876543210 |\n| Manav | 9123456789 |",
+              "simpleExample": "Each cell should hold one value only — no comma-separated lists."
+            },
+            {
+              "question": "What is Second Normal Form (2NF)?",
+              "answer": "2NF requires 1NF compliance plus every non-key column must depend on the entire primary key, not just part of it. This applies to composite primary keys.",
+              "codeExample": "-- ❌ Violates 2NF (student_name depends only on student_id, not course_id)\n| student_id | course_id | student_name | grade |\n\n-- ✅ 2NF: separate tables\nStudents: | student_id | student_name |\nGrades:   | student_id | course_id | grade |",
+              "simpleExample": "Every column must depend on the whole key, not just part of it."
+            },
+            {
+              "question": "What is Third Normal Form (3NF)?",
+              "answer": "3NF requires 2NF compliance plus no transitive dependencies — non-key columns should not depend on other non-key columns.",
+              "codeExample": "-- ❌ Violates 3NF (dept_name depends on dept_id, not on emp_id)\n| emp_id | emp_name | dept_id | dept_name |\n\n-- ✅ 3NF: separate tables\nEmployees:   | emp_id | emp_name | dept_id |\nDepartments: | dept_id | dept_name |",
+              "simpleExample": "Don't store info that can be looked up from another table — store the key, not the duplicate."
+            },
+            {
+              "question": "What is Denormalization and when is it used?",
+              "answer": "Denormalization intentionally adds redundancy to improve read performance. It is used in reporting databases, dashboards, and read-heavy applications where JOIN performance is a bottleneck.",
+              "simpleExample": "Normalization = organized and clean. Denormalization = faster reads at the cost of some duplication."
+            }
+          ]
+        },
+        "Common Table Expressions": {
+          "icon": "📋",
+          "questions": [
+            {
+              "question": "What is a CTE (Common Table Expression)?",
+              "answer": "A CTE is a temporary named result set defined using WITH keyword. It exists only during the execution of the query and improves readability of complex queries.",
+              "codeExample": "WITH high_earners AS (\n  SELECT name, salary, department\n  FROM employees\n  WHERE salary > 100000\n)\nSELECT department, COUNT(*) AS count\nFROM high_earners\nGROUP BY department;",
+              "simpleExample": "A CTE is like giving a temporary name to a subquery so you can reference it easily."
+            },
+            {
+              "question": "What is the difference between a CTE and a Subquery?",
+              "answer": "CTEs are named, reusable within the same query, and more readable. Subqueries are inline and can be harder to read in complex queries. CTEs can also be recursive.",
+              "codeExample": "-- CTE: readable, reusable\nWITH dept_stats AS (\n  SELECT department, AVG(salary) AS avg_sal FROM employees GROUP BY department\n)\nSELECT * FROM dept_stats WHERE avg_sal > 70000;\n\n-- Subquery: inline\nSELECT * FROM (\n  SELECT department, AVG(salary) AS avg_sal FROM employees GROUP BY department\n) t WHERE avg_sal > 70000;",
+              "simpleExample": "CTE gives the subquery a name — like saving a contact vs typing the number every time."
+            },
+            {
+              "question": "What is a Recursive CTE?",
+              "answer": "A Recursive CTE references itself to process hierarchical data like org charts, folder structures, or category trees.",
+              "codeExample": "WITH RECURSIVE org_tree AS (\n  -- Base: top-level (CEO)\n  SELECT id, name, manager_id, 1 AS level\n  FROM employees WHERE manager_id IS NULL\n\n  UNION ALL\n\n  -- Recursive: subordinates\n  SELECT e.id, e.name, e.manager_id, t.level + 1\n  FROM employees e\n  JOIN org_tree t ON e.manager_id = t.id\n)\nSELECT * FROM org_tree ORDER BY level;",
+              "simpleExample": "Traverse a tree: CEO → VPs → Directors → Managers → Engineers."
             }
           ]
         }
@@ -77,20 +527,157 @@
     },
     "4+": {
       "modules": {
-        "Expert": {
-          "icon": "🏆",
+        "Query Optimization": {
+          "icon": "🚀",
           "questions": [
             {
-              "question": "What are Transactions in SQL and what are the ACID properties?",
-              "answer": "A transaction is a sequence of operations treated as a single logical unit of work. Either all operations succeed (COMMIT) or all are undone (ROLLBACK). ACID properties: Atomicity (all-or-nothing), Consistency (data remains in a valid state), Isolation (concurrent transactions don't interfere), Durability (committed data persists even after crashes).",
-              "codeExample": "-- Bank transfer transaction\nBEGIN TRANSACTION;\n\nBEGIN TRY\n    UPDATE Accounts\n    SET Balance = Balance - 500\n    WHERE AccountId = 1 AND Balance >= 500;\n\n    IF @@ROWCOUNT = 0\n        THROW 50001, 'Insufficient funds', 1;\n\n    UPDATE Accounts\n    SET Balance = Balance + 500\n    WHERE AccountId = 2;\n\n    COMMIT TRANSACTION;\nEND TRY\nBEGIN CATCH\n    ROLLBACK TRANSACTION;\n    SELECT ERROR_MESSAGE() AS ErrorMessage;\nEND CATCH;",
-              "simpleExample": "A transaction is like an ATM transfer. You take $500 from Account A and add $500 to Account B. If the power cuts out after the debit but before the credit, you've lost $500! A transaction makes these two operations ATOMIC — either both happen or neither does."
+              "question": "What is EXPLAIN / EXPLAIN ANALYZE?",
+              "answer": "EXPLAIN shows the query execution plan — how the database intends to execute the query. EXPLAIN ANALYZE actually runs the query and shows real timing and row counts.",
+              "codeExample": "EXPLAIN SELECT * FROM employees WHERE department = 'Engineering';\n\nEXPLAIN ANALYZE\nSELECT e.name, d.name\nFROM employees e\nJOIN departments d ON e.dept_id = d.id\nWHERE e.salary > 50000;",
+              "simpleExample": "EXPLAIN is like asking for driving directions. EXPLAIN ANALYZE is driving the route and timing it."
             },
             {
-              "question": "What are Stored Procedures vs Views vs Functions in SQL?",
-              "answer": "Views are named queries — a virtual table that encapsulates a SELECT. They simplify complex queries but cannot have parameters. Stored Procedures are compiled SQL code blocks that can have parameters, contain DML (INSERT/UPDATE/DELETE), and include control flow. Functions (scalar or table-valued) return a value and can be used directly in SELECT queries; they cannot have side effects.",
-              "codeExample": "-- VIEW — simplified named query\nCREATE VIEW vw_ActiveCustomerOrders AS\nSELECT c.Name, COUNT(o.Id) AS OrderCount, SUM(o.Amount) AS TotalSpend\nFROM Customers c\nINNER JOIN Orders o ON c.Id = o.CustomerId\nWHERE c.IsActive = 1\nGROUP BY c.Id, c.Name;\n\n-- STORED PROCEDURE — parameterized, can do DML\nCREATE PROCEDURE usp_ProcessRefund\n    @OrderId INT, @Reason NVARCHAR(500)\nAS BEGIN\n    BEGIN TRANSACTION;\n    UPDATE Orders SET Status = 'Refunded' WHERE Id = @OrderId;\n    INSERT INTO RefundLog (OrderId, Reason) VALUES (@OrderId, @Reason);\n    COMMIT;\nEND;\n\n-- TABLE-VALUED FUNCTION\nCREATE FUNCTION fn_GetOrdersByDateRange(@Start DATE, @End DATE)\nRETURNS TABLE AS\nRETURN SELECT * FROM Orders WHERE OrderDate BETWEEN @Start AND @End;",
-              "simpleExample": "A View is a window with a permanently saved view (saved SELECT). A Stored Procedure is a script — it can do many things, accept inputs, insert/update data. A Function is a formula — it takes inputs and returns a value you can use inside another query."
+              "question": "What is a Full Table Scan and why is it slow?",
+              "answer": "A Full Table Scan reads every row in a table to find matching data. It is slow on large tables because it ignores indexes.",
+              "codeExample": "-- Full scan (no index on department)\nSELECT * FROM employees WHERE department = 'HR';\n\n-- Index scan (index exists on department)\nCREATE INDEX idx_dept ON employees(department);\nSELECT * FROM employees WHERE department = 'HR';",
+              "simpleExample": "Full scan = reading the entire book to find one chapter. Index scan = using the table of contents."
+            },
+            {
+              "question": "What causes an Index to not be used?",
+              "answer": "Indexes may be skipped when using functions on indexed columns, LIKE with leading wildcards, implicit type conversions, OR conditions without indexed columns, or when the table is too small.",
+              "codeExample": "-- ❌ Function on column: index ignored\nSELECT * FROM employees WHERE UPPER(name) = 'MANAV';\n\n-- ❌ Leading wildcard: index ignored\nSELECT * FROM employees WHERE name LIKE '%kumar';\n\n-- ✅ Trailing wildcard: index used\nSELECT * FROM employees WHERE name LIKE 'Man%';",
+              "simpleExample": "Wrapping a column in a function is like rearranging the phone book — the index becomes useless."
+            },
+            {
+              "question": "What is the N+1 Query Problem?",
+              "answer": "The N+1 problem occurs when code executes one query to get a list of N items, then runs N additional queries to fetch related data for each item instead of using a single JOIN.",
+              "codeExample": "-- ❌ N+1 Problem\nSELECT * FROM departments;  -- 1 query\n-- Then for EACH department:\nSELECT * FROM employees WHERE dept_id = ?;  -- N queries\n\n-- ✅ Single JOIN\nSELECT d.name, e.name\nFROM departments d\nJOIN employees e ON e.dept_id = d.id;  -- 1 query",
+              "simpleExample": "Instead of calling a shop 10 times for 10 items, place one order for all 10."
+            },
+            {
+              "question": "What are common query optimization techniques?",
+              "answer": "Key techniques include creating proper indexes, avoiding SELECT *, using LIMIT for large results, rewriting correlated subqueries as JOINs, using EXISTS instead of IN for large subsets, and analyzing execution plans.",
+              "codeExample": "-- ❌ Selecting all columns\nSELECT * FROM orders;\n\n-- ✅ Select only needed columns\nSELECT order_id, amount, status FROM orders;\n\n-- ❌ Correlated subquery (runs per row)\nSELECT name FROM employees e\nWHERE salary > (SELECT AVG(salary) FROM employees WHERE dept_id = e.dept_id);\n\n-- ✅ Rewritten with JOIN\nSELECT e.name\nFROM employees e\nJOIN (SELECT dept_id, AVG(salary) AS avg_sal FROM employees GROUP BY dept_id) d\n  ON e.dept_id = d.dept_id\nWHERE e.salary > d.avg_sal;",
+              "simpleExample": "Don't ask for everything when you only need three columns."
+            }
+          ]
+        },
+        "Advanced Joins & Patterns": {
+          "icon": "🧠",
+          "questions": [
+            {
+              "question": "How do you find duplicate rows?",
+              "answer": "Use GROUP BY with HAVING COUNT(*) > 1 to find values that appear more than once.",
+              "codeExample": "SELECT email, COUNT(*) AS cnt\nFROM users\nGROUP BY email\nHAVING COUNT(*) > 1;",
+              "simpleExample": "Find all email addresses that appear more than once in the users table."
+            },
+            {
+              "question": "How do you delete duplicate rows keeping only one?",
+              "answer": "Use a CTE with ROW_NUMBER() to identify duplicates and delete rows where the row number is greater than 1.",
+              "codeExample": "WITH cte AS (\n  SELECT *,\n    ROW_NUMBER() OVER (PARTITION BY email ORDER BY id) AS rn\n  FROM users\n)\nDELETE FROM users\nWHERE id IN (SELECT id FROM cte WHERE rn > 1);",
+              "simpleExample": "Number each duplicate, keep the first, delete the rest."
+            },
+            {
+              "question": "How do you find the Nth highest salary?",
+              "answer": "Use DENSE_RANK() or a subquery with DISTINCT and LIMIT/OFFSET.",
+              "codeExample": "-- Using DENSE_RANK\nWITH ranked AS (\n  SELECT name, salary,\n    DENSE_RANK() OVER (ORDER BY salary DESC) AS rnk\n  FROM employees\n)\nSELECT name, salary FROM ranked WHERE rnk = 3;\n\n-- Using LIMIT OFFSET (3rd highest)\nSELECT DISTINCT salary\nFROM employees\nORDER BY salary DESC\nLIMIT 1 OFFSET 2;",
+              "simpleExample": "Rank all salaries and pick the one at position N."
+            },
+            {
+              "question": "How do you find employees with no orders (anti-join)?",
+              "answer": "Use LEFT JOIN with IS NULL check, or NOT EXISTS to find rows in one table that have no matching rows in another.",
+              "codeExample": "-- LEFT JOIN + IS NULL (anti-join)\nSELECT c.name\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nWHERE o.customer_id IS NULL;\n\n-- NOT EXISTS\nSELECT c.name\nFROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o WHERE o.customer_id = c.id\n);",
+              "simpleExample": "Find customers who have never placed an order."
+            },
+            {
+              "question": "How do you pivot rows into columns?",
+              "answer": "Use conditional aggregation with CASE WHEN to transform row values into columns. Some databases support PIVOT syntax natively.",
+              "codeExample": "SELECT\n  employee_id,\n  SUM(CASE WHEN month = 'Jan' THEN sales ELSE 0 END) AS jan_sales,\n  SUM(CASE WHEN month = 'Feb' THEN sales ELSE 0 END) AS feb_sales,\n  SUM(CASE WHEN month = 'Mar' THEN sales ELSE 0 END) AS mar_sales\nFROM monthly_sales\nGROUP BY employee_id;",
+              "simpleExample": "Turn rows (Jan, Feb, Mar as data) into columns (Jan_sales, Feb_sales, Mar_sales)."
+            }
+          ]
+        },
+        "Locking & Concurrency": {
+          "icon": "🔐",
+          "questions": [
+            {
+              "question": "What is a Deadlock?",
+              "answer": "A Deadlock occurs when two or more transactions are waiting for each other to release locks, creating a circular dependency where none can proceed.",
+              "codeExample": "-- Transaction A:\nUPDATE accounts SET balance = balance - 100 WHERE id = 1; -- locks row 1\nUPDATE accounts SET balance = balance + 100 WHERE id = 2; -- waits for row 2\n\n-- Transaction B:\nUPDATE accounts SET balance = balance - 50 WHERE id = 2;  -- locks row 2\nUPDATE accounts SET balance = balance + 50 WHERE id = 1;  -- waits for row 1\n-- DEADLOCK!",
+              "simpleExample": "Two people at a narrow door — each waiting for the other to go first. Neither moves."
+            },
+            {
+              "question": "How can Deadlocks be prevented?",
+              "answer": "Common strategies include always accessing tables/rows in the same order, keeping transactions short, using appropriate isolation levels, and using lock timeouts.",
+              "codeExample": "-- Strategy: always lock rows in ascending ID order\n-- Transaction A:\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;\n\n-- Transaction B (same order):\nUPDATE accounts SET balance = balance + 50 WHERE id = 1;\nUPDATE accounts SET balance = balance - 50 WHERE id = 2;",
+              "simpleExample": "If everyone enters the narrow door from the same side, no deadlock."
+            },
+            {
+              "question": "What is Optimistic vs Pessimistic Locking?",
+              "answer": "Pessimistic Locking locks the row/table when reading to prevent others from modifying it. Optimistic Locking allows reads without locks and checks for conflicts before writing using a version column.",
+              "codeExample": "-- Pessimistic: lock rows during read\nSELECT * FROM products WHERE id = 1 FOR UPDATE;\n\n-- Optimistic: version-based conflict detection\nUPDATE products\nSET name = 'New Name', version = version + 1\nWHERE id = 1 AND version = 5;\n-- If 0 rows affected → someone else updated first",
+              "simpleExample": "Pessimistic = lock the hotel room while you decide. Optimistic = book now, check if someone else booked first."
+            },
+            {
+              "question": "What is a Dirty Read, Non-Repeatable Read, and Phantom Read?",
+              "answer": "Dirty Read: reading uncommitted data from another transaction. Non-Repeatable Read: same query returns different values because another transaction modified the data. Phantom Read: same query returns different rows because another transaction inserted or deleted rows.",
+              "codeExample": "-- Dirty Read (READ UNCOMMITTED)\n-- T1: UPDATE salary SET amount = 100000 (not committed)\n-- T2: SELECT amount → sees 100000 (uncommitted!)\n-- T1: ROLLBACK → the 100000 was never real\n\n-- Phantom Read (REPEATABLE READ)\n-- T1: SELECT COUNT(*) FROM employees WHERE dept='IT' → 5\n-- T2: INSERT INTO employees (dept) VALUES ('IT') → COMMIT\n-- T1: SELECT COUNT(*) → 6 (new phantom row appeared!)",
+              "simpleExample": "Dirty Read = reading a draft that gets deleted. Phantom Read = counting guests but someone new walks in."
+            }
+          ]
+        },
+        "Partitioning & Sharding": {
+          "icon": "🗂️",
+          "questions": [
+            {
+              "question": "What is Table Partitioning?",
+              "answer": "Partitioning splits a large table into smaller physical pieces (partitions) while keeping it as a single logical table. Queries automatically target only relevant partitions, improving performance.",
+              "codeExample": "-- Range partitioning by date (PostgreSQL)\nCREATE TABLE orders (\n  id SERIAL,\n  order_date DATE,\n  amount DECIMAL(10,2)\n) PARTITION BY RANGE (order_date);\n\nCREATE TABLE orders_2024 PARTITION OF orders\n  FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');\nCREATE TABLE orders_2025 PARTITION OF orders\n  FOR VALUES FROM ('2025-01-01') TO ('2026-01-01');",
+              "simpleExample": "Instead of one massive filing cabinet, split files by year — each year in its own drawer."
+            },
+            {
+              "question": "What are the types of Partitioning?",
+              "answer": "Range Partitioning splits by value ranges (dates, IDs). List Partitioning splits by specific values (regions, categories). Hash Partitioning distributes rows evenly using a hash function.",
+              "codeExample": "-- Range: by date\nPARTITION BY RANGE (order_date)\n\n-- List: by region\nPARTITION BY LIST (region)\n-- partition_india FOR VALUES IN ('IN')\n-- partition_us FOR VALUES IN ('US')\n\n-- Hash: distribute evenly\nPARTITION BY HASH (customer_id)",
+              "simpleExample": "Range = by date. List = by category. Hash = evenly spread."
+            },
+            {
+              "question": "What is the difference between Partitioning and Sharding?",
+              "answer": "Partitioning splits a table within a single database server. Sharding distributes data across multiple database servers. Sharding adds horizontal scalability but increases complexity.",
+              "simpleExample": "Partitioning = organizing drawers in one cabinet. Sharding = spreading drawers across different buildings."
+            }
+          ]
+        },
+        "Database Design Patterns": {
+          "icon": "🏗️",
+          "questions": [
+            {
+              "question": "What is the difference between OLTP and OLAP?",
+              "answer": "OLTP (Online Transaction Processing) handles day-to-day transactional operations with normalized tables. OLAP (Online Analytical Processing) handles reporting and analytics with denormalized, aggregated data.",
+              "codeExample": "-- OLTP: Normalized, fast writes\nINSERT INTO orders (customer_id, product_id, qty) VALUES (1, 5, 2);\n\n-- OLAP: Denormalized, fast reads\nSELECT region, product_category, SUM(revenue)\nFROM sales_fact\nJOIN date_dim ON sales_fact.date_id = date_dim.id\nWHERE date_dim.year = 2024\nGROUP BY region, product_category;",
+              "simpleExample": "OLTP = cashier processing transactions. OLAP = manager analyzing monthly sales reports."
+            },
+            {
+              "question": "What is a Star Schema?",
+              "answer": "A Star Schema is a data warehouse design with a central fact table (transactions/events) surrounded by dimension tables (descriptive data like time, product, location).",
+              "codeExample": "-- Fact table: sales_fact\n| sale_id | date_id | product_id | store_id | amount |\n\n-- Dimension tables:\n-- dim_date:    | date_id | year | quarter | month |\n-- dim_product: | product_id | name | category |\n-- dim_store:   | store_id | city | region |",
+              "simpleExample": "The fact table is the center of a star, with dimension tables radiating outward like star points."
+            },
+            {
+              "question": "What is Database Replication?",
+              "answer": "Replication copies data from one database server (primary) to one or more servers (replicas). It improves read performance, provides failover capability, and enables geographic distribution.",
+              "simpleExample": "Primary handles writes. Replicas handle reads. If primary fails, a replica takes over."
+            },
+            {
+              "question": "What is the CAP Theorem?",
+              "answer": "CAP Theorem states that a distributed database can guarantee only two of three properties: Consistency (all nodes see the same data), Availability (every request gets a response), and Partition Tolerance (system works despite network failures).",
+              "simpleExample": "You can pick only 2 out of 3: consistent data, always available, or network-failure tolerant."
+            },
+            {
+              "question": "What is an Execution Plan and how do you read it?",
+              "answer": "An Execution Plan shows the step-by-step operations the database performs to execute a query. Key elements to look for: Seq Scan (full table scan), Index Scan (using an index), Nested Loop / Hash Join / Merge Join (join strategies), and estimated vs actual rows.",
+              "codeExample": "EXPLAIN ANALYZE\nSELECT e.name, d.name\nFROM employees e\nJOIN departments d ON e.dept_id = d.id\nWHERE e.salary > 80000;\n\n-- Look for:\n-- → Seq Scan (bad on large tables)\n-- → Index Scan (good)\n-- → actual rows vs estimated rows (large mismatch = stale stats)",
+              "simpleExample": "Reading an execution plan is like reading a GPS route — look for traffic jams (Seq Scans) and find shortcuts (Index Scans)."
             }
           ]
         }
