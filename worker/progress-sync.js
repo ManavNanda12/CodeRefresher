@@ -7,6 +7,8 @@
 // We merge it into per-module + overall stats so the dashboard heatmap and
 // weak-spots can render. Math is identical to the client (progress.service.ts).
 
+import { updateLeaderboard } from "./leaderboard.js";
+
 const SCORES_MAX = 20;   // keep last N scores per module
 const HISTORY_MAX = 30;  // keep last N rounds
 
@@ -61,6 +63,7 @@ export async function handleProgressSync(request, env) {
   userData.lastActive = new Date().toISOString();
 
   await env.PROGRESS_KV.put(`user:${userId}`, JSON.stringify(userData));
+  await updateLeaderboard(env, userId, userData);
 
   return Response.json({ success: true });
 }

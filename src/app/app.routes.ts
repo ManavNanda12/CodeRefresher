@@ -25,5 +25,9 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
   },
+  {
+    path: 'leaderboard',
+    loadComponent: () => import('./pages/leaderboard/leaderboard').then(m => m.LeaderboardComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

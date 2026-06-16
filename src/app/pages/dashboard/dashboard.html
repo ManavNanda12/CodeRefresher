@@ -17,7 +17,7 @@
       <div class="stage-head">
         <span class="kicker">📊 Your Dashboard</span>
         <h1 class="dash-title">
-          @if (user.email()) { {{ user.email() }} } @else { Welcome back }
+          @if (user.name()) { {{ user.name() }} } @else if (user.email()) { {{ user.email() }} } @else { Welcome back }
         </h1>
         <p class="dash-tagline">
           @if (refreshing()) { Syncing your latest progress… }
@@ -239,6 +239,20 @@
         <div class="settings-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
           <button class="settings-close" type="button" (click)="closeSettings()" aria-label="Close">✕</button>
           <h2 class="settings-title">⚙️ Settings</h2>
+
+          <div class="settings-block">
+            <span class="settings-label">Display name</span>
+            <div class="settings-row">
+              <input class="settings-input" type="text" autocomplete="nickname" maxlength="24"
+                     [value]="nameDraft()"
+                     (input)="onNameDraft($any($event.target).value)"
+                     placeholder="Shown on the leaderboard" />
+              <button class="settings-btn" type="button" [disabled]="savingName()" (click)="saveName()">
+                {{ savingName() ? 'Saving…' : 'Save' }}
+              </button>
+            </div>
+            @if (nameSaved()) { <p class="settings-ok">✓ Name updated</p> }
+          </div>
 
           <div class="settings-block">
             <span class="settings-label">Email</span>

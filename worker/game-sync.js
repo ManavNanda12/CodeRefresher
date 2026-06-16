@@ -9,6 +9,8 @@
 //   if (p === "/api/game/sync" && method === "POST") return withCors(await handleGameSync(request, env));
 //   if (p === "/api/game/load" && method === "GET")  return withCors(await handleGameLoad(url, env));
 
+import { updateLeaderboard } from "./leaderboard.js";
+
 export async function handleGameSync(request, env) {
   const { userId, game } = await request.json();
   if (!userId || !game) {
@@ -22,6 +24,7 @@ export async function handleGameSync(request, env) {
   // Server-side merge too, so two devices writing close together don't clobber.
   rec.game = mergeGame(rec.game, game);
   await env.PROGRESS_KV.put(`user:${userId}`, JSON.stringify(rec));
+  await updateLeaderboard(env, userId, rec);
 
   return Response.json({ success: true, game: rec.game });
 }

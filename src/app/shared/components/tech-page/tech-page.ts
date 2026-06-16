@@ -7,6 +7,7 @@ import { DataService } from '../../../core/services/data.service';
 import { RefresherItem, RefresherCategory } from '../../../core/models/refresher-item.model';
 import { GameService, questionId } from '../../../core/services/game.service';
 import { FocusRoundService } from '../../../core/services/focus.service';
+import { SeoService } from '../../../core/services/seo.service';
 import { CardComponent, Tier } from '../card/card';
 
 interface TechMeta {
@@ -49,6 +50,7 @@ export class TechPageComponent {
   private dataService = inject(DataService);
   private game = inject(GameService);
   private focusRound = inject(FocusRoundService);
+  private seo = inject(SeoService);
   private router = inject(Router);
 
   activeTab    = signal<string>('0-1');
@@ -126,6 +128,7 @@ export class TechPageComponent {
         if (firstTab) this.activeTab.set(firstTab);
         this.loading.set(false);
         this.game.ping(); // browsing keeps the daily streak alive
+        this.emitStructuredData();
       },
       error: () => this.loading.set(false),
     });
@@ -228,5 +231,34 @@ export class TechPageComponent {
 
   cardDelay(index: number): string {
     return `${Math.min(index * 50, 400)}ms`;
+  }
+
+  /** FAQPage + BreadcrumbList structured data so Google reads these as Q&A pages. */
+  private emitStructuredData(): void {
+    const qa: { q: string; a: string }[] = [];
+    for (const cat of Object.values(this.allData())) {
+      for (const mod of Object.values(cat.modules)) {
+        for (const item of mod.questions) qa.push({ q: item.question, a: item.answer });
+      }
+    }
+    if (qa.length) {
+      this.seo.setJsonLd('faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: qa.slice(0, 50).map(x => ({
+          '@type': 'Question',
+          name: x.q,
+          acceptedAnswer: { '@type': 'Answer', text: x.a },
+        })),
+      });
+    }
+    this.seo.setJsonLd('breadcrumb', {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: this.seo.siteUrl('/') },
+        { '@type': 'ListItem', position: 2, name: this.title(), item: this.seo.siteUrl('/' + this.tech()) },
+      ],
+    });
   }
 }

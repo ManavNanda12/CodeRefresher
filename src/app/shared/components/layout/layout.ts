@@ -32,8 +32,9 @@ export class LayoutComponent {
     { path: '/angular', label: 'Angular', icon: '⚡' },
     { path: '/dotnet',  label: '.NET',    icon: '🔷' },
     { path: '/sql',     label: 'SQL',     icon: '🗄️' },
-    { path: '/test-me',   label: 'Test Me',   icon: '🧪' },
-    { path: '/dashboard', label: 'Dashboard', icon: '📊', badge: 'NEW' },
+    { path: '/test-me',     label: 'Test Me',     icon: '🧪' },
+    { path: '/dashboard',   label: 'Dashboard',   icon: '📊' },
+    { path: '/leaderboard', label: 'Leaderboard', icon: '🏆', badge: 'NEW' },
   ];
 
   toggleSidebar(): void {

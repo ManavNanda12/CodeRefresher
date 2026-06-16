@@ -81,6 +81,9 @@ export class DashboardComponent {
 
   // ── settings panel ─────────────────────────────────────────
   settingsOpen = signal(false);
+  nameDraft = signal('');
+  savingName = signal(false);
+  nameSaved = signal(false);
   emailDraft = signal('');
   emailError = signal('');
   savingEmail = signal(false);
@@ -238,11 +241,26 @@ export class DashboardComponent {
 
   // ── settings panel ─────────────────────────────────────────
   openSettings(): void {
+    this.nameDraft.set(this.user.name() ?? '');
+    this.nameSaved.set(false);
     this.emailDraft.set(this.user.email() ?? '');
     this.emailError.set('');
     this.emailSaved.set(false);
     this.confirmingDelete.set(false);
     this.settingsOpen.set(true);
+  }
+
+  onNameDraft(value: string): void {
+    this.nameDraft.set(value);
+    if (this.nameSaved()) this.nameSaved.set(false);
+  }
+
+  saveName(): void {
+    this.savingName.set(true);
+    this.user.setName(this.nameDraft().trim()).subscribe(() => {
+      this.savingName.set(false);
+      this.nameSaved.set(true);
+    });
   }
 
   closeSettings(): void {

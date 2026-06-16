@@ -27,6 +27,7 @@ export class OnboardingModalComponent {
 
   open = signal(false);
   mode = signal<Mode>('email');
+  nameInput = signal('');
   emailInput = signal('');
   codeInput = signal('');
   error = signal('');
@@ -71,7 +72,7 @@ export class OnboardingModalComponent {
       return;
     }
     this.submitting.set(true);
-    this.user.register(email).subscribe(() => {
+    this.user.register(email, this.nameInput().trim()).subscribe(() => {
       this.submitting.set(false);
       this.close();
     });

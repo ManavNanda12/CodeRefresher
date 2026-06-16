@@ -28,6 +28,7 @@ export async function handleRecover(request, env) {
     success: true,
     userId,
     email: userData.email || "",
+    name: userData.name || "",
     progress: {
       arenas: userData.arenas || {},
       recentRounds: userData.recentRounds || [],

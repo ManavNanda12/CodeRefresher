@@ -9,6 +9,7 @@ export const WORKER_BASE = 'https://coderefresherworker.manavnanda2404.workers.d
 
 const COOKIE_UID = 'cr_uid';
 const COOKIE_EMAIL = 'cr_email';
+const COOKIE_NAME = 'cr_name';
 const COOKIE_ONBOARDED = 'cr_onboarded';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
@@ -21,6 +22,7 @@ export interface RecoverResponse {
   success: boolean;
   userId: string;
   email: string;
+  name?: string;
   /** Full progress blob the client mirrors into localStorage. */
   progress?: unknown;
 }
@@ -39,6 +41,7 @@ export class UserService {
 
   readonly userId = signal<string | null>(null);
   readonly email = signal<string | null>(null);
+  readonly name = signal<string | null>(null);
   readonly onboarded = signal(false);
 
   /** Short, shareable secret derived from the UUID — used to restore on another device. */
@@ -61,24 +64,33 @@ export class UserService {
    * the profile in KV. Resolves to the recovery code even if the network call fails
    * (identity is still usable locally and will sync on the next round).
    */
-  register(email: string): Observable<RegisterResponse> {
+  register(email: string, name?: string): Observable<RegisterResponse> {
     const id = this.userId() ?? generateUuid();
     const clean = email.trim();
+    const cleanName = (name ?? this.name() ?? '').trim().slice(0, 24);
 
     this.userId.set(id);
     this.email.set(clean);
+    if (cleanName) this.name.set(cleanName);
     this.onboarded.set(true);
-    this.writeCookies(id, clean);
+    this.writeCookies(id, clean, this.name());
 
     const code = recoveryCodeFor(id);
+    const body: Record<string, string> = { userId: id, email: clean };
+    if (this.name()) body['name'] = this.name() as string;
     return this.http
-      .post<RegisterResponse>(`${WORKER_BASE}/api/user/register`, { userId: id, email: clean })
+      .post<RegisterResponse>(`${WORKER_BASE}/api/user/register`, body)
       .pipe(catchError(() => of({ success: false, recoveryCode: code })));
   }
 
   /** Update the email on the existing profile (reuses register's upsert by userId). */
   changeEmail(email: string): Observable<RegisterResponse> {
     return this.register(email);
+  }
+
+  /** Set/update the public display name (used on the leaderboard). */
+  setName(name: string): Observable<RegisterResponse> {
+    return this.register(this.email() ?? '', name);
   }
 
   /**
@@ -116,8 +128,9 @@ export class UserService {
           if (res?.success && res.userId) {
             this.userId.set(res.userId);
             this.email.set(res.email ?? null);
+            this.name.set(res.name ?? null);
             this.onboarded.set(true);
-            this.writeCookies(res.userId, res.email ?? '');
+            this.writeCookies(res.userId, res.email ?? '', res.name ?? null);
           }
           return res;
         }),
@@ -129,9 +142,11 @@ export class UserService {
   signOut(): void {
     this.userId.set(null);
     this.email.set(null);
+    this.name.set(null);
     this.onboarded.set(false);
     this.deleteCookie(COOKIE_UID);
     this.deleteCookie(COOKIE_EMAIL);
+    this.deleteCookie(COOKIE_NAME);
     this.deleteCookie(COOKIE_ONBOARDED);
   }
 
@@ -142,12 +157,15 @@ export class UserService {
     if (uid) this.userId.set(uid);
     const email = this.readCookie(COOKIE_EMAIL);
     if (email) this.email.set(decodeURIComponent(email));
+    const name = this.readCookie(COOKIE_NAME);
+    if (name) this.name.set(decodeURIComponent(name));
     this.onboarded.set(this.readCookie(COOKIE_ONBOARDED) === 'true');
   }
 
-  private writeCookies(uid: string, email: string): void {
+  private writeCookies(uid: string, email: string, name?: string | null): void {
     this.setCookie(COOKIE_UID, uid);
     this.setCookie(COOKIE_EMAIL, encodeURIComponent(email));
+    if (name) this.setCookie(COOKIE_NAME, encodeURIComponent(name));
     this.setCookie(COOKIE_ONBOARDED, 'true');
   }
 

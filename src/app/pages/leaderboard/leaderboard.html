@@ -1,0 +1,100 @@
+<section class="arena">
+  <div class="arena-bg-fx">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="lb-inner">
+    <header class="stage-head">
+      <span class="kicker">🏆 Arena Leaderboard</span>
+      <h1 class="lb-title">Top of the <span class="grad">Arena</span></h1>
+      <p class="lb-sub">The sharpest in the arena. Climb by mastering questions and acing Test Me rounds.</p>
+    </header>
+
+    <!-- Board tabs -->
+    <div class="lb-tabs" role="tablist">
+      @for (b of boards; track b.key) {
+        <button class="lb-tab" role="tab"
+                [class.active]="activeBoard() === b.key"
+                (click)="setBoard(b.key)">
+          <span>{{ b.icon }}</span> {{ b.label }}
+        </button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="lb-loading"><div class="spinner"></div><p>Loading the rankings…</p></div>
+    } @else if (entries().length === 0) {
+      <div class="lb-empty">
+        <span class="lb-empty-emoji">🏟️</span>
+        <h2>The arena's empty… for now</h2>
+        <p>Be the first on the board — take a Test Me round and start earning XP.</p>
+        <a routerLink="/test-me" class="lb-cta">🧪 Enter the Arena →</a>
+      </div>
+    } @else {
+      <!-- Podium (top 3) -->
+      <div class="podium">
+        <!-- 2nd -->
+        @if (podium()[1]; as e) {
+          <div class="ped ped-2" [class.me]="isMe(e)">
+            <div class="ped-medal">🥈</div>
+            <div class="ped-avatar">{{ e.name.charAt(0) }}</div>
+            <span class="ped-name">{{ e.name }}@if (isMe(e)) { <b class="you">YOU</b> }</span>
+            <span class="ped-lvl">Lv {{ e.level }}</span>
+            <div class="ped-stand"><span class="ped-rank">2</span><span class="ped-val">{{ fmt(e.value) }}</span></div>
+          </div>
+        }
+        <!-- 1st -->
+        @if (podium()[0]; as e) {
+          <div class="ped ped-1" [class.me]="isMe(e)">
+            <div class="ped-crown">👑</div>
+            <div class="ped-medal">🥇</div>
+            <div class="ped-avatar">{{ e.name.charAt(0) }}</div>
+            <span class="ped-name">{{ e.name }}@if (isMe(e)) { <b class="you">YOU</b> }</span>
+            <span class="ped-lvl">Lv {{ e.level }}</span>
+            <div class="ped-stand"><span class="ped-rank">1</span><span class="ped-val">{{ fmt(e.value) }}</span></div>
+          </div>
+        }
+        <!-- 3rd -->
+        @if (podium()[2]; as e) {
+          <div class="ped ped-3" [class.me]="isMe(e)">
+            <div class="ped-medal">🥉</div>
+            <div class="ped-avatar">{{ e.name.charAt(0) }}</div>
+            <span class="ped-name">{{ e.name }}@if (isMe(e)) { <b class="you">YOU</b> }</span>
+            <span class="ped-lvl">Lv {{ e.level }}</span>
+            <div class="ped-stand"><span class="ped-rank">3</span><span class="ped-val">{{ fmt(e.value) }}</span></div>
+          </div>
+        }
+      </div>
+
+      <!-- Ranks 4+ -->
+      @if (rest().length) {
+        <div class="lb-list">
+          @for (e of rest(); track e.id; let i = $index) {
+            <div class="lb-row" [class.me]="isMe(e)" [style.--row-delay]="(i * 45) + 'ms'">
+              <span class="lb-pos">{{ i + 4 }}</span>
+              <div class="lb-avatar">{{ e.name.charAt(0) }}</div>
+              <div class="lb-info">
+                <span class="lb-name">{{ e.name }}@if (isMe(e)) { <b class="you">YOU</b> }</span>
+                <span class="lb-lvl">Lv {{ e.level }}</span>
+              </div>
+              <div class="lb-bar-track"><div class="lb-bar-fill" [style.width.%]="barPct(e.value)"></div></div>
+              <span class="lb-val">{{ fmt(e.value) }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Your standing -->
+      <div class="lb-foot">
+        @if (myRank()) {
+          <span>You're <strong>#{{ myRank() }}</strong> on this board. Keep climbing! 🚀</span>
+        } @else {
+          <span>You're not on this board yet — <a routerLink="/test-me">take a round</a> to break in.</span>
+        }
+      </div>
+    }
+  </div>
+</section>

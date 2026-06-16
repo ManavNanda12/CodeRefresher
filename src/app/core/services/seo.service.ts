@@ -26,6 +26,9 @@ export class SeoService {
     const fullTitle = `${config.title} | ${this.SITE_NAME}`;
     const url       = `${this.BASE_URL}${this.router.url}`;
 
+    // Drop any page-specific structured data from the previous route.
+    this.clearDynamicJsonLd();
+
     this.titleSvc.setTitle(fullTitle);
 
     this.meta.updateTag({ name: 'description',  content: config.description });
@@ -52,6 +55,32 @@ export class SeoService {
     this.meta.updateTag({ name: 'twitter:image',       content: this.OG_IMAGE });
 
     this.setCanonical(url);
+  }
+
+  /** Absolute URL for a path on the canonical domain. */
+  siteUrl(path = ''): string {
+    return `${this.BASE_URL}${path}`;
+  }
+
+  /**
+   * Add/replace a page-specific JSON-LD block (e.g. FAQPage, BreadcrumbList).
+   * Tagged with `data-seo` so it's cleared on the next navigation.
+   */
+  setJsonLd(id: string, data: unknown): void {
+    const selector = `script[data-seo="${id}"]`;
+    let el = this.doc.querySelector<HTMLScriptElement>(selector);
+    if (!el) {
+      el = this.doc.createElement('script');
+      el.type = 'application/ld+json';
+      el.setAttribute('data-seo', id);
+      this.doc.head.appendChild(el);
+    }
+    // Escape "<" so an answer containing "</script>" can't break out of the tag.
+    el.textContent = JSON.stringify(data).replace(/</g, '\\u003c');
+  }
+
+  private clearDynamicJsonLd(): void {
+    this.doc.querySelectorAll('script[data-seo]').forEach(el => el.remove());
   }
 
   private setCanonical(url: string): void {
