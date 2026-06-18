@@ -808,3 +808,204 @@
   .q-nav .btn-accent, .q-nav .btn-submit { flex: 1; }
   .rq-verdict { display: none; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   Anti-cheat: tab-leave warning banner (inside the quiz)
+   ════════════════════════════════════════════════════════════ */
+.cheat-warn {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1.1rem;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #fcd34d;
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.38);
+  animation: cheatPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.cheat-warn strong { color: #fef08a; }
+@keyframes cheatPop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Leave-guard dialog (in-app navigation)
+   ════════════════════════════════════════════════════════════ */
+.leave-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(4,8,18,0.72);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  animation: ldFade 0.25s ease both;
+}
+@keyframes ldFade { from { opacity: 0; } to { opacity: 1; } }
+
+.leave-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  padding: 2.5rem 2rem 2rem;
+  border-radius: 22px;
+  background: linear-gradient(160deg, #131c33 0%, #0b1224 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 40px 90px rgba(0,0,0,0.6);
+  overflow: hidden;
+  animation: ldRise 0.42s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes ldRise {
+  from { opacity: 0; transform: translateY(26px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.ld-glow {
+  position: absolute;
+  top: -90px; left: 50%;
+  width: 260px; height: 260px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(251,191,36,0.5), transparent 70%);
+  filter: blur(50px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* pulsing warning icon */
+.ld-icon {
+  position: relative;
+  width: 76px; height: 76px;
+  margin: 0 auto 1.4rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.ld-icon-core {
+  position: relative;
+  z-index: 1;
+  font-size: 2.2rem;
+  filter: drop-shadow(0 4px 12px rgba(251,191,36,0.5));
+  animation: ldBob 2.4s ease-in-out infinite;
+}
+@keyframes ldBob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-4px) rotate(4deg); }
+}
+.ld-icon-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(251,191,36,0.5);
+  animation: ldRipple 2.2s ease-out infinite;
+}
+.ld-icon-ring.d2 { animation-delay: 1.1s; }
+@keyframes ldRipple {
+  0%   { transform: scale(0.7); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.ld-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #f8fafc;
+  margin: 0 0 0.65rem;
+}
+.ld-body {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #b4c0d6;
+  margin: 0 0 1.1rem;
+}
+.ld-body strong { color: #fca5a5; }
+
+.ld-cheat {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #fcd34d;
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.34);
+  border-radius: 11px;
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 1.4rem;
+}
+
+.ld-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.ld-actions .btn-submit { width: 100%; padding: 0.9rem; font-size: 0.92rem; }
+.ld-actions .btn-soft { width: 100%; padding: 0.8rem; }
+
+.btn-soft.danger { color: #fca5a5; }
+.btn-soft.danger:hover:not(:disabled) {
+  background: rgba(239,68,68,0.14);
+  border-color: rgba(239,68,68,0.4);
+  color: #fecaca;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .leave-overlay, .leave-dialog, .cheat-warn,
+  .ld-icon-core, .ld-icon-ring { animation: none; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   Optional code editor inside a quiz question
+   ════════════════════════════════════════════════════════════ */
+.code-zone { margin-top: 1rem; }
+
+.code-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  background: rgba(99,102,241,0.1);
+  border: 1px dashed rgba(99,102,241,0.4);
+  padding: 0.5rem 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.code-toggle:hover {
+  background: rgba(99,102,241,0.18);
+  border-color: rgba(99,102,241,0.6);
+  color: #c7d2fe;
+}
+.code-toggle.open {
+  color: #fca5a5;
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.4);
+  border-style: solid;
+}
+.ct-icon { font-size: 0.95rem; line-height: 1; }
+.ct-lang {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #e2e8f0;
+  background: rgba(255,255,255,0.1);
+  border-radius: 100px;
+  padding: 0.15rem 0.55rem;
+}
+
+.code-wrap {
+  margin-top: 0.75rem;
+  animation: codeSlide 0.35s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes codeSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.code-hint {
+  margin: 0.55rem 0 0;
+  font-size: 0.76rem;
+  color: #64748b;
+}
+.code-hint strong { color: #94a3b8; }

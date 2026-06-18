@@ -144,6 +144,12 @@
             <p class="focus-targets">Targeting: <span>{{ focusTargets().join(' · ') }}</span></p>
           }
 
+          @if (tabLeaves() > 0) {
+            <div class="cheat-warn mb-2" role="status">
+              {{getTabLeaveMessage(tabLeaves())}}
+            </div>
+          }
+
           <!-- Question card (re-keyed per index → re-triggers slide-in) -->
           @if (current(); as q) {
             <div class="q-card" [attr.data-key]="currentIndex()">
@@ -158,6 +164,28 @@
                         [value]="currentAnswer()"
                         (input)="updateAnswer($any($event.target).value)"
                         placeholder="Answer as if you're in the interview room. Type what you genuinely remember…"></textarea>
+
+              <!-- Optional code example (language follows the chosen arena) -->
+              <div class="code-zone">
+                <button class="code-toggle" type="button" (click)="toggleEditor()"
+                        [class.open]="currentCodeOpen()">
+                  <span class="ct-icon">{{ currentCodeOpen() ? '✕' : '＋' }}</span>
+                  {{ currentCodeOpen() ? 'Hide code example' : 'Add a code example' }}
+                  <span class="ct-lang">{{ editorLangLabel() }}</span>
+                </button>
+
+                @if (currentCodeOpen()) {
+                  <div class="code-wrap">
+                    <app-code-editor
+                      [language]="editorLanguage()"
+                      [value]="currentCode()"
+                      (valueChange)="updateCode($event)" />
+                    <p class="code-hint">
+                      💡 Optional — your code is sent to the AI <strong>together with your answer</strong>. Tab to indent.
+                    </p>
+                  </div>
+                }
+              </div>
 
               <div class="q-foot">
                 <div class="q-meta-left">
@@ -329,6 +357,12 @@
                         <span class="fb-label">Your answer</span>
                         <p>{{ (answers()[i] ?? '').trim() || '— (skipped)' }}</p>
                       </div>
+                      @if ((codes()[i] ?? '').trim()) {
+                        <div class="fb-block your">
+                          <span class="fb-label">💻 Your code</span>
+                          <pre class="code"><code>{{ codes()[i] }}</code></pre>
+                        </div>
+                      }
                       <div class="fb-block ok">
                         <span class="fb-label">✓ Strengths</span>
                         <p>{{ r.strengths }}</p>
@@ -371,4 +405,42 @@
       }
     }
   </div>
+
+  <!-- ════════ LEAVE-GUARD DIALOG (in-app navigation) ════════ -->
+  @if (showLeaveDialog()) {
+    <div class="leave-overlay" (click)="stayInQuiz()">
+      <div class="leave-dialog" role="alertdialog" aria-modal="true"
+           aria-labelledby="leave-title" (click)="$event.stopPropagation()">
+        <div class="ld-glow" aria-hidden="true"></div>
+
+        <div class="ld-icon" aria-hidden="true">
+          <span class="ld-icon-core">⚠️</span>
+          <span class="ld-icon-ring"></span>
+          <span class="ld-icon-ring d2"></span>
+        </div>
+
+        <h3 class="ld-title" id="leave-title">Leave the arena?</h3>
+        <p class="ld-body">
+          Your round is still live. If you leave now your answers are
+          <strong>wiped</strong> and this attempt won't be scored.
+        </p>
+
+        @if (tabLeaves() > 0) {
+          <p class="ld-cheat">
+            👀 We noticed you switched away {{ tabLeaves() }}
+            time{{ tabLeaves() === 1 ? '' : 's' }} — keep it solo to make the score count.
+          </p>
+        }
+
+        <div class="ld-actions">
+          <button class="btn-submit" type="button" (click)="stayInQuiz()" autofocus>
+            ⚡ Stay &amp; finish
+          </button>
+          <button class="btn-soft danger" type="button" (click)="confirmLeave()">
+            Leave anyway
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

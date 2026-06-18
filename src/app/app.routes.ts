@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { CanDeactivateGuard } from './core/guards/can-deactivate-guard';
 
 export const routes: Routes = [
   {
@@ -19,7 +20,8 @@ export const routes: Routes = [
   },
   {
     path: 'test-me',
-    loadComponent: () => import('./pages/test-me/test-me').then(m => m.TestMeComponent)
+    loadComponent: () => import('./pages/test-me/test-me').then(m => m.TestMeComponent),
+    canDeactivate: [CanDeactivateGuard]
   },
   {
     path: 'dashboard',

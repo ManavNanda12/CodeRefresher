@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, computed, inject, signal, PLATFORM_ID, HostListener } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
@@ -7,6 +7,7 @@ import { ProgressService, RoundRecord } from '../../core/services/progress.servi
 import { GameService } from '../../core/services/game.service';
 import { FocusRoundService } from '../../core/services/focus.service';
 import { RefresherData, RefresherItem } from '../../core/models/refresher-item.model';
+import { CodeEditorComponent, EditorLang } from '../../shared/components/code-editor/code-editor';
 import {
   TestMeService,
   EvalResult,
@@ -73,10 +74,10 @@ const ARENAS: Arena[] = [
 ];
 
 const LEVEL_META: Record<string, { label: string; badge: string; difficulty: number }> = {
-  '0-1': { label: 'Rookie',   badge: '0–1 yr',  difficulty: 1 },
-  '1-2': { label: 'Builder',  badge: '1–2 yrs', difficulty: 2 },
-  '2-3': { label: 'Senior',   badge: '2–3 yrs', difficulty: 3 },
-  '4+':  { label: 'Architect', badge: '4+ yrs', difficulty: 4 },
+  '0-1': { label: 'Rookie', badge: '0–1 yr', difficulty: 1 },
+  '1-2': { label: 'Builder', badge: '1–2 yrs', difficulty: 2 },
+  '2-3': { label: 'Senior', badge: '2–3 yrs', difficulty: 3 },
+  '4+': { label: 'Architect', badge: '4+ yrs', difficulty: 4 },
 };
 
 const QUIZ_SIZE = 5;
@@ -87,7 +88,7 @@ const HISTORY_MAX = 6;
 
 @Component({
   selector: 'app-test-me',
-  imports: [RouterLink],
+  imports: [RouterLink, CodeEditorComponent],
   templateUrl: './test-me.html',
   styleUrl: './test-me.css',
 })
@@ -122,6 +123,10 @@ export class TestMeComponent {
 
   questions = signal<QuizQuestion[]>([]);
   answers = signal<string[]>([]);
+  /** Optional per-question code snippet, folded into the answer sent to the AI. */
+  codes = signal<string[]>([]);
+  /** Question indices where the user explicitly opened the code editor. */
+  editorOpen = signal<Set<number>>(new Set());
   currentIndex = signal(0);
 
   results = signal<EvalResult[]>([]);
@@ -146,7 +151,36 @@ export class TestMeComponent {
 
   readonly current = computed<QuizQuestion | null>(() => this.questions()[this.currentIndex()] ?? null);
   readonly total = computed(() => this.questions().length);
-  readonly answeredCount = computed(() => this.answers().filter(a => a.trim().length > 0).length);
+  // A question counts as answered if it has prose OR a code snippet.
+  readonly answeredCount = computed(() =>
+    this.questions().reduce((n, _q, i) => {
+      const hasText = (this.answers()[i] ?? '').trim().length > 0;
+      const hasCode = (this.codes()[i] ?? '').trim().length > 0;
+      return n + (hasText || hasCode ? 1 : 0);
+    }, 0),
+  );
+
+  // ── Code editor (per question, language-aware) ─────────────
+  /** Editor language follows the chosen arena so syntax highlighting matches the stack. */
+  readonly editorLanguage = computed<EditorLang>(() => {
+    switch (this.selectedArena()?.id) {
+      case 'sql': return 'sql';
+      case 'dotnet': return 'csharp';
+      default: return 'typescript';
+    }
+  });
+  readonly editorLangLabel = computed(() => {
+    switch (this.editorLanguage()) {
+      case 'sql': return 'SQL';
+      case 'csharp': return 'C#';
+      default: return 'TypeScript';
+    }
+  });
+  readonly currentCode = computed(() => this.codes()[this.currentIndex()] ?? '');
+  /** Show the editor if the user opened it for this question, or it already holds code. */
+  readonly currentCodeOpen = computed(
+    () => this.editorOpen().has(this.currentIndex()) || this.currentCode().trim().length > 0,
+  );
   readonly progressPct = computed(() => {
     const t = this.total();
     return t ? Math.round(((this.currentIndex() + 1) / t) * 100) : 0;
@@ -213,8 +247,11 @@ export class TestMeComponent {
     if (!data) return;
     this.questions.set(this.buildQuiz(data, level.key));
     this.answers.set(this.questions().map(() => ''));
+    this.codes.set(this.questions().map(() => ''));
+    this.editorOpen.set(new Set());
     this.results.set([]);
     this.currentIndex.set(0);
+    this.tabLeaves.set(0);
     this.startedAt = this.now();
     this.stage.set('quiz');
   }
@@ -264,9 +301,12 @@ export class TestMeComponent {
     this.selectedLevel.set({ key: 'focus', label: 'Focus Round', badge: 'adaptive', count: questions.length, difficulty: 0 });
     this.questions.set(questions);
     this.answers.set(questions.map(() => ''));
+    this.codes.set(questions.map(() => ''));
+    this.editorOpen.set(new Set());
     this.results.set([]);
     this.expanded.set(new Set());
     this.currentIndex.set(0);
+    this.tabLeaves.set(0);
     this.startedAt = this.now();
     this.stage.set('quiz');
   }
@@ -343,6 +383,28 @@ export class TestMeComponent {
     });
   }
 
+  updateCode(value: string): void {
+    this.codes.update(arr => {
+      const next = [...arr];
+      next[this.currentIndex()] = value;
+      return next;
+    });
+  }
+
+  /** Reveal/hide the code editor for the current question (kept per-index). */
+  toggleEditor(): void {
+    const idx = this.currentIndex();
+    this.editorOpen.update(set => {
+      const next = new Set(set);
+      if (next.has(idx) && this.currentCode().trim().length === 0) {
+        next.delete(idx); // only collapse when there's no code to lose
+      } else {
+        next.add(idx);
+      }
+      return next;
+    });
+  }
+
   goTo(index: number): void {
     if (index < 0 || index >= this.total()) return;
     this.currentIndex.set(index);
@@ -356,6 +418,21 @@ export class TestMeComponent {
     if (this.currentIndex() > 0) this.currentIndex.update(i => i - 1);
   }
 
+  /**
+   * Merge each question's code snippet into its prose answer as a fenced block so the
+   * AI evaluator (worker contract unchanged) grades both together. Empty code is a no-op.
+   */
+  private answersWithCode(): string[] {
+    const lang = this.editorLanguage();
+    return this.questions().map((_q, i) => {
+      const answer = (this.answers()[i] ?? '').trim();
+      const code = (this.codes()[i] ?? '').trim();
+      if (!code) return answer;
+      const block = '```' + lang + '\n' + code + '\n```';
+      return answer ? `${answer}\n\n${block}` : block;
+    });
+  }
+
   // ── Stage 4: evaluate ──────────────────────────────────────
   submitQuiz(): void {
     const elapsedMs = this.now() - this.startedAt;
@@ -365,7 +442,7 @@ export class TestMeComponent {
     this.evalProgress.set(0);
     this.runProgressAnimation();
 
-    this.testMe.evaluateBatch(this.questions(), this.answers()).subscribe({
+    this.testMe.evaluateBatch(this.questions(), this.answersWithCode()).subscribe({
       next: res => {
         this.results.set(res);
         this.evalProgress.set(this.total());
@@ -440,9 +517,12 @@ export class TestMeComponent {
     }
     this.questions.set(this.buildQuiz(data, level.key));
     this.answers.set(this.questions().map(() => ''));
+    this.codes.set(this.questions().map(() => ''));
+    this.editorOpen.set(new Set());
     this.results.set([]);
     this.expanded.set(new Set());
     this.currentIndex.set(0);
+    this.tabLeaves.set(0);
     this.startedAt = this.now();
     this.stage.set('quiz');
   }
@@ -464,6 +544,8 @@ export class TestMeComponent {
     this.rawData.set(null);
     this.questions.set([]);
     this.answers.set([]);
+    this.codes.set([]);
+    this.editorOpen.set(new Set());
     this.results.set([]);
     this.expanded.set(new Set());
     this.currentIndex.set(0);
@@ -581,5 +663,81 @@ export class TestMeComponent {
     const m = Math.floor(totalSec / 60);
     const s = totalSec % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+
+  // ── Leave-guard + anti-cheat ───────────────────────────────
+  /** A round is "live" while answering or grading — leaving now loses work / invites cheating. */
+  readonly quizInProgress = computed(() => this.stage() === 'quiz' || this.stage() === 'evaluating');
+
+  /** Controls the animated "Leave the arena?" dialog (in-app navigation only). */
+  showLeaveDialog = signal(false);
+  private leaveResolver: ((proceed: boolean) => void) | null = null;
+
+  /** How many times the user switched away from this tab mid-round (look-up attempts). */
+  tabLeaves = signal(0);
+
+  /**
+   * Router CanDeactivate hook. While a round is live we suspend the navigation and
+   * show our own animated dialog, resolving the returned promise with the choice.
+   * (Refresh / tab-close can't use a custom dialog — see beforeUnloadHandler.)
+   */
+  canDeactivate(): boolean | Promise<boolean> {
+    if (!this.quizInProgress() || !isPlatformBrowser(this.platformId)) return true;
+    this.showLeaveDialog.set(true);
+    return new Promise<boolean>(resolve => (this.leaveResolver = resolve));
+  }
+
+  /** "Leave anyway" — abandon the round and let the navigation through. */
+  confirmLeave(): void {
+    this.showLeaveDialog.set(false);
+    this.leaveResolver?.(true);
+    this.leaveResolver = null;
+  }
+
+  /** "Stay & finish" — cancel the navigation, keep the round intact. */
+  stayInQuiz(): void {
+    this.showLeaveDialog.set(false);
+    this.leaveResolver?.(false);
+    this.leaveResolver = null;
+  }
+
+  /** Native browser warning for refresh / tab-close / external links — cannot be styled. */
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnloadHandler(event: BeforeUnloadEvent): void {
+    if (this.quizInProgress() && isPlatformBrowser(this.platformId)) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
+
+  /** Anti-cheat: flag every time the tab is hidden (switching to another site/window) mid-round. */
+  @HostListener('document:visibilitychange')
+  onVisibilityChange(): void {
+    if (this.quizInProgress() && isPlatformBrowser(this.platformId) && document.hidden) {
+      this.tabLeaves.update(n => n + 1);
+    }
+  }
+
+  /** Message to display when the user attempts to leave the page mid-round. */
+  getTabLeaveMessage(count: number): string {
+    const messages = [
+      "👀 First tab switch already? The test just started...",
+      "🤨 Came back quick... checking notes already?",
+      "📚 3 times? That textbook must be getting attention.",
+      "😏 We’re starting to feel ignored here.",
+      "🚨 5 tab switches... confidence level dropping.",
+      "🕵️ Interesting strategy... very interesting.",
+      "💀 At this point, Google knows the answers better than you.",
+      "📸 We’ve noticed a pattern developing here...",
+      "🤖 The tab counter is working harder than you right now.",
+      "☠️ Double digits soon? This is becoming a side quest."
+    ];
+
+    if (count <= messages.length) {
+      return messages[count - 1];
+    }
+
+    return `🚔 You left ${count} times... honestly, just trust yourself at this point.`;
   }
 }
