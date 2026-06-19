@@ -1,211 +1,363 @@
-/* ════════════════════════════════════════════════════════
-   LEVEL-UP CRATE — crate-opening reward moment
-   ════════════════════════════════════════════════════════ */
-.lvl-backdrop {
+/* ════════════════════════════════════════════
+   LEVEL-UP OVERLAY
+   ViewEncapsulation.None — all classes lu- prefixed.
+   The whole overlay mounts at once (keyed @for) and the
+   choreography is driven purely by CSS animation-delays
+   on a single timeline from mount — matching the standalone,
+   so there's no mid-animation DOM insertion / dead beat.
+   Themed to the arena palette via the --lu-* vars below.
+   ════════════════════════════════════════════ */
+
+.lu-backdrop {
+  /* arena accent system — indigo → purple, cool navy surfaces */
+  --lu-accent:      #c084fc;             /* primary highlight (purple)  */
+  --lu-accent-2:    #818cf8;             /* secondary highlight (indigo) */
+  --lu-accent-deep: #6366f1;             /* deep indigo (gradient start) */
+  --lu-grad:        linear-gradient(90deg, #6366f1, #c084fc);
+  --lu-surface:     #0a1124;             /* card body (deep navy)        */
+  --lu-glow:        rgba(192, 132, 252, 0.5);
+  --lu-glow-soft:   rgba(129, 140, 248, 0.32);
+  --lu-ink:         #f1f5f9;             /* primary text                 */
+  --lu-ink-dim:     rgba(203, 213, 225, 0.45);
+  --lu-line:        rgba(148, 163, 184, 0.16);
+
   position: fixed; inset: 0; z-index: 2000;
-  background: radial-gradient(circle at center, rgba(20,10,40,0.85), rgba(7,13,28,0.94));
-  backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center; padding: 1.5rem;
-  animation: lvlFade 0.3s ease both;
+  /* faint indigo vignette so the sides read as "arena" depth, not flat black */
+  background:
+    radial-gradient(circle at 50% 42%, rgba(99,102,241,0.16), transparent 58%),
+    rgba(7, 13, 28, 0.78);
+  backdrop-filter: blur(7px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  animation: luFadeIn 250ms ease-out both;
 }
-@keyframes lvlFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes luFadeIn { from { opacity:0 } }
 
-.lvl-card {
-  position: relative; width: 100%; max-width: 380px; text-align: center;
-  padding: 2.5rem 2rem 2rem;
-  animation: lvlRise 0.5s cubic-bezier(0.16,1,0.3,1) both;
+/* ── Card ───────────────────────────────────── */
+.lu-card {
+  position: relative; width: 100%; max-width: 420px;
+  background: var(--lu-surface);
+  border: 1px solid var(--lu-line);
+  border-radius: 10px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.65);
+  overflow: hidden;
+  padding-bottom: 36px;
+  animation: luCardIn 620ms cubic-bezier(.2,.9,.25,1.4) 120ms both;
 }
-@keyframes lvlRise { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-
-/* Rotating light rays */
-.lvl-rays {
-  position: absolute; top: 30px; left: 50%; width: 360px; height: 360px;
-  transform: translateX(-50%); pointer-events: none; opacity: 0; transition: opacity 0.6s;
-  background: conic-gradient(from 0deg,
-    transparent 0deg, rgba(251,191,36,0.16) 12deg, transparent 24deg,
-    transparent 36deg, rgba(251,191,36,0.16) 48deg, transparent 60deg,
-    transparent 90deg, rgba(251,191,36,0.16) 102deg, transparent 114deg,
-    transparent 180deg, rgba(251,191,36,0.16) 192deg, transparent 204deg,
-    transparent 270deg, rgba(251,191,36,0.16) 282deg, transparent 294deg);
-  border-radius: 50%;
-  animation: raySpin 14s linear infinite;
-}
-.lvl-card.opened .lvl-rays { opacity: 1; }
-@keyframes raySpin { to { transform: translateX(-50%) rotate(360deg); } }
-
-/* ── The crate ──────────────────────────────────────── */
-.crate { position: relative; width: 130px; height: 110px; margin: 0 auto 1.5rem; animation: crateShake 0.9s ease; }
-@keyframes crateShake {
-  0%, 100% { transform: translateX(0) rotate(0); }
-  15% { transform: translateX(-4px) rotate(-2deg); }
-  30% { transform: translateX(4px) rotate(2deg); }
-  45% { transform: translateX(-3px) rotate(-1.5deg); }
-  60% { transform: translateX(3px) rotate(1.5deg); }
-  75% { transform: translateX(-2px) rotate(-1deg); }
+@keyframes luCardIn {
+  0%   { opacity:0; transform: translateY(40px) scale(0.82) }
+  60%  { opacity:1; transform: translateY(0) scale(1.04) }
+  80%  { transform: scale(0.985) }
+  100% { opacity:1; transform: translateY(0) scale(1) }
 }
 
-.crate-glow {
-  position: absolute; inset: -30px; border-radius: 50%; opacity: 0; transition: opacity 0.5s;
-  background: radial-gradient(circle, rgba(251,191,36,0.5), transparent 65%);
+/* white flash on impact */
+.lu-card::before {
+  content:''; position:absolute; inset:0; z-index:10;
+  background: var(--lu-accent-2); mix-blend-mode:screen; pointer-events:none;
+  animation: luFlash 700ms ease-out 600ms both;
 }
-.lvl-card.opened .crate-glow { opacity: 1; animation: glowPulse 1.6s ease-in-out infinite; }
-@keyframes glowPulse { 0%,100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.12); opacity: 1; } }
+@keyframes luFlash { 0%{opacity:0} 8%{opacity:.55} 100%{opacity:0} }
 
-.crate-base {
-  position: absolute; bottom: 0; left: 9px; width: 112px; height: 72px;
-  background: linear-gradient(160deg, #c2792f, #8a4f1c);
-  border: 2px solid #5e3411; border-radius: 8px 8px 10px 10px;
-  box-shadow: inset 0 -8px 14px rgba(0,0,0,0.35);
-}
-.crate-base::after {
-  content: '⚡'; position: absolute; inset: 0; display: grid; place-items: center;
-  font-size: 1.5rem; opacity: 0; transition: opacity 0.4s 0.3s; filter: drop-shadow(0 0 8px #fcd34d);
-}
-.lvl-card.opened .crate-base::after { opacity: 1; }
-
-.crate-lid {
-  position: absolute; top: 0; left: 6px; width: 118px; height: 34px;
-  background: linear-gradient(160deg, #e0913c, #b46a24);
-  border: 2px solid #5e3411; border-radius: 9px 9px 4px 4px;
-  transform-origin: bottom center; transition: transform 0.6s cubic-bezier(0.5, -0.4, 0.4, 1.4);
-  z-index: 2;
-}
-.lvl-card.opened .crate-lid { transform: rotateX(115deg) translateY(-6px); }
-
-/* Burst particles */
-.crate-burst { position: absolute; top: 30px; left: 50%; width: 0; height: 0; }
-.burst-particle {
-  position: absolute; width: 8px; height: 8px; border-radius: 50%;
-  background: radial-gradient(circle, #fde68a, #fb923c);
-  opacity: 0; transform: translate(-50%, -50%);
-}
-.lvl-card.opened .burst-particle {
-  animation: burst 0.85s ease-out 0.25s forwards;
-  transform: rotate(calc(var(--i) * 45deg)) translateY(0);
-}
-@keyframes burst {
-  0%   { opacity: 1; transform: rotate(calc(var(--i) * 45deg)) translateY(0) scale(1); }
-  100% { opacity: 0; transform: rotate(calc(var(--i) * 45deg)) translateY(-90px) scale(0.4); }
+/* ── Top strip ──────────────────────────────── */
+.lu-strip {
+  height: 4px;
+  background: var(--lu-grad);
+  box-shadow: 0 0 20px var(--lu-glow);
 }
 
-/* ── Text + numbers ─────────────────────────────────── */
-.lvl-kicker {
-  margin: 0 0 0.75rem; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
-  color: #fcd34d;
-}
-.lvl-numbers { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1.25rem; }
-.lvl-old { font-size: 1.8rem; font-weight: 800; color: #475569; filter: blur(1px); transition: all 0.5s; }
-.lvl-arrow { color: #64748b; font-size: 1.2rem; }
-.lvl-new {
-  font-size: 3rem; font-weight: 900; line-height: 1;
-  color: #fcd34d; opacity: 0; transform: scale(0.4);
-  text-shadow: 0 0 18px rgba(251,191,36,0.7), 0 0 40px rgba(251,146,60,0.5);
-}
-.lvl-card.opened .lvl-new { animation: lvlPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.4s forwards; }
-@keyframes lvlPop { to { opacity: 1; transform: scale(1); } }
-
-.lvl-bar { height: 9px; border-radius: 100px; background: rgba(255,255,255,0.1); overflow: hidden; margin-bottom: 1.25rem; }
-.lvl-bar-fill {
-  display: block; height: 100%; width: 0; border-radius: 100px;
-  background: linear-gradient(90deg, #fbbf24, #fb923c);
-}
-.lvl-card.opened .lvl-bar-fill { animation: barFill 0.9s cubic-bezier(0.16,1,0.3,1) 0.5s forwards; }
-@keyframes barFill { to { width: 100%; } }
-
-.lvl-msg { color: #94a3b8; font-size: 0.88rem; margin: 0 0 1.5rem; line-height: 1.5; }
-.lvl-claim {
-  border: none; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 0.95rem;
-  padding: 0.85rem 2rem; border-radius: 12px; color: #1a1206;
-  background: linear-gradient(135deg, #fcd34d, #fb923c);
-  box-shadow: 0 10px 30px rgba(251,146,60,0.4); transition: transform 0.15s, box-shadow 0.2s;
-}
-.lvl-claim:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(251,146,60,0.55); }
-
-@media (prefers-reduced-motion: reduce) {
-  .crate, .crate-glow, .lvl-rays, .burst-particle { animation: none !important; }
-  .lvl-card.opened .crate-lid { transition: none; }
+/* ── Hero zone ──────────────────────────────── */
+.lu-hero {
+  position: relative; height: 280px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
 }
 
-/* ════════════════════════════════════════════════════════
+/* spinning rays */
+.lu-rays {
+  position: absolute; width: 520px; height: 520px;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(129, 140, 248, 0.14) 0deg 7deg,
+    transparent 7deg 18deg
+  );
+  animation: luRaysIn 500ms ease-out 360ms forwards,
+             luRaysSpin 18s linear 360ms infinite;
+}
+@keyframes luRaysIn { from { opacity:0; transform:scale(.3) } to { opacity:.5; transform:scale(1) } }
+@keyframes luRaysSpin { to { transform:rotate(360deg) } }
+
+/* glow */
+.lu-glow {
+  position: absolute; width: 280px; height: 280px;
+  border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(192,132,252,0.3) 0%, rgba(99,102,241,0.08) 50%, transparent 72%);
+  animation: luGlowPulse 2.4s ease-in-out 700ms infinite;
+}
+@keyframes luGlowPulse {
+  0%,100% { opacity:.8; transform:scale(1) }
+  50%     { opacity:1;  transform:scale(1.06) }
+}
+
+/* shockwave ring — one on badge pop, one on the number-land "blast" */
+.lu-shock {
+  position: absolute; width: 50px; height: 50px;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  border: 2px solid var(--lu-glow);
+  animation: luShock .9s cubic-bezier(.16,1,.3,1) 520ms forwards;
+}
+.lu-shock--late {
+  border-color: var(--lu-accent);
+  animation: luShock 1s cubic-bezier(.16,1,.3,1) 1000ms forwards;
+}
+@keyframes luShock {
+  0%   { opacity:.9; transform:scale(.3);  border-width:3px }
+  100% { opacity:0;  transform:scale(3.6); border-width:.5px }
+}
+
+/* radial burst flash behind the hex when the new number lands */
+.lu-burst {
+  position: absolute; width: 40px; height: 40px;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle,
+    rgba(192,132,252,0.95) 0%,
+    rgba(129,140,248,0.45) 35%,
+    transparent 70%);
+  animation: luBurst 720ms ease-out 1000ms forwards;
+}
+@keyframes luBurst {
+  0%   { opacity:0;   transform:scale(.2) }
+  18%  { opacity:.95; transform:scale(2) }
+  100% { opacity:0;   transform:scale(8.5) }
+}
+
+/* particles — bigger, brighter, varied; burst on number-land via --delay */
+.lu-particle {
+  position: absolute; width: 8px; height: 8px;
+  border-radius: 1px; pointer-events: none; opacity: 0;
+  background: var(--lu-accent);
+  box-shadow: 0 0 10px var(--lu-glow);
+  animation: luParticle 950ms cubic-bezier(.12,.7,.3,1) var(--delay) forwards;
+}
+.lu-particle:nth-child(3n)   { background:#a5b4fc }
+.lu-particle:nth-child(3n+2) { background:#6366f1 }
+.lu-particle:nth-child(4n)   { width:5px; height:5px }
+.lu-particle:nth-child(5n)   { width:11px; height:11px; border-radius:50% }
+@keyframes luParticle {
+  0%  { opacity:0; transform:translate(0,0) scale(.3) }
+  12% { opacity:1; transform:translate(0,0) scale(1.1) }
+  100%{ opacity:0; transform:translate(var(--px),var(--py)) scale(.6) }
+}
+
+/* eyebrow */
+.lu-eyebrow {
+  position: absolute; top: 28px; left: 0; right: 0;
+  text-align: center;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .42em; text-transform: uppercase;
+  color: var(--lu-accent);
+  animation: luEyebrow 460ms ease-out 460ms both;
+}
+@keyframes luEyebrow {
+  from { opacity:0; transform:translateY(14px); letter-spacing:.6em }
+  to   { opacity:1; transform:translateY(0);    letter-spacing:.42em }
+}
+
+/* ── Hex badge ──────────────────────────────── */
+.lu-badge {
+  position: relative; width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  animation: luBadgePop 640ms cubic-bezier(.2,.9,.25,1.5) 520ms both;
+}
+@keyframes luBadgePop {
+  0%   { opacity:0; transform:scale(.2) rotate(-12deg) }
+  55%  { opacity:1; transform:scale(1.18) rotate(4deg) }
+  72%  { transform:scale(.94) rotate(-1deg) }
+  100% { opacity:1; transform:scale(1) rotate(0) }
+}
+
+.lu-hex-outer,
+.lu-hex-inner {
+  position: absolute;
+  clip-path: polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+}
+.lu-hex-outer {
+  inset: 0;
+  background: var(--lu-grad);
+  box-shadow: 0 0 36px var(--lu-glow);
+  animation: luHexPunch 700ms ease-out 1000ms both;
+}
+@keyframes luHexPunch {
+  0%   { box-shadow: 0 0 36px var(--lu-glow); filter: brightness(1) }
+  28%  { box-shadow: 0 0 80px var(--lu-glow), 0 0 130px var(--lu-glow); filter: brightness(1.55) }
+  100% { box-shadow: 0 0 36px var(--lu-glow); filter: brightness(1) }
+}
+.lu-hex-inner {
+  inset: 7px;
+  background: var(--lu-surface);
+}
+
+/* number swap */
+.lu-num-wrap {
+  position: relative; width: 100%; height: 100%;
+  overflow: hidden; z-index: 1;
+}
+.lu-old-num, .lu-new-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Archivo Black', Impact, sans-serif;
+  font-size: 76px; line-height: 1;
+}
+.lu-old-num {
+  color: #475569;
+  animation: luOldOut 520ms cubic-bezier(.6,0,.4,1) 760ms both;
+}
+.lu-new-num {
+  color: var(--lu-accent);
+  text-shadow: 0 0 28px var(--lu-glow);
+  animation: luNewIn 640ms cubic-bezier(.2,.7,.3,1.3) 1040ms both;
+}
+@keyframes luOldOut {
+  0%  { opacity:1; transform:translateY(0) scale(1); filter:blur(0) }
+  100%{ opacity:0; transform:translateY(-46px) scale(.6); filter:blur(6px) }
+}
+@keyframes luNewIn {
+  0%  { opacity:0; transform:translateY(54px) scale(1.5); filter:blur(8px) }
+  55% { opacity:1 }
+  70% { transform:translateY(-6px) scale(1.06); filter:blur(0) }
+  100%{ opacity:1; transform:translateY(0) scale(1); filter:blur(0) }
+}
+
+/* ── Staggered sections ─────────────────────── */
+.lu-rank     { animation: luRowIn 460ms ease-out 1240ms both }
+.lu-xp       { animation: luRowIn 460ms ease-out 1380ms both }
+.lu-rewards  { animation: luRowIn 460ms ease-out 1560ms both }
+.lu-cta-wrap { animation: luRowIn 460ms ease-out 1680ms both }
+@keyframes luRowIn {
+  from { opacity:0; transform:translateY(16px) }
+  to   { opacity:1; transform:translateY(0) }
+}
+
+/* ── Rank title ─────────────────────────────── */
+.lu-rank { text-align: center; padding: 0 36px }
+.lu-rank-title {
+  font-family: 'Archivo Black', Impact, sans-serif;
+  font-size: 24px; color: var(--lu-ink); letter-spacing: -.01em;
+}
+.lu-rank-sub {
+  margin-top: 5px; font-size: 13px;
+  color: var(--lu-ink-dim);
+}
+
+/* ── XP bar ─────────────────────────────────── */
+.lu-xp { margin: 22px 36px 0 }
+.lu-xp-labels {
+  display: flex; justify-content: space-between;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--lu-ink-dim); margin-bottom: 8px;
+}
+.lu-xp-val { color: var(--lu-accent) }
+.lu-xp-track {
+  position: relative; height: 10px;
+  background: rgba(148,163,184,0.1);
+  border: 1px solid var(--lu-line);
+  border-radius: 999px; overflow: hidden;
+}
+.lu-xp-fill {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  width: 8%;
+  border-radius: 999px;
+  background: var(--lu-grad);
+  box-shadow: 0 0 12px var(--lu-glow);
+  /* fires on the same mount timeline, after the bar row reveals */
+  animation: luBarFill 1100ms cubic-bezier(.3,.7,.2,1) 1480ms both;
+}
+@keyframes luBarFill { from { width:8% } to { width: var(--lu-to,8%) } }
+
+.lu-xp-fill::after {
+  content:''; position:absolute; top:0; bottom:0; width:36%;
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);
+  animation: luShine 1.3s ease-in-out 2.3s infinite;
+}
+@keyframes luShine { 0%{transform:translateX(-120%)} 100%{transform:translateX(320%)} }
+
+/* ── Reward chips ───────────────────────────── */
+.lu-rewards {
+  display: flex; gap: 10px; padding: 20px 36px 0;
+}
+.lu-chip {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  padding: 12px 13px;
+  background: rgba(148,163,184,0.05);
+  border: 1px solid var(--lu-line);
+  border-radius: 4px;
+}
+.lu-chip-label {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--lu-ink-dim);
+}
+.lu-chip-value {
+  font-family: 'Archivo Black', Impact, sans-serif;
+  font-size: 17px; color: var(--lu-accent);
+}
+
+/* ── CTA ────────────────────────────────────── */
+.lu-cta-wrap { padding: 22px 36px 0 }
+.lu-claim {
+  width: 100%; padding: 14px;
+  border: none; border-radius: 3px;
+  background: var(--lu-grad); color: #fff;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  letter-spacing: .02em; cursor: pointer;
+  transition: box-shadow 150ms, transform 100ms;
+}
+.lu-claim:hover { box-shadow: 0 0 0 5px var(--lu-glow-soft) }
+.lu-claim:active { transform: scale(.98) }
+
+/* The full celebration plays unconditionally — it's a rare, user-triggered,
+   dismissible reward, so it intentionally ignores prefers-reduced-motion.
+   (No @media gate = no OS/DevTools setting can suppress the blast.) */
+
+/* ── Mobile ─────────────────────────────────── */
+@media (max-width:480px) {
+  .lu-card { max-width:100% }
+  .lu-hero { height:220px }
+  .lu-badge { width:130px; height:130px }
+  .lu-old-num, .lu-new-num { font-size:60px }
+  .lu-rank-title { font-size:20px }
+  .lu-xp, .lu-rewards, .lu-cta-wrap, .lu-rank { padding-left:20px; padding-right:20px }
+}
+
+/* ════════════════════════════════════════════
    ACHIEVEMENT TOAST
-   ════════════════════════════════════════════════════════ */
+   ════════════════════════════════════════════ */
 .ach-toast {
-  position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 1900;
-  display: flex; align-items: center; gap: 0.9rem; text-align: left; cursor: pointer; font-family: inherit;
-  max-width: 330px; padding: 0.9rem 1.1rem; border-radius: 14px;
-  background: linear-gradient(160deg, #141d33, #0c1124);
-  border: 1px solid rgba(251,191,36,0.4);
-  box-shadow: 0 18px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(251,191,36,0.1);
-  animation: achIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+  position:fixed; right:1.25rem; bottom:1.25rem; z-index:1900;
+  display:flex; align-items:center; gap:.85rem; text-align:left;
+  cursor:pointer; font-family:inherit;
+  max-width:320px; padding:.85rem 1rem; border-radius:8px;
+  background:#0a1124;
+  border:1px solid rgba(192,132,252,0.28);
+  box-shadow:0 16px 44px rgba(0,0,0,0.5);
+  animation: achIn .45s cubic-bezier(.16,1,.3,1) both;
 }
-@keyframes achIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes achIn { from{opacity:0;transform:translateY(18px) scale(.96)} }
 .ach-icon {
-  flex-shrink: 0; width: 44px; height: 44px; border-radius: 11px; display: grid; place-items: center; font-size: 1.4rem;
-  background: rgba(251,191,36,0.14); border: 1px solid rgba(251,191,36,0.3);
+  flex-shrink:0; width:42px; height:42px;
+  border-radius:6px; display:grid; place-items:center; font-size:1.35rem;
+  background:rgba(129,140,248,0.1); border:1px solid rgba(129,140,248,0.22);
 }
-.ach-text { display: flex; flex-direction: column; gap: 1px; }
-.ach-label { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #fcd34d; }
-.ach-name { font-size: 0.95rem; font-weight: 800; color: #f1f5f9; }
-.ach-desc { font-size: 0.78rem; color: #94a3b8; }
+.ach-text { display:flex; flex-direction:column; gap:1px }
+.ach-label { font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:#c084fc }
+.ach-name  { font-size:.92rem; font-weight:800; color:#f1f5f9 }
+.ach-desc  { font-size:.76rem; color:rgba(203,213,225,0.45) }
 
-@media (max-width: 640px) {
-  .ach-toast { left: 1rem; right: 1rem; max-width: none; }
-}
-
-/* ════════════════════════════════════════════════════════
-   PREMIUM LEVEL-UP UPGRADES
-   ════════════════════════════════════════════════════════ */
-
-/* Expanding shockwave ring on open */
-.lvl-shock {
-  position: absolute; top: 86px; left: 50%; width: 60px; height: 60px; transform: translate(-50%, -50%);
-  border-radius: 50%; border: 2px solid rgba(251,191,36,0.7); opacity: 0; pointer-events: none;
-}
-.lvl-card.opened .lvl-shock { animation: lvlShock 0.95s cubic-bezier(0.16,1,0.3,1) 0.18s forwards; }
-@keyframes lvlShock {
-  0%   { opacity: 0.9; transform: translate(-50%,-50%) scale(0.3); border-width: 3px; }
-  100% { opacity: 0; transform: translate(-50%,-50%) scale(3.6); border-width: 0.5px; }
-}
-
-/* Metallic crate with a sheen */
-.crate-base {
-  background: linear-gradient(150deg, #d9923a 0%, #b06a22 52%, #8a4f1c 100%);
-  box-shadow: inset 0 -10px 16px rgba(0,0,0,0.4), inset 0 3px 0 rgba(255,255,255,0.28);
-}
-.crate-lid {
-  background: linear-gradient(150deg, #f0a948 0%, #cf7e2a 100%);
-  box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
-}
-.crate-base::after { filter: drop-shadow(0 0 10px #fcd34d) drop-shadow(0 0 22px rgba(251,191,36,0.6)); }
-
-/* Colourful confetti, 12 pieces, flying farther */
-.burst-particle:nth-child(3n)   { background: radial-gradient(circle, #c7d2fe, #6366f1); }
-.burst-particle:nth-child(3n+1) { background: radial-gradient(circle, #f5d0fe, #c084fc); }
-.burst-particle:nth-child(3n+2) { background: radial-gradient(circle, #fde68a, #fb923c); }
-.lvl-card.opened .burst-particle { animation: burst 1s ease-out 0.25s forwards; }
-@keyframes burst {
-  0%   { opacity: 1; transform: rotate(calc(var(--i) * 30deg)) translateY(0) scale(1); }
-  100% { opacity: 0; transform: rotate(calc(var(--i) * 30deg)) translateY(-120px) scale(0.3); }
-}
-
-/* New-level number: animated gradient + glow */
-.lvl-new {
-  background: linear-gradient(135deg, #fde68a, #fb923c, #fcd34d);
-  background-size: 220% 220%;
-  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-}
-.lvl-card.opened .lvl-new {
-  animation: lvlPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.4s both, lvlShine 2.6s ease 1s infinite;
-}
-@keyframes lvlShine { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-
-/* Kicker shimmer */
-.lvl-kicker { animation: kickGlow 2s ease-in-out infinite; }
-@keyframes kickGlow {
-  0%, 100% { text-shadow: 0 0 0 transparent; }
-  50%      { text-shadow: 0 0 14px rgba(251,191,36,0.7); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lvl-shock, .lvl-card.opened .burst-particle, .lvl-card.opened .lvl-new, .lvl-kicker { animation: none; }
+@media (max-width:640px) {
+  .ach-toast { left:1rem; right:1rem; max-width:none }
 }

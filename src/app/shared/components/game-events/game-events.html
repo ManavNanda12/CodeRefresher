@@ -1,38 +1,78 @@
-<!-- ── Level-up crate ─────────────────────────────────── -->
 @if (game.justLeveledUp(); as lvl) {
-  <div class="lvl-backdrop" (click)="closeLevelUp()">
-    <div class="lvl-card" [class.opened]="opened()" (click)="$event.stopPropagation()">
-      <div class="lvl-rays"></div>
-      <div class="lvl-shock" aria-hidden="true"></div>
+  @for (k of [replayKey()]; track k) {
+    <div class="lu-backdrop" (click)="closeLevelUp()">
+      <div class="lu-card" (click)="$event.stopPropagation()">
 
-      <div class="crate">
-        <div class="crate-glow"></div>
-        <div class="crate-base"></div>
-        <div class="crate-lid"></div>
-        <div class="crate-burst">
-          @for (s of [1,2,3,4,5,6,7,8,9,10,11,12]; track s) {
-            <span class="burst-particle" [style.--i]="s"></span>
+        <div class="lu-strip"></div>
+
+        <div class="lu-hero">
+          <div class="lu-rays"></div>
+          <div class="lu-glow"></div>
+          <div class="lu-shock"></div>
+          <div class="lu-shock lu-shock--late"></div>
+          <div class="lu-burst"></div>
+
+          @for (p of particles; track $index) {
+            <span
+              class="lu-particle"
+              [style.--px]="p.x"
+              [style.--py]="p.y"
+              [style.--delay]="p.delay"
+            ></span>
           }
+
+          <span class="lu-eyebrow">Level Up</span>
+
+          <div class="lu-badge">
+            <div class="lu-hex-outer"></div>
+            <div class="lu-hex-inner"></div>
+            <div class="lu-num-wrap">
+              <span class="lu-old-num">{{ lvl.from }}</span>
+              <span class="lu-new-num">{{ lvl.to }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- rank -->
+        <div class="lu-rank">
+          <div class="lu-rank-title">{{ lvl.rankTitle ?? 'Rank Up' }}</div>
+          <div class="lu-rank-sub">{{ lvl.rankSub ?? 'New rank unlocked' }}</div>
+        </div>
+
+        <!-- xp bar -->
+        <div class="lu-xp">
+          <div class="lu-xp-labels">
+            <span>XP</span>
+            <span class="lu-xp-val">{{ lvl.xpLabel }}</span>
+          </div>
+          <div class="lu-xp-track">
+            <div class="lu-xp-fill" [style.--lu-to]="(lvl.xpPct ?? 0) + '%'"></div>
+          </div>
+        </div>
+
+        <!-- rewards (only if present) -->
+        @if (lvl.rewards?.length) {
+          <div class="lu-rewards">
+            @for (r of lvl.rewards; track r.label) {
+              <div class="lu-chip">
+                <div class="lu-chip-label">{{ r.label }}</div>
+                <div class="lu-chip-value">{{ r.value }}</div>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="lu-cta-wrap">
+          <button class="lu-claim" type="button" (click)="closeLevelUp()">
+            Claim & continue
+          </button>
         </div>
       </div>
-
-      <p class="lvl-kicker">⚡ Level Up!</p>
-
-      <div class="lvl-numbers">
-        <span class="lvl-old">{{ lvl.from }}</span>
-        <span class="lvl-arrow">→</span>
-        <span class="lvl-new">{{ lvl.to }}</span>
-      </div>
-
-      <div class="lvl-bar"><span class="lvl-bar-fill"></span></div>
-
-      <p class="lvl-msg">You're getting dangerous. Keep clearing the arena.</p>
-      <button class="lvl-claim" type="button" (click)="closeLevelUp()">Claim ⚡</button>
     </div>
-  </div>
+  }
 }
 
-<!-- ── Achievement toast ──────────────────────────────── -->
+<!-- achievement toast -->
 @if (game.justUnlocked(); as a) {
   <button class="ach-toast" type="button" (click)="game.dismissUnlock()">
     <span class="ach-icon">{{ a.icon }}</span>

@@ -16,13 +16,25 @@ export interface Achievement {
   desc: string;
 }
 
+export interface LevelUpData {
+  from: number;
+  to: number;
+  rankTitle?: string;       // "Platinum II"
+  rankSub?: string;         // "New rank unlocked"
+  xpLabel?: string;         // "12,400 / 14,000" — overrides xpCurrent/xpMax
+  xpCurrent?: number;
+  xpMax?: number;
+  xpPct?: number;           // 0–100, drives the bar fill width
+  rewards?: { label: string; value: string }[];
+}
+
 export const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_blood', icon: '🎯', title: 'First Blood',    desc: 'Master your first question' },
-  { id: 'ten',         icon: '⚔️', title: 'Sharpening Up',   desc: 'Master 10 questions' },
-  { id: 'fifty',       icon: '🏆', title: 'Arena Veteran',   desc: 'Master 50 questions' },
-  { id: 'streak_3',    icon: '🔥', title: 'On Fire',         desc: 'Keep a 3-day streak' },
-  { id: 'streak_7',    icon: '🌟', title: 'Unstoppable',     desc: 'Keep a 7-day streak' },
-  { id: 'level_5',     icon: '💎', title: 'Rising Star',     desc: 'Reach level 5' },
+  { id: 'first_blood', icon: '🎯', title: 'First Blood', desc: 'Master your first question' },
+  { id: 'ten', icon: '⚔️', title: 'Sharpening Up', desc: 'Master 10 questions' },
+  { id: 'fifty', icon: '🏆', title: 'Arena Veteran', desc: 'Master 50 questions' },
+  { id: 'streak_3', icon: '🔥', title: 'On Fire', desc: 'Keep a 3-day streak' },
+  { id: 'streak_7', icon: '🌟', title: 'Unstoppable', desc: 'Keep a 7-day streak' },
+  { id: 'level_5', icon: '💎', title: 'Rising Star', desc: 'Reach level 5' },
 ];
 
 interface GameState {
@@ -55,7 +67,7 @@ export class GameService {
   /** Most-recently unlocked achievement (for a toast); cleared after display. */
   readonly justUnlocked = signal<Achievement | null>(null);
   /** Fires when the user's level increases — drives the level-up crate overlay. */
-  readonly justLeveledUp = signal<{ from: number; to: number } | null>(null);
+  readonly justLeveledUp = signal<LevelUpData | null>(null);
   /** Fires when a question is freshly mastered — lets pages detect module completion. */
   readonly justMastered = signal<{ arena: string; qid: string } | null>(null);
 
@@ -152,6 +164,28 @@ export class GameService {
     this.justLeveledUp.set(null);
   }
 
+  /** Preview the level-up overlay on demand (QA/testing — earns no XP). */
+  previewLevelUp(): void {
+    const from = this.level();
+    const to = from + 1;
+    // mirror commit(): bar fills to 100% to celebrate the level just cleared
+    const span = 50 * from ** 2 - 50 * (from - 1) ** 2;
+    this.justLeveledUp.set({
+      from,
+      to,
+      rankTitle: this.rankTitle(to),
+      rankSub: 'New rank unlocked',
+      xpLabel: `${span.toLocaleString()} / ${span.toLocaleString()}`,
+      xpCurrent: span,
+      xpMax: span,
+      xpPct: 100,
+      rewards: [
+        { label: 'Bonus XP', value: `+${to * 25}` },
+        { label: 'Streak', value: `×${Math.max(1, this.streak())}` },
+      ],
+    });
+  }
+
   // ── internals ──────────────────────────────────────────────
   private withStreak(s: GameState): GameState {
     const today = this.today();
@@ -191,8 +225,28 @@ export class GameService {
     this.state.set(s);
     this.persistLocal(s);
     this.scheduleSync();
-    if (this.level() > prevLevel) {
-      this.justLeveledUp.set({ from: prevLevel, to: this.level() });
+
+    const newLevel = this.level();
+    if (newLevel > prevLevel) {
+      // Celebrate COMPLETING the level just cleared: the bar sweeps to 100%.
+      // (The tiny remainder into the new level reads as a broken/empty bar.)
+      const cleared = newLevel - 1;
+      const span = 50 * cleared ** 2 - 50 * (cleared - 1) ** 2;
+
+      this.justLeveledUp.set({
+        from: prevLevel,
+        to: newLevel,
+        rankTitle: this.rankTitle(newLevel),
+        rankSub: 'New rank unlocked',
+        xpLabel: `${span.toLocaleString()} / ${span.toLocaleString()}`,
+        xpCurrent: span,
+        xpMax: span,
+        xpPct: 100,
+        rewards: [
+          { label: 'Bonus XP', value: `+${newLevel * 25}` },
+          { label: 'Streak', value: `×${Math.max(1, s.streak.count)}` },
+        ],
+      });
     }
   }
 
@@ -236,7 +290,7 @@ export class GameService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, game: this.state() }),
       keepalive,
-    }).catch(() => {/* offline — localStorage still holds it */});
+    }).catch(() => {/* offline — localStorage still holds it */ });
   }
 
   /** Pull KV state and merge it with local (union mastery, max XP) on app start. */
@@ -252,7 +306,7 @@ export class GameService {
         this.state.set(merged);
         this.persistLocal(merged);
       })
-      .catch(() => {/* offline — keep local */});
+      .catch(() => {/* offline — keep local */ });
   }
 
   private mergeStates(a: GameState, b: GameState): GameState {
@@ -279,4 +333,15 @@ export class GameService {
     const p = (n: number) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
+
+private rankTitle(level: number): string {
+  const tiers: [number, string][] = [
+    [20, 'Diamond'], [15, 'Platinum'], [10, 'Gold'], [5, 'Silver'],
+  ];
+  const tier = tiers.find(([min]) => level >= min)?.[1] ?? 'Bronze';
+  const base = tiers.find(([min]) => level >= min)?.[0] ?? 1;
+  const sub = Math.min(level - base, 4);
+  const numerals = ['I', 'II', 'III', 'IV', 'V'];
+  return `${tier} ${numerals[sub]}`;
+}
 }
