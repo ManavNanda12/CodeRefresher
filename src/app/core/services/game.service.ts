@@ -128,6 +128,13 @@ export class GameService {
     this.checkAchievements();
   }
 
+  /** Spend XP (e.g. a paid Test Me hint). Floored at 0 — never goes negative. */
+  spendXp(amount: number): void {
+    if (!isPlatformBrowser(this.platformId) || amount <= 0) return;
+    const next = { ...this.state(), xp: Math.max(0, this.state().xp - amount) };
+    this.commit(next);
+  }
+
   /** Call on any meaningful visit to keep the daily streak alive. */
   ping(): void {
     if (!isPlatformBrowser(this.platformId)) return;

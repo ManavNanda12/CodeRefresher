@@ -15,6 +15,7 @@ import { handleAdminUsers } from "./admin-users.js";
 import { handleUnsubscribe } from "./email-unsubscribe.js";
 import { handleGameSync, handleGameLoad } from "./game-sync.js";
 import { handleLeaderboard } from "./leaderboard.js";
+import { handleHint } from "./hint.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
 // ── Allowed browser origins ────────────────────────────────
@@ -78,6 +79,12 @@ export default {
     if (p === "/api/evaluate") {
       if (method === "POST") return withCors(request, await evaluateHandler(request, env));
       return withCors(request, new Response("Method not allowed", { status: 405 }));
+    }
+
+    // ── /api/hint (Test Me lifeline) ──
+    if (p === "/api/hint" && method === "POST") {
+      if (await rateLimited(request, env, "hint", 120)) return withCors(request, tooMany());
+      return withCors(request, await handleHint(request, env));
     }
 
     // ── progress + user endpoints ──

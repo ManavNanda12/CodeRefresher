@@ -3,13 +3,14 @@
   <div class="lvl-backdrop" (click)="closeLevelUp()">
     <div class="lvl-card" [class.opened]="opened()" (click)="$event.stopPropagation()">
       <div class="lvl-rays"></div>
+      <div class="lvl-shock" aria-hidden="true"></div>
 
       <div class="crate">
         <div class="crate-glow"></div>
         <div class="crate-base"></div>
         <div class="crate-lid"></div>
         <div class="crate-burst">
-          @for (s of [1,2,3,4,5,6,7,8]; track s) {
+          @for (s of [1,2,3,4,5,6,7,8,9,10,11,12]; track s) {
             <span class="burst-particle" [style.--i]="s"></span>
           }
         </div>

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 export type Verdict = 'nailed_it' | 'good' | 'partial' | 'needs_work' | 'missed';
 
@@ -56,8 +56,19 @@ export function rankFor(avg: number): Rank {
 
 @Injectable({ providedIn: 'root' })
 export class TestMeService {
-  private apiUrl = 'https://coderefresherworker.manavnanda2404.workers.dev/api/evaluate';
+  private base = 'https://coderefresherworker.manavnanda2404.workers.dev';
+  private apiUrl = `${this.base}/api/evaluate`;
   private http = inject(HttpClient);
+
+  /** Lifeline hint — a one-line nudge that doesn't reveal the answer. */
+  getHint(question: string, correctAnswer: string): Observable<string> {
+    return this.http
+      .post<{ hint: string }>(`${this.base}/api/hint`, { question, correctAnswer })
+      .pipe(
+        map(r => r?.hint || 'Think about the core concept this question is testing.'),
+        catchError(() => of('Think about the core concept this question is testing.')),
+      );
+  }
 
   /** Evaluate a single answer against the ground-truth answer. */
   evaluate(questionData: any, userAnswer: string): Observable<EvalResult> {

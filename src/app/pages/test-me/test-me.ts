@@ -81,6 +81,7 @@ const LEVEL_META: Record<string, { label: string; badge: string; difficulty: num
 };
 
 const QUIZ_SIZE = 5;
+const HINT_COST_XP = 20; // first hint per round is free; each extra costs this
 const BEST_KEY = 'testme_best_score';
 const TAKEN_KEY = 'testme_total_taken';
 const HISTORY_KEY = 'testme_history';
@@ -118,6 +119,18 @@ export class TestMeComponent {
   focusMode = signal(false);
   focusTargets = signal<string[]>([]);
   private focusModule: string | null = null;
+
+  // ── Hint lifeline (1 free per round; each extra costs XP) ───
+  readonly HINT_COST = HINT_COST_XP;
+  hints = signal<Record<number, string>>({}); // question index → hint text
+  hintedIndices = signal<Set<number>>(new Set());
+  hintsUsed = signal(0);
+  hintLoading = signal(false);
+  hintConfirm = signal(false);
+
+  readonly currentHint = computed(() => this.hints()[this.currentIndex()] ?? null);
+  readonly hintIsFree = computed(() => this.hintsUsed() === 0);
+  readonly canAffordHint = computed(() => this.game.xp() >= HINT_COST_XP);
 
   private rawData = signal<RefresherData | null>(null);
 
@@ -253,6 +266,7 @@ export class TestMeComponent {
     this.currentIndex.set(0);
     this.tabLeaves.set(0);
     this.startedAt = this.now();
+    this.resetHints();
     this.stage.set('quiz');
   }
 
@@ -308,6 +322,7 @@ export class TestMeComponent {
     this.currentIndex.set(0);
     this.tabLeaves.set(0);
     this.startedAt = this.now();
+    this.resetHints();
     this.stage.set('quiz');
   }
 
@@ -407,15 +422,60 @@ export class TestMeComponent {
 
   goTo(index: number): void {
     if (index < 0 || index >= this.total()) return;
+    this.hintConfirm.set(false);
     this.currentIndex.set(index);
   }
 
   next(): void {
+    this.hintConfirm.set(false);
     if (!this.isLast()) this.currentIndex.update(i => i + 1);
   }
 
   prev(): void {
+    this.hintConfirm.set(false);
     if (this.currentIndex() > 0) this.currentIndex.update(i => i - 1);
+  }
+
+  // ── Hint lifeline ──────────────────────────────────────────
+  requestHint(): void {
+    const i = this.currentIndex();
+    if (this.hints()[i] || this.hintLoading()) return; // already shown / loading
+    if (!this.hintIsFree() && !this.canAffordHint()) return; // can't afford a paid hint
+    this.hintConfirm.set(true); // confirm the lifeline (free or paid)
+  }
+
+  confirmHint(): void {
+    this.hintConfirm.set(false);
+    this.fetchHint(this.currentIndex(), !this.hintIsFree());
+  }
+
+  cancelHint(): void {
+    this.hintConfirm.set(false);
+  }
+
+  private fetchHint(index: number, paid: boolean): void {
+    const q = this.questions()[index];
+    if (!q) return;
+    this.hintLoading.set(true);
+    this.testMe.getHint(q.question, q.answer ?? '').subscribe(hint => {
+      this.hints.update(h => ({ ...h, [index]: hint }));
+      this.hintedIndices.update(s => { const next = new Set(s); next.add(index); return next; });
+      this.hintsUsed.update(n => n + 1);
+      if (paid) this.game.spendXp(HINT_COST_XP);
+      this.hintLoading.set(false);
+    });
+  }
+
+  private resetHints(): void {
+    this.hints.set({});
+    this.hintedIndices.set(new Set());
+    this.hintsUsed.set(0);
+    this.hintLoading.set(false);
+    this.hintConfirm.set(false);
+  }
+
+  isHinted(i: number): boolean {
+    return this.hintedIndices().has(i);
   }
 
   /**
@@ -524,6 +584,7 @@ export class TestMeComponent {
     this.currentIndex.set(0);
     this.tabLeaves.set(0);
     this.startedAt = this.now();
+    this.resetHints();
     this.stage.set('quiz');
   }
 
@@ -549,6 +610,7 @@ export class TestMeComponent {
     this.results.set([]);
     this.expanded.set(new Set());
     this.currentIndex.set(0);
+    this.resetHints();
     this.stage.set('pick-tech');
   }
 

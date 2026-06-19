@@ -159,6 +159,29 @@
               </div>
               <h3 class="q-text">{{ q.question }}</h3>
 
+              <!-- Hint lifeline (1 free per round, then costs XP) -->
+              <div class="lifeline">
+                @if (currentHint(); as hint) {
+                  <div class="hint-reveal">
+                    <span class="hint-bulb">💡</span>
+                    <span class="hint-text">{{ hint }}</span>
+                  </div>
+                } @else {
+                  <button type="button" class="hint-btn"
+                          [class.paid]="!hintIsFree()"
+                          [disabled]="hintLoading() || (!hintIsFree() && !canAffordHint())"
+                          (click)="requestHint()">
+                    <span class="hint-pulse" aria-hidden="true"></span>
+                    <span class="hint-ico">🛟</span>
+                    @if (hintLoading()) { Summoning a hint… }
+                    @else if (hintIsFree()) { Use your lifeline · free }
+                    @else if (canAffordHint()) { Use your lifeline · −{{ HINT_COST }} XP }
+                    @else { 🔒 Need {{ HINT_COST }} XP }
+                  </button>
+                }
+              </div>
+
+
               <textarea class="q-input"
                         rows="6"
                         [value]="currentAnswer()"
@@ -342,7 +365,7 @@
                       <span class="mini-score" [style.color]="ringColor(r.score)">{{ r.score }}</span>
                     </div>
                     <div class="rq-info">
-                      <span class="rq-module">{{ q.icon }} {{ q.module }}</span>
+                      <span class="rq-module">{{ q.icon }} {{ q.module }} @if (isHinted(i)) { <span class="rq-hinted">💡 hint used</span> }</span>
                       <span class="rq-q">{{ q.question }}</span>
                     </div>
                     <span class="rq-verdict" [style.color]="verdictStyle(r.verdict).text">
@@ -439,6 +462,30 @@
           <button class="btn-soft danger" type="button" (click)="confirmLeave()">
             Leave anyway
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ LIFELINE CONFIRMATION (top-level → fixed overlay isn't trapped by q-card transform) ════════ -->
+  @if (hintConfirm()) {
+    <div class="ll-backdrop" (click)="cancelHint()">
+      <div class="ll-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="ll-rings" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="ll-orb">🛟</div>
+        <h3 class="ll-title">Use your lifeline?</h3>
+        <p class="ll-desc">
+          @if (hintIsFree()) {
+            This is your <strong>free hint</strong> for this round — we'll nudge you toward the answer without giving it away.
+          } @else {
+            A hint will cost <strong>{{ HINT_COST }} XP</strong>. Spend it only when you're truly stuck.
+          }
+        </p>
+        <div class="ll-actions">
+          <button class="ll-yes" type="button" (click)="confirmHint()">
+            {{ hintIsFree() ? '💡 Use free hint' : '💡 Spend ' + HINT_COST + ' XP' }}
+          </button>
+          <button class="ll-no" type="button" (click)="cancelHint()">Not now</button>
         </div>
       </div>
     </div>

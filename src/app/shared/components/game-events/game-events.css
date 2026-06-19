@@ -151,3 +151,61 @@
 @media (max-width: 640px) {
   .ach-toast { left: 1rem; right: 1rem; max-width: none; }
 }
+
+/* ════════════════════════════════════════════════════════
+   PREMIUM LEVEL-UP UPGRADES
+   ════════════════════════════════════════════════════════ */
+
+/* Expanding shockwave ring on open */
+.lvl-shock {
+  position: absolute; top: 86px; left: 50%; width: 60px; height: 60px; transform: translate(-50%, -50%);
+  border-radius: 50%; border: 2px solid rgba(251,191,36,0.7); opacity: 0; pointer-events: none;
+}
+.lvl-card.opened .lvl-shock { animation: lvlShock 0.95s cubic-bezier(0.16,1,0.3,1) 0.18s forwards; }
+@keyframes lvlShock {
+  0%   { opacity: 0.9; transform: translate(-50%,-50%) scale(0.3); border-width: 3px; }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(3.6); border-width: 0.5px; }
+}
+
+/* Metallic crate with a sheen */
+.crate-base {
+  background: linear-gradient(150deg, #d9923a 0%, #b06a22 52%, #8a4f1c 100%);
+  box-shadow: inset 0 -10px 16px rgba(0,0,0,0.4), inset 0 3px 0 rgba(255,255,255,0.28);
+}
+.crate-lid {
+  background: linear-gradient(150deg, #f0a948 0%, #cf7e2a 100%);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
+}
+.crate-base::after { filter: drop-shadow(0 0 10px #fcd34d) drop-shadow(0 0 22px rgba(251,191,36,0.6)); }
+
+/* Colourful confetti, 12 pieces, flying farther */
+.burst-particle:nth-child(3n)   { background: radial-gradient(circle, #c7d2fe, #6366f1); }
+.burst-particle:nth-child(3n+1) { background: radial-gradient(circle, #f5d0fe, #c084fc); }
+.burst-particle:nth-child(3n+2) { background: radial-gradient(circle, #fde68a, #fb923c); }
+.lvl-card.opened .burst-particle { animation: burst 1s ease-out 0.25s forwards; }
+@keyframes burst {
+  0%   { opacity: 1; transform: rotate(calc(var(--i) * 30deg)) translateY(0) scale(1); }
+  100% { opacity: 0; transform: rotate(calc(var(--i) * 30deg)) translateY(-120px) scale(0.3); }
+}
+
+/* New-level number: animated gradient + glow */
+.lvl-new {
+  background: linear-gradient(135deg, #fde68a, #fb923c, #fcd34d);
+  background-size: 220% 220%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.lvl-card.opened .lvl-new {
+  animation: lvlPop 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.4s both, lvlShine 2.6s ease 1s infinite;
+}
+@keyframes lvlShine { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+/* Kicker shimmer */
+.lvl-kicker { animation: kickGlow 2s ease-in-out infinite; }
+@keyframes kickGlow {
+  0%, 100% { text-shadow: 0 0 0 transparent; }
+  50%      { text-shadow: 0 0 14px rgba(251,191,36,0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lvl-shock, .lvl-card.opened .burst-particle, .lvl-card.opened .lvl-new, .lvl-kicker { animation: none; }
+}
