@@ -12,7 +12,9 @@ An interview-prep **arena** built with **Angular 22**. Don't just *read* about A
 Curated interview questions for **Angular**, **.NET / ASP.NET Core**, and **SQL**, split by experience tier (0–1 / 1–2 / 2–3 / 4+ years). Every question ships with a detailed answer, a syntax-highlighted **code example**, and a plain-English **analogy** so concepts actually stick. Each card is a **challenge card** — difficulty tier, XP value, and a **"Master ✓"** toggle.
 
 ### 🧪 Test Me — AI-graded mock interview
-Pick a tech + level, answer **5 random questions from memory**, and a large language model grades each answer **0–10 against an expert response** — returning a verdict, your **strengths**, **what you missed**, and a **tip**. Results screen shows an overall score ring, a rank, a per-question breakdown, and XP earned.
+Pick a tech + level, answer **5 random questions from memory**, and a large language model grades each answer **0–10 against an expert response** — returning a verdict, your **strengths**, **what you missed**, and a **tip**. Answers can include prose and optional code, and the quiz validates each question independently so empty or failed evaluations are handled gracefully. A playful anti-cheat guard watches for tab switches during a live round and shows funny warning messages when you look away.
+
+- A hint lifeline is available during Test Me: the first hint is free, and each additional hint costs **20 XP**.
 
 ### 📊 Smart Dashboard
 Every round feeds a live, **cross-device** dashboard:
