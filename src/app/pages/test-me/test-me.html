@@ -199,10 +199,7 @@
 
                 @if (currentCodeOpen()) {
                   <div class="code-wrap">
-                    <app-code-editor
-                      [language]="editorLanguage()"
-                      [value]="currentCode()"
-                      (valueChange)="updateCode($event)" />
+                    <div #editorHost></div>
                     <p class="code-hint">
                       💡 Optional — your code is sent to the AI <strong>together with your answer</strong>. Tab to indent.
                     </p>

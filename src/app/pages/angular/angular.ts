@@ -10,9 +10,9 @@ import { SeoService } from '../../core/services/seo.service';
 export class AngularComponent {
   constructor() {
     inject(SeoService).update({
-      title: 'Angular Interview Questions',
-      description: 'Practice Angular interview questions on components, signals, dependency injection, routing, RxJS, lifecycle hooks, lazy loading, and change detection.',
-      keywords: 'angular interview questions, angular signals, angular components, angular routing, rxjs interview, angular dependency injection, angular lifecycle hooks'
+      title: 'Angular Interview Questions | CodeRefresher',
+      description: 'Practice gamified Angular interview questions on components, signals, dependency injection, routing, RxJS, lifecycle hooks, lazy loading, and change detection.',
+      keywords: 'CodeRefresher, gamified angular interview questions, angular interview questions, angular signals, angular components, rxjs interview'
     });
   }
 }

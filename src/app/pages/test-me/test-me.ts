@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, PLATFORM_ID, HostListener } from '@angular/core';
+import { Component, computed, inject, signal, PLATFORM_ID, HostListener, ViewChild, ViewContainerRef, ComponentRef, Injector } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
@@ -7,7 +7,7 @@ import { ProgressService, RoundRecord } from '../../core/services/progress.servi
 import { GameService } from '../../core/services/game.service';
 import { FocusRoundService } from '../../core/services/focus.service';
 import { RefresherData, RefresherItem } from '../../core/models/refresher-item.model';
-import { CodeEditorComponent, EditorLang } from '../../shared/components/code-editor/code-editor';
+import { EditorLang } from '../../shared/components/code-editor/code-editor';
 import {
   TestMeService,
   EvalResult,
@@ -89,7 +89,7 @@ const HISTORY_MAX = 6;
 
 @Component({
   selector: 'app-test-me',
-  imports: [RouterLink, CodeEditorComponent],
+  imports: [RouterLink],
   templateUrl: './test-me.html',
   styleUrl: './test-me.css',
 })
@@ -234,6 +234,11 @@ export class TestMeComponent {
     const focus = this.focusRound.consume();
     if (focus) this.startFocus(focus.arena, focus.module);
   }
+
+  // Dynamic editor host (we create/destroy the heavy editor on demand)
+  @ViewChild('editorHost', { read: ViewContainerRef }) private editorHost!: ViewContainerRef;
+  private injector = inject(Injector);
+  private editorCompRef: ComponentRef<any> | null = null;
 
   // ── Stage 1: pick a tech arena ─────────────────────────────
   pickArena(arena: Arena): void {
@@ -409,15 +414,61 @@ export class TestMeComponent {
   /** Reveal/hide the code editor for the current question (kept per-index). */
   toggleEditor(): void {
     const idx = this.currentIndex();
+    const isOpen = this.editorOpen().has(idx) || this.currentCode().trim().length > 0;
+    const willOpen = !isOpen;
+
+    // update signal synchronously
     this.editorOpen.update(set => {
       const next = new Set(set);
-      if (next.has(idx) && this.currentCode().trim().length === 0) {
-        next.delete(idx); // only collapse when there's no code to lose
-      } else {
-        next.add(idx);
-      }
+      if (willOpen) next.add(idx);
+      else if (next.has(idx) && this.currentCode().trim().length === 0) next.delete(idx);
       return next;
     });
+
+    // perform dynamic creation/destruction outside the signal update
+    if (willOpen && !this.editorCompRef && this.editorHost) {
+      this.ensureEditorCreated().catch(e => console.error('Failed to lazy-load editor', e));
+    }
+
+    if (!willOpen && this.editorCompRef && this.currentCode().trim().length === 0) {
+      try { this.editorCompRef.destroy(); } catch {}
+      this.editorCompRef = null;
+    }
+  }
+
+  private async ensureEditorCreated(): Promise<void> {
+    if (this.editorCompRef || !this.editorHost) return;
+    try {
+      const mod = await import('../../shared/components/code-editor/code-editor');
+      const Editor = mod.CodeEditorComponent;
+      const compRef = this.editorHost.createComponent(Editor, { injector: this.injector });
+      // set inputs via setInput to satisfy typed inputs
+      if (typeof compRef.setInput === 'function') {
+        compRef.setInput('language', this.editorLanguage());
+        compRef.setInput('value', this.currentCode());
+      } else {
+        // fallback — assign directly (less type-safe)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        compRef.instance.language = this.editorLanguage();
+        // @ts-ignore
+        compRef.instance.value = this.currentCode();
+      }
+
+      // wire output if present
+      // some output shapes may not be an Observable; guard accordingly
+      const out = (compRef.instance as any).valueChange;
+      if (out && typeof out.subscribe === 'function') {
+        out.subscribe((v: string) => this.updateCode(v));
+      } else if (out && typeof out === 'function') {
+        // older-style callback — try assigning
+        try { out((v: string) => this.updateCode(v)); } catch {}
+      }
+
+      this.editorCompRef = compRef;
+    } catch (e) {
+      console.error('ensureEditorCreated error', e);
+    }
   }
 
   goTo(index: number): void {

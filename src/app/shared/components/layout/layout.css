@@ -116,6 +116,29 @@
   transition: background 0.2s, transform 0.2s;
 }
 .theme-toggle:hover { background: rgba(255,255,255,0.12); transform: rotate(15deg); }
+.theme-toggle:active { transform: scale(0.82) rotate(-25deg); }
+
+/* ─── Theme-flip flash overlay (sits above the whole app) ──────────── */
+.theme-flip {
+  position: fixed; inset: 0; z-index: 6000; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at var(--flip-x, 92%) var(--flip-y, 4%),
+              rgba(99,102,241,0.10), transparent 60%);
+}
+.theme-flip.go { animation: themeFlash 600ms ease-out; }
+.theme-flip::before {
+  content: ''; position: absolute;
+  left: var(--flip-x, 92%); top: var(--flip-y, 4%);
+  width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(192,132,252,0.6),
+              rgba(99,102,241,0.3) 45%, transparent 72%);
+  transform: scale(0);
+}
+.theme-flip.go::before { animation: themeRipple 620ms cubic-bezier(.4,0,.2,1) both; }
+@keyframes themeFlash { 0% { opacity: 0; } 14% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes themeRipple {
+  0%   { transform: scale(0);   opacity: 0.95; }
+  100% { transform: scale(150); opacity: 0; }
+}
 
 /* ─── Game HUD ─────────────────────────────────────────────────────── */
 .hud {

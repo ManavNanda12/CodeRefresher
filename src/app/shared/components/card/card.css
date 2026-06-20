@@ -172,9 +172,31 @@
   box-shadow: 0 1px 3px rgba(2,6,23,0.06);
 }
 :host-context([data-theme="light"]) .card:hover { box-shadow: 0 10px 30px -10px rgba(99,102,241,0.35); }
-:host-context([data-theme="light"]) .master-btn,
+
+/* Only the OFF/idle controls get the pale surface — never clobber the
+   vivid green "mastered" (.on) state (which the old rule was overriding). */
+:host-context([data-theme="light"]) .master-btn:not(.on),
 :host-context([data-theme="light"]) .chevron-btn,
-:host-context([data-theme="light"]) .master-cta { background: #f1f5f9; }
+:host-context([data-theme="light"]) .master-cta:not(.on) {
+  background: #f1f5f9;
+  border-color: #d8e0ea;
+}
+:host-context([data-theme="light"]) .master-btn:not(.on) { color: #94a3b8; }
+:host-context([data-theme="light"]) .master-btn:not(.on):hover {
+  border-color: rgba(5,150,105,0.55); color: #059669;
+}
+/* keep the mastered states clearly green & readable on white */
+:host-context([data-theme="light"]) .master-btn.on {
+  background: linear-gradient(135deg, #10b981, #059669); border-color: transparent; color: #fff;
+}
+:host-context([data-theme="light"]) .master-cta.on {
+  background: linear-gradient(135deg, rgba(16,185,129,0.16), rgba(5,150,105,0.1));
+  border-color: rgba(5,150,105,0.45); color: #047857;
+}
+:host-context([data-theme="light"]) .done-badge {
+  color: #047857; background: rgba(16,185,129,0.14); border-color: rgba(5,150,105,0.34);
+}
+
 :host-context([data-theme="light"]) .answer-section { background: rgba(99,102,241,0.07); }
 :host-context([data-theme="light"]) .simple-section { background: rgba(251,191,36,0.1); }
 :host-context([data-theme="light"]) .simple-text { color: #92660c; }

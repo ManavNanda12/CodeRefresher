@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Developer Refresher — Master Dev Interviews</title>
+  <title>CodeRefresher — Gamified Interview Practice</title>
   <base href="/">
 
   <!-- Apply saved theme before paint (no light→dark flash) -->
@@ -10,8 +10,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Primary Meta -->
-  <meta name="description" content="Structured Q&A for Angular, .NET, SQL and more — organized by experience level, with code examples and simple analogies so concepts actually stick.">
-  <meta name="keywords" content="angular interview questions, dotnet interview prep, sql interview questions, developer refresher, coding interview, asp.net core interview, c# interview">
+  <meta name="description" content="CodeRefresher is a gamified, AI-powered interview practice app for Angular, .NET and SQL — AI-graded quizzes, hint lifelines, animated XP level-ups, and a progress dashboard to boost your interview readiness.">
+  <meta name="keywords" content="CodeRefresher, gamified Angular interview questions, AI interview prep, mock coding interview, angular interview game, dotnet interview questions, sql interview practice">
   <meta name="author" content="Developer Refresher">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#0f172a">
@@ -20,8 +20,8 @@
   <!-- Open Graph -->
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="Developer Refresher">
-  <meta property="og:title"       content="Developer Refresher — Master Dev Interviews">
-  <meta property="og:description" content="Structured Q&A for Angular, .NET, SQL and more — organized by experience level, with code examples and simple analogies.">
+  <meta property="og:title"       content="CodeRefresher — Gamified Interview Practice">
+  <meta property="og:description" content="Gamified, AI-graded interview practice for Angular, .NET and SQL. Try Test Me, use hint lifelines, earn XP and level up.">
   <meta property="og:url"         content="https://coderefresher.pages.dev/">
   <meta property="og:image"       content="https://coderefresher.pages.dev/og-image.png">
   <meta property="og:image:width"  content="1200">
@@ -50,16 +50,33 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Load fonts non-blocking: preload stylesheet then apply -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" as="style" onload="this.rel='stylesheet'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"></noscript>
+
+  <!-- Preload social / LCP image to help Largest Contentful Paint on share previews -->
+  <link rel="preload" href="/og-image.png" as="image">
+
+  <!-- Inline critical hero CSS to reduce render-blocking -->
+  <style>
+    /* Critical hero styles (minimal subset) */
+    .hero{display:block;padding:56px 16px;margin:0 auto;position:relative}
+    .hero-content{position:relative;z-index:2;max-width:780px}
+    .hero-headline{font-size:clamp(1.5rem,4vw,2.6rem);margin:0 0 .5rem}
+    .headline-accent{color:#c084fc}
+    .hero-sub,.hero-why{margin:0 0 .75rem;color:rgba(241,245,249,.95)}
+    .hero-actions{margin-top:18px;display:flex;gap:12px}
+    .btn-primary,.btn-ghost{padding:10px 16px;border-radius:8px;text-decoration:none}
+  </style>
 
   <!-- JSON-LD: WebSite schema -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Developer Refresher",
+    "name": "CodeRefresher",
     "url": "https://coderefresher.pages.dev",
-    "description": "Structured Q&A for Angular, .NET, SQL and more — organized by experience level for interview prep.",
+    "description": "CodeRefresher — gamified, AI-powered interview practice for Angular, .NET and SQL. AI-graded quizzes, hint lifelines and progress tracking.",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://coderefresher.pages.dev/?q={search_term_string}",
@@ -73,7 +90,7 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "Developer Refresher",
+    "name": "CodeRefresher",
     "url": "https://coderefresher.pages.dev",
     "applicationCategory": "EducationalApplication",
     "operatingSystem": "Web",
@@ -82,7 +99,7 @@
       "price": "0",
       "priceCurrency": "USD"
     },
-    "description": "A free interview prep tool with structured Q&A for Angular, .NET, and SQL developers.",
+    "description": "A free, gamified interview prep app with AI-graded quizzes, hint lifelines, and animated progress for Angular, .NET, and SQL.",
     "featureList": [
       "Angular interview questions",
       ".NET interview questions",

@@ -18,7 +18,7 @@ export class SeoService {
   private router   = inject(Router);
   private doc      = inject(DOCUMENT);
 
-  private readonly SITE_NAME = 'Developer Refresher';
+  private readonly SITE_NAME = 'CodeRefresher';
   private readonly BASE_URL  = 'https://coderefresher.pages.dev';
   private readonly OG_IMAGE  = `${this.BASE_URL}/og-image.png`;
 

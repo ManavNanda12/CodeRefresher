@@ -178,10 +178,27 @@
 
 /* ── Light theme: pills/tabs flip via tokens; fix rgba-white chips + ring core ── */
 :host-context([data-theme="light"]) .ah-ring::before { background: #ffffff; }
+/* progress-ring track visible on a light page */
+:host-context([data-theme="light"]) .ah-ring {
+  background: conic-gradient(var(--accent, #34d399) var(--p, 0%), rgba(15,23,42,0.1) 0);
+}
 :host-context([data-theme="light"]) .tab-chip,
 :host-context([data-theme="light"]) .module-count { background: rgba(15,23,42,0.08); color: var(--arena-dim); }
 :host-context([data-theme="light"]) .tab-btn:hover:not(.active) { background: rgba(15,23,42,0.05); }
 :host-context([data-theme="light"]) .module-pill:hover:not(.active) { color: #4f46e5; border-color: rgba(99,102,241,0.5); }
+
+/* Active tier tab: on dark it's a translucent accent tint + white text, which
+   on a WHITE page becomes pale-on-pale (unreadable). Use a SOLID accent fill. */
+:host-context([data-theme="light"]) .tab-btn.active {
+  background: var(--accent, #6366f1); color: #fff;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #6366f1) 55%, transparent);
+}
+:host-context([data-theme="light"]) .tab-btn.active .tab-chip { background: rgba(255,255,255,0.3); color: #fff; }
+/* tone the tag badge so the accent text keeps contrast on white */
+:host-context([data-theme="light"]) .ah-tag {
+  background: color-mix(in srgb, var(--accent, #6366f1) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--accent, #6366f1) 45%, transparent);
+}
 :host-context([data-theme="light"]) .skeleton-card { background: #ffffff; }
 :host-context([data-theme="light"]) .sk-line {
   background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 50%, #eef2f7 75%);

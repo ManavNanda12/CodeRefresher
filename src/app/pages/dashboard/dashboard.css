@@ -321,6 +321,73 @@
 .settings-confirm p { color: #fecaca; font-size: 0.85rem; margin: 0 0 0.75rem; }
 .settings-confirm-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
 
+/* ════════════════════════════════════════════════════════════
+   LIGHT THEME — flip the dashboard to daylight.
+   (Settings modal + code chips intentionally stay dark = accents.)
+   ════════════════════════════════════════════════════════════ */
+:host-context([data-theme="light"]) {
+  --arena-bg: #eef2f7;
+  --arena-panel: #ffffff;
+  --arena-panel-2: #f8fafc;
+  --arena-border: #dbe3ec;
+  --arena-text: #0f172a;
+  --arena-soft: #334155;
+  --arena-muted: #5b6677;
+  --arena-dim: #8895a7;
+}
+:host-context([data-theme="light"]) .arena { background: #eef2f7; }
+:host-context([data-theme="light"]) .orb { opacity: 0.14; }
+:host-context([data-theme="light"]) .grid-overlay {
+  background-image:
+    linear-gradient(rgba(15,23,42,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15,23,42,0.045) 1px, transparent 1px);
+}
+
+/* text */
+:host-context([data-theme="light"]) .dash-title,
+:host-context([data-theme="light"]) .panel-title,
+:host-context([data-theme="light"]) .weak-name,
+:host-context([data-theme="light"]) .heat-name,
+:host-context([data-theme="light"]) .split-title,
+:host-context([data-theme="light"]) .split-item b,
+:host-context([data-theme="light"]) .empty-card h2,
+:host-context([data-theme="light"]) .detail-name { color: #0f172a; }
+:host-context([data-theme="light"]) .dash-tagline,
+:host-context([data-theme="light"]) .ring-meta,
+:host-context([data-theme="light"]) .round-level,
+:host-context([data-theme="light"]) .legend span,
+:host-context([data-theme="light"]) .empty-card p,
+:host-context([data-theme="light"]) .detail-sub { color: #5b6677; }
+:host-context([data-theme="light"]) .ring-arena,
+:host-context([data-theme="light"]) .round-arena,
+:host-context([data-theme="light"]) .split-item { color: #334155; }
+:host-context([data-theme="light"]) .kicker,
+:host-context([data-theme="light"]) .recovery-label,
+:host-context([data-theme="light"]) .back-link { color: #4f46e5; }
+:host-context([data-theme="light"]) .back-link:hover { color: #4338ca; }
+
+/* surfaces */
+:host-context([data-theme="light"]) .panel,
+:host-context([data-theme="light"]) .empty-card,
+:host-context([data-theme="light"]) .split-col {
+  background: #ffffff; border-color: #e2e8f0; box-shadow: 0 1px 3px rgba(2,6,23,0.05);
+}
+:host-context([data-theme="light"]) .ring-card { background: #f8fafc; border-color: #e6ebf2; }
+:host-context([data-theme="light"]) .ring-card:not(:disabled):hover { background: #eef1ff; border-color: rgba(99,102,241,0.5); }
+:host-context([data-theme="light"]) .game-panel { background: linear-gradient(160deg, rgba(99,102,241,0.08), #ffffff); }
+:host-context([data-theme="light"]) .ring-bg { stroke: rgba(15,23,42,0.1); }
+:host-context([data-theme="light"]) .weak-bar-track,
+:host-context([data-theme="light"]) .heat-track,
+:host-context([data-theme="light"]) .gp-bar { background: #e2e8f0; }
+
+/* controls */
+:host-context([data-theme="light"]) .cta-ghost,
+:host-context([data-theme="light"]) .recovery-copy,
+:host-context([data-theme="light"]) .settings-gear { background: #f1f5f9; border-color: #d8e0ea; color: #334155; }
+:host-context([data-theme="light"]) .cta-ghost:hover,
+:host-context([data-theme="light"]) .recovery-copy:hover { background: #e2e8f0; color: #0f172a; }
+:host-context([data-theme="light"]) .settings-gear:hover { background: #e0e7ff; border-color: rgba(99,102,241,0.5); }
+
 /* ── responsive ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .arena { padding: 2.5rem 1rem 4rem; }

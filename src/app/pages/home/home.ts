@@ -51,10 +51,10 @@ export class HomeComponent {
 
   constructor() {
     inject(SeoService).update({
-      title: 'Master Dev Interviews',
+      title: 'CodeRefresher — Gamified Interview Practice',
       description:
-        'Refresh, test, and track your interview prep for Angular, .NET & SQL — structured Q&A, AI-graded quizzes, a progress dashboard, and adaptive focus rounds.',
-      keywords: 'angular interview questions, dotnet interview prep, sql interview questions, ai mock interview, developer dashboard, coding interview',
+        'CodeRefresher is a gamified, AI-powered interview prep app for Angular, .NET and SQL — AI-graded quizzes, hint lifelines, animated XP level-ups, and a progress dashboard to improve readiness.',
+      keywords: 'CodeRefresher, gamified interview practice, angular interview questions, ai mock interview, angular interview game, coding interview prep',
     });
 
     // Runs only in the browser, after the first render — SSR-safe.

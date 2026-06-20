@@ -4,6 +4,10 @@
 <!-- Global game juice: level-up crate + achievement toast -->
 <app-game-events />
 
+<!-- Theme-flip flash (ripples from the toggle on every switch) -->
+<div class="theme-flip" [class.go]="flip()"
+     [style.--flip-x]="flipX()" [style.--flip-y]="flipY()"></div>
+
 <!-- Sidebar Overlay (mobile) -->
 <div class="sidebar-overlay"
      [class.active]="sidebarOpen()"
@@ -41,16 +45,16 @@
   </nav>
 
   <div class="sidebar-footer">
-    <span>Developer Refresher</span>
+    <span>Code Refresher</span>
     <small>v1.0</small>
   </div>
 </aside>
 
 <!-- ── Single Responsive Header ────────────────── -->
 <header class="app-header" role="banner">
-  <a routerLink="/" class="header-brand" aria-label="Developer Refresher Home">
+  <a routerLink="/" class="header-brand" aria-label="Code Refresher Home">
     <span class="brand-icon">&#60;/&#62;</span>
-    <span class="header-title">Developer Refresher</span>
+    <span class="header-title">Code Refresher</span>
   </a>
 
   <!-- Desktop nav — hidden below 768px via CSS -->
@@ -68,11 +72,11 @@
   </nav>
 
   <!-- Theme toggle (always visible) -->
-  <button class="theme-toggle" type="button" (click)="theme.toggle()"
+  <!-- <button class="theme-toggle" type="button" (click)="onThemeToggle($event)"
           [attr.aria-label]="theme.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
           [title]="theme.theme() === 'dark' ? 'Light mode' : 'Dark mode'">
     {{ theme.theme() === 'dark' ? '☀️' : '🌙' }}
-  </button>
+  </button> -->
 
   <!-- Game HUD (desktop) -->
   <a routerLink="/dashboard" class="hud" [title]="'Level ' + game.level() + ' · ' + game.xp() + ' XP'">

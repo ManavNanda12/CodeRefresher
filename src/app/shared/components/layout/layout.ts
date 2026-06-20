@@ -27,6 +27,11 @@ export class LayoutComponent {
 
   sidebarOpen = signal(false);
 
+  /* Theme-flip flash: a ripple that washes the screen from the toggle on switch */
+  readonly flip = signal(false);
+  readonly flipX = signal('92%');
+  readonly flipY = signal('4%');
+
   navItems: NavItem[] = [
     { path: '/',        label: 'Home',    icon: '🏠', exact: true },
     { path: '/angular', label: 'Angular', icon: '⚡' },
@@ -36,6 +41,20 @@ export class LayoutComponent {
     { path: '/dashboard',   label: 'Dashboard',   icon: '📊' },
     { path: '/leaderboard', label: 'Leaderboard', icon: '🏆', badge: 'NEW' },
   ];
+
+  onThemeToggle(e: MouseEvent): void {
+    this.theme.toggle();
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (e.clientX || e.clientY) {
+      this.flipX.set(e.clientX + 'px');
+      this.flipY.set(e.clientY + 'px');
+    }
+    this.flip.set(false);
+    requestAnimationFrame(() => {
+      this.flip.set(true);
+      setTimeout(() => this.flip.set(false), 650);
+    });
+  }
 
   toggleSidebar(): void {
     this.sidebarOpen.update(v => !v);
