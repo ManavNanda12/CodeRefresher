@@ -341,6 +341,35 @@
             </div>
           }
 
+          <!-- Share your scorecard -->
+          <div class="share-card">
+            @for (k of [burstKey()]; track k) {
+              <div class="share-burst" aria-hidden="true">
+                @for (p of shareParticles(); track $index) {
+                  <span class="sp" [style.--x]="p.x" [style.--y]="p.y" [style.--d]="p.delay"></span>
+                }
+              </div>
+            }
+            <div class="share-head">
+              <span class="share-title">📣 Share your scorecard</span>
+              <span class="share-sub">Turn your {{ overallScore() }}/10 into a flex — and dare a friend to beat it.</span>
+            </div>
+            <div class="share-row">
+              <button class="sbtn link" type="button" (click)="copyLink()" [class.done]="copied() === 'link'">
+                {{ copied() === 'link' ? '✓ Copied!' : '🔗 Copy link' }}
+              </button>
+              <button class="sbtn x" type="button" (click)="shareTwitter()" aria-label="Share on Twitter / X">𝕏 Twitter</button>
+              <button class="sbtn in" type="button" (click)="shareLinkedIn()" aria-label="Share on LinkedIn">in LinkedIn</button>
+              <button class="sbtn wa" type="button" (click)="shareWhatsApp()" aria-label="Share on WhatsApp">🟢 WhatsApp</button>
+              <button class="sbtn dl" type="button" (click)="downloadCard()" [disabled]="downloading()">
+                {{ downloading() ? '⏳ Rendering…' : '📸 Download card' }}
+              </button>
+              <button class="sbtn challenge" type="button" (click)="copyChallenge()" [class.done]="copied() === 'challenge'">
+                {{ copied() === 'challenge' ? '✓ Challenge copied!' : '🤺 Challenge a friend' }}
+              </button>
+            </div>
+          </div>
+
           <!-- Per-question breakdown -->
           <h3 class="breakdown-title">Question Breakdown</h3>
           <div class="breakdown">

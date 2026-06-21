@@ -1,11 +1,14 @@
 import { Component, computed, inject, signal, PLATFORM_ID, HostListener, ViewChild, ViewContainerRef, ComponentRef, Injector } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
 import { ProgressService, RoundRecord } from '../../core/services/progress.service';
 import { GameService } from '../../core/services/game.service';
 import { FocusRoundService } from '../../core/services/focus.service';
+import { UserService } from '../../core/services/user.service';
+import { ShareService, ScoreCard, ShareLinks } from '../../core/services/share.service';
+import { ScorecardImageService } from '../../core/services/scorecard-image.service';
 import { RefresherData, RefresherItem } from '../../core/models/refresher-item.model';
 import { EditorLang } from '../../shared/components/code-editor/code-editor';
 import {
@@ -100,6 +103,9 @@ export class TestMeComponent {
   private progressService = inject(ProgressService);
   private focusRound = inject(FocusRoundService);
   private game = inject(GameService);
+  private user = inject(UserService);
+  private share = inject(ShareService);
+  private scorecard = inject(ScorecardImageService);
 
   /** XP earned on the round just finished (shown on the results screen). */
   xpEarned = signal(0);
@@ -232,8 +238,25 @@ export class TestMeComponent {
 
     // Launched from a "Focus My Weak Spots" / "Test Yourself" challenge?
     const focus = this.focusRound.consume();
-    if (focus) this.startFocus(focus.arena, focus.module);
+    if (focus) {
+      this.startFocus(focus.arena, focus.module);
+      return;
+    }
+
+    // Launched from a shared scorecard's "Take the Same Challenge" link?
+    // (?arena=angular&level=2-3) — drop the visitor straight into that round.
+    if (isPlatformBrowser(this.platformId)) {
+      const qp = inject(ActivatedRoute).snapshot.queryParamMap;
+      const arena = ARENAS.find(a => a.id === qp.get('arena'));
+      if (arena) {
+        this.pendingLevelKey = qp.get('level');
+        this.pickArena(arena);
+      }
+    }
   }
+
+  /** Level to auto-select once arena data lands (set by a shared challenge link). */
+  private pendingLevelKey: string | null = null;
 
   // Dynamic editor host (we create/destroy the heavy editor on demand)
   @ViewChild('editorHost', { read: ViewContainerRef }) private editorHost!: ViewContainerRef;
@@ -250,6 +273,13 @@ export class TestMeComponent {
       next: data => {
         this.rawData.set(data);
         this.loadingLevels.set(false);
+        // Auto-advance into the quiz when arriving from a shared challenge link.
+        if (this.pendingLevelKey) {
+          const key = this.pendingLevelKey;
+          this.pendingLevelKey = null;
+          const lvl = this.levels().find(l => l.key === key);
+          if (lvl) this.pickLevel(lvl);
+        }
       },
       error: () => {
         this.loadError.set(true);
@@ -272,6 +302,7 @@ export class TestMeComponent {
     this.tabLeaves.set(0);
     this.startedAt = this.now();
     this.resetHints();
+    this.resetShare();
     this.stage.set('quiz');
   }
 
@@ -328,6 +359,7 @@ export class TestMeComponent {
     this.tabLeaves.set(0);
     this.startedAt = this.now();
     this.resetHints();
+    this.resetShare();
     this.stage.set('quiz');
   }
 
@@ -599,6 +631,122 @@ export class TestMeComponent {
     setTimeout(tick, 500);
   }
 
+  // ── Share scorecard ────────────────────────────────────────
+  /** Lazily minted on the first share action so we only write KV when used. */
+  shareLinks = signal<ShareLinks | null>(null);
+  private shareCard: ScoreCard | null = null;
+  /** Which action just copied — drives the inline "Copied!" confirmation. */
+  copied = signal<'link' | 'challenge' | null>(null);
+  /** Bumped on each successful copy so the @for-keyed burst replays from frame 0. */
+  burstKey = signal(0);
+  shareParticles = signal<{ x: string; y: string; delay: string }[]>([]);
+
+  private buildCard(): ScoreCard | null {
+    const arena = this.selectedArena();
+    const level = this.selectedLevel();
+    const results = this.results();
+    if (!arena || !level || !results.length) return null;
+    return {
+      arena: arena.id,
+      arenaName: arena.name,
+      arenaIcon: arena.icon,
+      accent: arena.accent,
+      level: level.key,
+      levelName: level.label,
+      levelBadge: level.badge,
+      username: this.user.name() || 'A developer',
+      score: this.overallScore(),
+      timeLabel: this.elapsedLabel(),
+      streak: this.game.streak(),
+      userLevel: this.game.level(),
+      questions: this.questions().map((q, i) => ({ module: q.module, score: results[i]?.score ?? 0 })),
+    };
+  }
+
+  /** Build the share link + fire the background KV write once, on first use. */
+  private ensureShare(): ShareLinks | null {
+    const existing = this.shareLinks();
+    if (existing) return existing;
+    const card = this.buildCard();
+    if (!card) return null;
+    this.shareCard = card;
+    const links = this.share.create(card);
+    this.shareLinks.set(links);
+    return links;
+  }
+
+  shareTwitter(): void {
+    const l = this.ensureShare();
+    if (l && this.shareCard) this.openShare(this.share.twitterUrl(this.shareCard, l.url));
+  }
+
+  shareLinkedIn(): void {
+    const l = this.ensureShare();
+    if (l) this.openShare(this.share.linkedInUrl(l.url));
+  }
+
+  shareWhatsApp(): void {
+    const l = this.ensureShare();
+    if (l && this.shareCard) this.openShare(this.share.whatsAppUrl(this.shareCard, l.url));
+  }
+
+  async copyLink(): Promise<void> {
+    const l = this.ensureShare();
+    if (l && (await this.share.copy(l.url))) this.flashCopied('link');
+  }
+
+  async copyChallenge(): Promise<void> {
+    const l = this.ensureShare();
+    if (l && this.shareCard && (await this.share.copy(this.share.challengeText(this.shareCard, l.url)))) {
+      this.flashCopied('challenge');
+    }
+  }
+
+  /** Render + download the scorecard PNG (client-side, no link needed). */
+  downloading = signal(false);
+  async downloadCard(): Promise<void> {
+    if (this.downloading()) return;
+    const card = this.shareCard ?? this.buildCard();
+    if (!card) return;
+    this.shareCard = card;
+    this.downloading.set(true);
+    try {
+      await this.scorecard.download(card);
+    } finally {
+      this.downloading.set(false);
+    }
+  }
+
+  private openShare(url: string): void {
+    if (isPlatformBrowser(this.platformId)) window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  private flashCopied(which: 'link' | 'challenge'): void {
+    this.copied.set(which);
+    this.shareParticles.set(this.makeShareParticles());
+    this.burstKey.update(k => k + 1);
+    setTimeout(() => this.copied.set(null), 2200);
+  }
+
+  private makeShareParticles(): { x: string; y: string; delay: string }[] {
+    return Array.from({ length: 14 }, (_, i) => {
+      const angle = (Math.PI * 2 * i) / 14 + (Math.random() - 0.5) * 0.5;
+      const dist = 55 + Math.random() * 55;
+      return {
+        x: (Math.cos(angle) * dist).toFixed(0) + 'px',
+        y: (Math.sin(angle) * dist).toFixed(0) + 'px',
+        delay: (Math.random() * 80).toFixed(0) + 'ms',
+      };
+    });
+  }
+
+  /** Drop the previous round's share link so the next round mints a fresh one. */
+  private resetShare(): void {
+    this.shareLinks.set(null);
+    this.shareCard = null;
+    this.copied.set(null);
+  }
+
   // ── Stage 5: results actions ───────────────────────────────
   expanded = signal<Set<number>>(new Set());
 
@@ -636,6 +784,7 @@ export class TestMeComponent {
     this.tabLeaves.set(0);
     this.startedAt = this.now();
     this.resetHints();
+    this.resetShare();
     this.stage.set('quiz');
   }
 
@@ -662,6 +811,7 @@ export class TestMeComponent {
     this.expanded.set(new Set());
     this.currentIndex.set(0);
     this.resetHints();
+    this.resetShare();
     this.stage.set('pick-tech');
   }
 

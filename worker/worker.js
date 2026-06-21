@@ -16,6 +16,7 @@ import { handleUnsubscribe } from "./email-unsubscribe.js";
 import { handleGameSync, handleGameLoad } from "./game-sync.js";
 import { handleLeaderboard } from "./leaderboard.js";
 import { handleHint } from "./hint.js";
+import { handleShareCreate, handleSharePage, handleShareImage, handleShareImageGet } from "./share.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
 // ── Allowed browser origins ────────────────────────────────
@@ -69,6 +70,14 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(request) });
     }
 
+    // ── Public share page + og:image (crawlers + humans; no browser Origin) ──
+    // Served outside the origin gate so social crawlers can read the OG tags.
+    if (method === "GET" && p.startsWith("/share/")) {
+      const imgMatch = p.match(/^\/share\/([^/]+)\/image\.png$/);
+      if (imgMatch) return handleShareImageGet(decodeURIComponent(imgMatch[1]), env);
+      return handleSharePage(decodeURIComponent(p.slice("/share/".length)), env, url.origin);
+    }
+
     // ── Origin gate — block browser endpoints not from our frontend ──
     // Exempt: server-to-server (admin) + public email links (unsubscribe).
     if (p.startsWith("/api/") && !exempt && !isAllowed(request)) {
@@ -116,6 +125,16 @@ export default {
     }
     if (p === "/api/leaderboard" && method === "GET") {
       return withCors(request, await handleLeaderboard(env));
+    }
+
+    // ── share scorecard (write a public share entry) ──
+    if (p === "/api/share/create" && method === "POST") {
+      if (await rateLimited(request, env, "share", 60)) return withCors(request, tooMany());
+      return withCors(request, await handleShareCreate(request, env));
+    }
+    if (p === "/api/share/image" && method === "POST") {
+      if (await rateLimited(request, env, "share", 60)) return withCors(request, tooMany());
+      return withCors(request, await handleShareImage(request, env));
     }
 
     // ── email outreach (exempt from origin gate; auth'd separately) ──

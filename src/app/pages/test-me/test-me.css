@@ -1094,3 +1094,59 @@
   color: #64748b;
 }
 .code-hint strong { color: #94a3b8; }
+
+/* ── Share your scorecard ── */
+.share-card {
+  position: relative; margin: 0 0 2.5rem; padding: 1.5rem 1.6rem; border-radius: 20px;
+  background: radial-gradient(120% 120% at 100% 0%, rgba(99,102,241,0.14), transparent 55%), rgba(255,255,255,0.04);
+  border: 1px solid rgba(129,140,248,0.28); overflow: hidden;
+  animation: shareIn 0.55s cubic-bezier(0.16,1,0.3,1) 0.15s both;
+}
+@keyframes shareIn { from { opacity: 0; transform: translateY(14px) scale(0.985); } to { opacity: 1; transform: none; } }
+.share-head { display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 1.1rem; }
+.share-title { font-size: 1.05rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.01em; }
+.share-sub { font-size: 0.84rem; color: #94a3b8; }
+.share-row { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.sbtn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem;
+  font-family: inherit; font-weight: 700; font-size: 0.82rem; padding: 0.6rem 1.05rem;
+  border-radius: 11px; cursor: pointer; color: #e2e8f0;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  /* spring overshoot so a press/hover feels alive, not corporate */
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s;
+}
+.sbtn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); color: #fff; }
+.sbtn:active { transform: scale(0.96); }
+.sbtn.link:hover { border-color: rgba(129,140,248,0.6); box-shadow: 0 8px 22px rgba(99,102,241,0.3); }
+.sbtn.x:hover { border-color: rgba(255,255,255,0.55); box-shadow: 0 8px 22px rgba(255,255,255,0.12); }
+.sbtn.in:hover { border-color: rgba(56,138,229,0.7); box-shadow: 0 8px 22px rgba(10,102,194,0.35); color: #cfe3ff; }
+.sbtn.wa:hover { border-color: rgba(37,211,102,0.7); box-shadow: 0 8px 22px rgba(37,211,102,0.3); color: #c9f7d8; }
+.sbtn.dl:hover { border-color: rgba(251,191,36,0.6); box-shadow: 0 8px 22px rgba(251,191,36,0.25); color: #fde68a; }
+.sbtn:disabled { opacity: 0.5; cursor: progress; transform: none; box-shadow: none; }
+.sbtn.challenge { background: linear-gradient(135deg, #6366f1, #4f46e5); border-color: transparent; color: #fff; box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
+.sbtn.challenge:hover { box-shadow: 0 10px 28px rgba(99,102,241,0.55); }
+.sbtn.done {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  border-color: transparent !important; color: #fff !important;
+  box-shadow: 0 6px 20px rgba(16,185,129,0.45) !important;
+  animation: sbtnPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes sbtnPop { 0% { transform: scale(0.9); } 55% { transform: scale(1.06); } 100% { transform: scale(1); } }
+/* particle burst on a successful copy — the one "earned" celebration here */
+.share-burst { position: absolute; top: 50%; left: 50%; width: 0; height: 0; pointer-events: none; z-index: 4; }
+.share-burst .sp {
+  position: absolute; top: 0; left: 0; width: 9px; height: 9px; border-radius: 50%;
+  background: radial-gradient(circle, #a5b4fc, #6366f1); opacity: 0;
+  animation: spFly 0.85s cubic-bezier(0.16,1,0.3,1) var(--d, 0ms) both;
+}
+.share-burst .sp:nth-child(3n) { background: radial-gradient(circle, #6ee7b7, #10b981); }
+.share-burst .sp:nth-child(3n+1) { background: radial-gradient(circle, #fde68a, #f59e0b); }
+@keyframes spFly { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--x,0), var(--y,0)) scale(0.3); } }
+@media (max-width: 720px) { .share-row .sbtn { flex: 1 1 auto; } }
+/* Respect users who opt out of motion — kill the showy stuff, keep it usable. */
+@media (prefers-reduced-motion: reduce) {
+  .share-card, .sbtn.done { animation: none; }
+  .sbtn { transition: background 0.2s, color 0.2s; }
+  .sbtn:hover, .sbtn:active { transform: none; }
+  .share-burst { display: none; }
+}
