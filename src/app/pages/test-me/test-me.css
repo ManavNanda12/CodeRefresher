@@ -1095,6 +1095,28 @@
 }
 .code-hint strong { color: #94a3b8; }
 
+/* ── Head-to-head challenge result ── */
+.vs-card {
+  position: relative; margin: 0 0 1.75rem; padding: 1.25rem 1.5rem; border-radius: 18px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+  animation: shareIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.vs-card.win  { border-color: rgba(52,211,153,0.45); background: radial-gradient(120% 120% at 100% 0%, rgba(16,185,129,0.16), transparent 60%), rgba(255,255,255,0.04); }
+.vs-card.lose { border-color: rgba(248,113,113,0.4); }
+.vs-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.4rem; }
+.vs-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #94a3b8; }
+.vs-verdict { font-size: 1rem; font-weight: 800; color: #f1f5f9; }
+.vs-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; }
+.vs-side { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.vs-name { font-size: 0.9rem; font-weight: 700; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vs-name.you { color: #f8fafc; }
+.vs-score { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: #cbd5e1; line-height: 1; }
+.vs-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.vs-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+.vs-fill.them { background: #64748b; }
+.vs-x { font-size: 0.8rem; font-weight: 800; color: #475569; letter-spacing: 1px; }
+@media (prefers-reduced-motion: reduce) { .vs-card { animation: none; } .vs-fill { transition: none; } }
+
 /* ── Share your scorecard ── */
 .share-card {
   position: relative; margin: 0 0 2.5rem; padding: 1.5rem 1.6rem; border-radius: 20px;

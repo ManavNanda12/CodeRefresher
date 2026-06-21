@@ -244,12 +244,18 @@ export class TestMeComponent {
     }
 
     // Launched from a shared scorecard's "Take the Same Challenge" link?
-    // (?arena=angular&level=2-3) — drop the visitor straight into that round.
+    // (?arena=angular&level=2-3&vs=Manav&vsScore=8.2) — drop the visitor straight
+    // into that round, and remember the opponent for the head-to-head on results.
     if (isPlatformBrowser(this.platformId)) {
       const qp = inject(ActivatedRoute).snapshot.queryParamMap;
       const arena = ARENAS.find(a => a.id === qp.get('arena'));
       if (arena) {
         this.pendingLevelKey = qp.get('level');
+        const vs = qp.get('vs');
+        const vsScore = Number(qp.get('vsScore'));
+        if (vs && Number.isFinite(vsScore)) {
+          this.opponent.set({ name: vs.slice(0, 24), score: Math.max(0, Math.min(10, vsScore)) });
+        }
         this.pickArena(arena);
       }
     }
@@ -257,6 +263,15 @@ export class TestMeComponent {
 
   /** Level to auto-select once arena data lands (set by a shared challenge link). */
   private pendingLevelKey: string | null = null;
+
+  /** The scorecard owner we're racing, when arriving from a challenge link. */
+  opponent = signal<{ name: string; score: number } | null>(null);
+  readonly challengeOutcome = computed<'win' | 'lose' | 'tie' | null>(() => {
+    const opp = this.opponent();
+    if (!opp) return null;
+    const you = this.overallScore();
+    return you > opp.score ? 'win' : you < opp.score ? 'lose' : 'tie';
+  });
 
   // Dynamic editor host (we create/destroy the heavy editor on demand)
   @ViewChild('editorHost', { read: ViewContainerRef }) private editorHost!: ViewContainerRef;
@@ -793,6 +808,7 @@ export class TestMeComponent {
     this.expanded.set(new Set());
     this.focusMode.set(false);
     this.focusTargets.set([]);
+    this.opponent.set(null); // different level → no longer the same challenge
     this.stage.set('pick-level');
   }
 
@@ -812,6 +828,7 @@ export class TestMeComponent {
     this.currentIndex.set(0);
     this.resetHints();
     this.resetShare();
+    this.opponent.set(null);
     this.stage.set('pick-tech');
   }
 

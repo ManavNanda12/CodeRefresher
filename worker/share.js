@@ -153,7 +153,12 @@ function renderCard(c, shareId, origin) {
   // og:url must be where this page actually lives (the Worker). CTAs link into the app (SITE).
   const pageUrl = `${origin || SITE}/share/${shareId}`;
   const imageUrl = `${pageUrl}/image.png`;
-  const challengeUrl = `${SITE}/test-me${c.arena ? `?arena=${encodeURIComponent(c.arena)}${c.level ? `&level=${encodeURIComponent(c.level)}` : ""}` : ""}`;
+  // Carry the opponent's name + score so the challenger's results can show a head-to-head.
+  const challengeUrl = c.arena
+    ? `${SITE}/test-me?arena=${encodeURIComponent(c.arena)}` +
+      (c.level ? `&level=${encodeURIComponent(c.level)}` : "") +
+      `&vs=${encodeURIComponent(c.username)}&vsScore=${c.score}`
+    : `${SITE}/test-me`;
 
   // ring geometry (r=58, circ≈364.4)
   const circ = 2 * Math.PI * 58;

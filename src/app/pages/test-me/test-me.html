@@ -278,6 +278,36 @@
         <div class="results">
           @if (isNewBest()) { <div class="confetti-burst" aria-hidden="true">🎉</div> }
 
+          <!-- Head-to-head (arrived via a "Take the Same Challenge" link) -->
+          @if (opponent(); as opp) {
+            <div class="vs-card" [class.win]="challengeOutcome() === 'win'" [class.lose]="challengeOutcome() === 'lose'">
+              <div class="vs-head">
+                <span class="vs-eyebrow">⚔️ Challenge result</span>
+                <span class="vs-verdict">
+                  @switch (challengeOutcome()) {
+                    @case ('win') { 🏆 You won! }
+                    @case ('lose') { 😤 So close — rematch? }
+                    @default { 🤝 Dead heat! }
+                  }
+                </span>
+              </div>
+              <div class="vs-grid">
+                <div class="vs-side">
+                  <span class="vs-name">{{ opp.name }}</span>
+                  <span class="vs-score">{{ opp.score }}</span>
+                  <div class="vs-bar"><div class="vs-fill them" [style.width.%]="opp.score * 10"></div></div>
+                </div>
+                <span class="vs-x">VS</span>
+                <div class="vs-side">
+                  <span class="vs-name you">You</span>
+                  <span class="vs-score" [style.color]="ringColor(overallScore())">{{ overallScore() }}</span>
+                  <div class="vs-bar"><div class="vs-fill you" [style.width.%]="overallScore() * 10"
+                       [style.background]="ringColor(overallScore())"></div></div>
+                </div>
+              </div>
+            </div>
+          }
+
           <!-- Hero score -->
           <div class="score-hero" [style.--rank-color]="ringColor(overallScore())">
             <div class="sh-glow" aria-hidden="true"></div>
@@ -445,7 +475,7 @@
 
           <!-- Actions -->
           <div class="result-actions">
-            <button class="btn-submit" type="button" (click)="retrySameLevel()">🔄 New 5 questions</button>
+            <button class="btn-submit" type="button" (click)="retrySameLevel()">{{ opponent() ? '🔄 Rematch' : '🔄 New 5 questions' }}</button>
             <a class="btn-soft" routerLink="/dashboard">📊 View Dashboard</a>
             <button class="btn-soft" type="button" (click)="changeLevel()">🎚 Change level</button>
             <button class="btn-soft" type="button" (click)="restart()">🧪 Pick another arena</button>
