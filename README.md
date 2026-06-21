@@ -35,6 +35,13 @@ One tap builds a quiz **weighted toward your weakest and untested modules** — 
 ### 🏆 Leaderboard
 Climb the arena: three ranked boards — **Top Rank** (XP), **Most Tests**, and **Best Score** — with an animated **top-3 podium**, your own row highlighted, and a friendly display name (set yours, or a generated alias). Built **scale-safe**: one cached KV key holds the top 20 per board, updated incrementally, so reads stay O(1) no matter how many users join.
 
+### 📣 Share Scorecard
+After any Test Me round, share your result — every share links back to CodeRefresher, turning a good score into free reach.
+- **Rich link previews** — paste the link into Twitter/X, LinkedIn or WhatsApp and a server-rendered, **OG-tagged** scorecard page generates the preview (crawlers read the meta from the first HTML response — no client JS needed).
+- **Downloadable card** — a 1200×630 PNG built **entirely client-side with zero dependencies** (a self-contained SVG rasterised through canvas, not html2canvas) for Instagram stories or manual shares. The same card is uploaded as the `og:image` so feed previews show the visual scorecard.
+- **🤺 Challenge a friend** — the share page's *"Take the Same Challenge"* button drops them into the **exact arena + level**, and after their round shows a **head-to-head** ("Manav 8.2 · You 6.8") with a one-tap **rematch**.
+- Share entries **auto-expire after 90 days**, and sharing works even before sign-up.
+
 ### 📬 Weekly progress emails
 An opt-out **weekly digest** (GitHub Actions cron + SMTP) emails each user their progress recap, weakest module, and a nudge to keep the streak alive.
 
@@ -52,7 +59,7 @@ A signature dark **arena** theme with an opt-in **daylight** mode (browse surfac
 | Reactivity | Signals (`signal`, `computed`, `effect`, `afterNextRender`) |
 | Routing | Lazy routes + `withViewTransitions()` |
 | Styling | Plain CSS — custom-property design tokens, `color-mix()`, keyframe animations |
-| Backend | **Cloudflare Worker** + **Workers KV** (progress, game state, users) |
+| Backend | **Cloudflare Worker** + **Workers KV** (progress, game state, users, shared scorecards) |
 | AI grading | LLM via the Worker (`/api/evaluate`) |
 | Email | **GitHub Actions** cron + `nodemailer` (SMTP), transport-swappable to Resend |
 | Persistence | Cookie (identity) + localStorage (fast cache) + KV (source of truth) |
@@ -71,10 +78,13 @@ Browser (Angular SSR)
                 ├─ /api/progress/sync|dashboard   → per-module stats + history
                 ├─ /api/game/sync|load            → XP / mastery / streak (batched writes)
                 ├─ /api/leaderboard               → cached top-20 boards (O(1) read)
+                ├─ /api/share/create|image        → write a public scorecard + og:image
+                ├─ /share/{id}[/image.png]        → public OG-tagged scorecard page + PNG
                 ├─ /api/admin/users               → email export (Bearer secret)
                 └─ /api/email/unsubscribe
                         │
-                        └─ Workers KV  (user:{id} = profile + progress + game · leaderboard = cached boards)
+                        └─ Workers KV  (user:{id} = profile + progress + game · leaderboard = cached boards
+                                        · share:{id} = public scorecard, 90-day TTL · email:{addr} = dedup index)
 
 GitHub Actions (weekly cron) → scripts/send-weekly-digest.mjs → SMTP → users
 ```
@@ -88,6 +98,7 @@ GitHub Actions (weekly cron) → scripts/send-weekly-digest.mjs → SMTP → use
 ```
 src/app/
   core/services/        data · seo · user · progress · game · theme · focus · leaderboard
+                         · share · scorecard-image
   shared/components/     layout (header HUD + footer) · card (challenge card)
                          · tech-page (arena) · onboarding-modal · game-events
                          (level-up crate + toasts)
@@ -126,6 +137,7 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] Adaptive focus rounds
 - [x] Arena gamification (XP / streak / achievements / level-up)
 - [x] Leaderboard (XP / tests / best score)
+- [x] Share scorecard (rich link previews · downloadable card · head-to-head challenge)
 - [x] Weekly email digest
 - [x] Light / dark theme
 - [ ] More arenas (React, Python, AWS, Docker) & deeper question banks
