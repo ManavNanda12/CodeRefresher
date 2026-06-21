@@ -13,9 +13,22 @@ const COOKIE_NAME = 'cr_name';
 const COOKIE_ONBOARDED = 'cr_onboarded';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
+/** Progress blob mirrored into localStorage after auth (matches DashboardPayload shape). */
+export interface AuthProgress {
+  arenas: Record<string, unknown>;
+  recentRounds: unknown[];
+}
+
 export interface RegisterResponse {
   success: boolean;
   recoveryCode: string;
+  /** True when the email already had an account and we adopted it (no duplicate). */
+  adopted?: boolean;
+  /** The canonical account id — differs from ours when adopted. */
+  userId?: string;
+  name?: string;
+  /** The adopted account's progress, to mirror into localStorage. */
+  progress?: AuthProgress;
 }
 
 export interface RecoverResponse {
@@ -80,7 +93,19 @@ export class UserService {
     if (this.name()) body['name'] = this.name() as string;
     return this.http
       .post<RegisterResponse>(`${WORKER_BASE}/api/user/register`, body)
-      .pipe(catchError(() => of({ success: false, recoveryCode: code })));
+      .pipe(
+        map(res => {
+          // The email already had an account — switch our identity to it so we don't
+          // run as a duplicate. localStorage is reconciled by the caller (onboarding).
+          if (res?.userId && res.userId !== this.userId()) {
+            this.userId.set(res.userId);
+            if (res.name) this.name.set(res.name);
+            this.writeCookies(res.userId, this.email() ?? clean, this.name());
+          }
+          return res;
+        }),
+        catchError(() => of({ success: false, recoveryCode: code })),
+      );
   }
 
   /** Update the email on the existing profile (reuses register's upsert by userId). */

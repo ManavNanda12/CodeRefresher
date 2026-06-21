@@ -291,20 +291,34 @@ export class DashboardComponent {
   }
 
   signOut(): void {
-    this.user.signOut();
-    this.progress.clearLocal();
+    this.user.signOut();        // clear identity cookies
+    this.game.clearLocal();     // stop pending sync + reset XP/level/streak (HUD)
     this.settingsOpen.set(false);
-    this.backToOverview();
+    if (isPlatformBrowser(this.platformId)) {
+      // Full reset: wipe every cached key so no stale data lingers, then reload
+      // anonymous so the header HUD and dashboard rebind cleanly.
+      try { localStorage.clear(); } catch { /* storage disabled */ }
+      window.location.assign('/');
+    } else {
+      this.progress.clearLocal();
+      this.backToOverview();
+    }
   }
 
   deleteAccount(): void {
     this.deleting.set(true);
     this.user.deleteAccount().subscribe(() => {
-      this.progress.clearLocal();
+      this.game.clearLocal();
       this.deleting.set(false);
       this.settingsOpen.set(false);
       this.confirmingDelete.set(false);
-      this.backToOverview();
+      if (isPlatformBrowser(this.platformId)) {
+        try { localStorage.clear(); } catch { /* storage disabled */ }
+        window.location.assign('/');
+      } else {
+        this.progress.clearLocal();
+        this.backToOverview();
+      }
     });
   }
 

@@ -835,18 +835,34 @@ export class TestMeComponent {
   // ── localStorage stats (SSR-safe) ──────────────────────────
   private loadBest(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    const v = Number(localStorage.getItem(BEST_KEY) ?? '0');
-    if (!Number.isNaN(v)) this.bestScore.set(v);
+    const local = Number(localStorage.getItem(BEST_KEY) ?? '0');
+    // Personal best must follow the account. testme_best_score is device-local and
+    // isn't restored on sign-in, but the round history (cr:history) IS synced — so
+    // derive the best from it too and keep the higher of the two.
+    const fromHistory = this.progressService
+      .getHistory()
+      .reduce((m, r) => Math.max(m, r.score ?? 0), 0);
+    const best = Math.max(Number.isNaN(local) ? 0 : local, fromHistory);
+    this.bestScore.set(best);
+    if (best > 0) localStorage.setItem(BEST_KEY, String(best));
   }
 
   private loadHistory(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+    let local: Record<string, number[]> = {};
     try {
-      const raw = localStorage.getItem(HISTORY_KEY);
-      if (raw) this.history.set(JSON.parse(raw));
+      local = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '{}') || {};
     } catch {
-      /* ignore corrupt history */
+      local = {}; // ignore corrupt history
     }
+    // Rebuild per arena:level trends from synced rounds (oldest→newest) so a freshly
+    // signed-in device shows the trend even without the device-local testme_history.
+    const derived: Record<string, number[]> = {};
+    for (const r of [...this.progressService.getHistory()].reverse()) {
+      const key = `${r.arena}:${r.level}`;
+      (derived[key] ??= []).push(r.score);
+    }
+    this.history.set({ ...derived, ...local });
   }
 
   totalTaken = signal(0);

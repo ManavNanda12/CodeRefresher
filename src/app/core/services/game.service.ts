@@ -250,6 +250,20 @@ export class GameService {
     }
   }
 
+  /** Wipe cached game state (used on sign-in/recover so the next identity starts clean). */
+  clearLocal(): void {
+    if (this.syncTimer) { clearTimeout(this.syncTimer); this.syncTimer = null; }
+    this.state.set(emptyState());
+    if (isPlatformBrowser(this.platformId)) {
+      try { localStorage.removeItem(KEY); } catch { /* ignore */ }
+    }
+  }
+
+  /** Re-pull game state from KV for the current identity (after recover/adopt). */
+  reload(): void {
+    if (isPlatformBrowser(this.platformId)) this.loadFromKv();
+  }
+
   private persistLocal(s: GameState): void {
     if (!isPlatformBrowser(this.platformId)) return;
     try {

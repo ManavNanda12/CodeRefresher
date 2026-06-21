@@ -24,6 +24,12 @@ export async function handleRecover(request, env) {
 
   const userData = JSON.parse(data);
 
+  // Backfill the email→userId index so accounts created before the index existed
+  // still dedupe on a later re-register with the same email.
+  if (userData.email) {
+    await env.PROGRESS_KV.put(`email:${String(userData.email).trim().toLowerCase()}`, userId);
+  }
+
   return Response.json({
     success: true,
     userId,

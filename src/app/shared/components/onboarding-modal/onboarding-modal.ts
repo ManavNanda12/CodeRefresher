@@ -2,7 +2,9 @@ import { Component, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { UserService, isValidEmail } from '../../../core/services/user.service';
+import { UserService, isValidEmail, AuthProgress } from '../../../core/services/user.service';
+import { ProgressService } from '../../../core/services/progress.service';
+import { GameService } from '../../../core/services/game.service';
 
 type Mode = 'email' | 'recover';
 
@@ -24,6 +26,8 @@ export class OnboardingModalComponent {
   private platformId = inject(PLATFORM_ID);
   private router = inject(Router);
   readonly user = inject(UserService);
+  private progress = inject(ProgressService);
+  private game = inject(GameService);
 
   open = signal(false);
   mode = signal<Mode>('email');
@@ -72,9 +76,14 @@ export class OnboardingModalComponent {
       return;
     }
     this.submitting.set(true);
-    this.user.register(email, this.nameInput().trim()).subscribe(() => {
+    this.user.register(email, this.nameInput().trim()).subscribe(res => {
       this.submitting.set(false);
-      this.close();
+      // Email already had an account → we adopted it; rebind to its data.
+      if (res?.adopted) {
+        this.applyAuthAndReload(res.progress);
+      } else {
+        this.close();
+      }
     });
   }
 
@@ -88,11 +97,36 @@ export class OnboardingModalComponent {
     this.user.recover(code).subscribe(res => {
       this.submitting.set(false);
       if (res?.success) {
-        this.close();
+        this.applyAuthAndReload(res.progress as AuthProgress | undefined);
       } else {
         this.error.set("We couldn't find that recovery code.");
       }
     });
+  }
+
+  /**
+   * After a recover/adopt: clear the previous identity's cached data so it can't
+   * bleed in, seed the restored account's progress, then hard-reload so every
+   * service re-hydrates from the new cookies + KV (the cleanest cross-device rebind).
+   */
+  private applyAuthAndReload(progress?: AuthProgress | null): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.close();
+      return;
+    }
+    // Cancel any queued game sync, then wipe ALL cached app data (cr:*, cr:game and
+    // the Test Me testme_* stats) so the previous identity can't bleed into this one.
+    this.game.clearLocal();
+    try { localStorage.clear(); } catch { /* storage disabled */ }
+    // Re-seed the restored account's progress before reload so it's there instantly.
+    if (progress) {
+      this.progress.mergeFromKv({
+        arenas: progress.arenas as never,
+        recentRounds: progress.recentRounds as never,
+      });
+    }
+    // Hard reload so every service re-hydrates from the new cookies + KV.
+    window.location.assign('/dashboard');
   }
 
   dismiss(): void {
