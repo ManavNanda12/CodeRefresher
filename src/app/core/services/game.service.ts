@@ -42,6 +42,7 @@ interface GameState {
   mastered: Record<string, boolean>;        // composite key `${arena}:${qid}` → true
   streak: { count: number; lastActive: string }; // lastActive = YYYY-MM-DD
   achievements: string[];                    // unlocked ids
+  daily?: { date: string; score: number };  // last Daily Challenge completion (YYYY-MM-DD)
 }
 
 const KEY = 'cr:game';
@@ -92,6 +93,16 @@ export class GameService {
   readonly xpIntoLevel = computed(() => this.state().xp - 50 * (this.level() - 1) ** 2);
   readonly xpForLevel = computed(() => 50 * this.level() ** 2 - 50 * (this.level() - 1) ** 2);
 
+  // ── Daily Challenge ────────────────────────────────────────
+  /** Flat bonus on top of the AI score for completing the daily question. */
+  readonly DAILY_BONUS = 5;
+  /** True once today's daily has been answered (drives the "come back tomorrow" state). */
+  readonly dailyDoneToday = computed(() => this.state().daily?.date === this.today());
+  /** Today's daily score, or null if not done yet today. */
+  readonly dailyScore = computed(() =>
+    this.state().daily?.date === this.today() ? this.state().daily!.score : null,
+  );
+
   constructor() {
     this.hydrate();
     if (isPlatformBrowser(this.platformId)) {
@@ -138,6 +149,25 @@ export class GameService {
     const next = this.withStreak({ ...this.state(), xp: this.state().xp + amount });
     this.commit(next);
     this.checkAchievements();
+  }
+
+  /**
+   * Record today's Daily Challenge completion and award XP (AI score + flat bonus).
+   * Bumps the daily streak (via withStreak) and may trigger a level-up. No-op if already
+   * done today. Returns the XP granted so the modal can celebrate it.
+   */
+  completeDaily(score: number): number {
+    if (!isPlatformBrowser(this.platformId) || this.dailyDoneToday()) return 0;
+    const s = Math.max(0, Math.min(10, score));
+    const xp = Math.round(s) + this.DAILY_BONUS;
+    const next = this.withStreak({
+      ...this.state(),
+      xp: this.state().xp + xp,
+      daily: { date: this.today(), score: Math.round(s * 10) / 10 },
+    });
+    this.commit(next);
+    this.checkAchievements();
+    return xp;
   }
 
   /** Spend XP (e.g. a paid Test Me hint). Floored at 0 — never goes negative. */
@@ -329,6 +359,7 @@ export class GameService {
       mastered: { ...(a.mastered || {}), ...(b.mastered || {}) },
       streak: (a.streak?.lastActive || '') >= (b.streak?.lastActive || '') ? a.streak : b.streak,
       achievements: [...new Set([...(a.achievements || []), ...(b.achievements || [])])],
+      daily: (a.daily?.date || '') >= (b.daily?.date || '') ? a.daily : b.daily,
     };
   }
 

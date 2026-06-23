@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { OnboardingModalComponent } from '../onboarding-modal/onboarding-modal';
 import { GameEventsComponent } from '../game-events/game-events';
+import { DailyChallengeComponent } from '../daily-challenge/daily-challenge';
 import { GameService } from '../../../core/services/game.service';
 import { ThemeService } from '../../../core/services/theme.service';
 
@@ -16,7 +17,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterLink, RouterLinkActive, OnboardingModalComponent, GameEventsComponent],
+  imports: [RouterLink, RouterLinkActive, OnboardingModalComponent, GameEventsComponent, DailyChallengeComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })

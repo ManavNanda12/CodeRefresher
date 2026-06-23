@@ -1,0 +1,112 @@
+<!-- Floating launcher — lets the user (re)open the daily once it's been dismissed -->
+@if (showLauncher()) {
+  <button class="dc-fab" type="button" (click)="launch()"
+          [class.done]="doneToday()"
+          [attr.aria-label]="doneToday() ? 'Daily challenge done' : 'Open the daily challenge'">
+    @if (doneToday()) { <span class="dc-fab-ico">✓</span> Daily done }
+    @else { <span class="dc-fab-ico">🎯</span> Daily Challenge <span class="dc-fab-pulse" aria-hidden="true"></span> }
+  </button>
+}
+
+@if (open()) {
+  <div class="dc-backdrop" (click)="close()">
+    <div class="dc-modal" role="dialog" aria-modal="true" aria-labelledby="dc-title"
+         (click)="$event.stopPropagation()">
+      <div class="dc-glow" aria-hidden="true"></div>
+      <button class="dc-x" type="button" (click)="close()" aria-label="Close">✕</button>
+
+      <div class="dc-head">
+        <span class="dc-kicker">🎯 Daily Challenge</span>
+        <span class="dc-streak">🔥 {{ game.streak() }} day streak</span>
+      </div>
+
+      @switch (stage()) {
+
+        @case ('loading') {
+          <div class="dc-state">
+            <div class="dc-spinner"></div>
+            <p>Fetching today’s question…</p>
+          </div>
+        }
+
+        @case ('question') {
+          @if (question(); as q) {
+            <div class="dc-q" [style.--accent]="q.accent">
+              <div class="dc-tags">
+                <span class="dc-chip">{{ q.icon }} {{ q.arenaName }}</span>
+                <span class="dc-chip ghost">{{ q.module }}</span>
+              </div>
+              <h2 class="dc-title" id="dc-title">{{ q.question }}</h2>
+              <textarea class="dc-input" rows="5"
+                        [value]="answer()"
+                        (input)="updateAnswer($any($event.target).value)"
+                        placeholder="Answer from memory — the AI grades it against an expert answer."></textarea>
+              <div class="dc-foot">
+                <span class="dc-note">One shot per day · {{ answer().length }} chars</span>
+                <button class="dc-submit" type="button" [disabled]="!canSubmit()" (click)="submit()">
+                  ⚡ Submit answer
+                </button>
+              </div>
+            </div>
+          }
+        }
+
+        @case ('grading') {
+          <div class="dc-state">
+            <div class="dc-scan">🤖</div>
+            <p>The AI is grading your answer…</p>
+          </div>
+        }
+
+        @case ('result') {
+          @if (result(); as r) {
+            <div class="dc-result">
+              <div class="dc-score" [style.--c]="ringColor(r.score)">
+                <span class="dc-score-num">{{ r.score }}</span><span class="dc-score-of">/10</span>
+              </div>
+              <p class="dc-praise">{{ praise(r.score) }}</p>
+
+              <div class="dc-rewards">
+                @if (xpEarned() > 0) { <span class="dc-reward xp">⚡ +{{ xpEarned() }} XP</span> }
+                <span class="dc-reward streak">🔥 {{ game.streak() }} day streak</span>
+              </div>
+
+              <div class="dc-fb ok"><span>✓ Strengths</span><p>{{ r.strengths }}</p></div>
+              @if (r.score < 8) { <div class="dc-fb warn"><span>△ What’s missing</span><p>{{ r.missing }}</p></div> }
+              <div class="dc-fb tip"><span>💡 Tip</span><p>{{ r.tip }}</p></div>
+
+              @if (question(); as q) {
+                <details class="dc-expert">
+                  <summary>📘 See the expert answer</summary>
+                  <p>{{ q.answer }}</p>
+                  @if (q.simpleExample) { <p class="dc-analogy">💡 {{ q.simpleExample }}</p> }
+                </details>
+              }
+
+              <p class="dc-tomorrow">🎉 Come back tomorrow to keep your streak alive!</p>
+              <button class="dc-submit wide" type="button" (click)="close()">Done</button>
+            </div>
+          }
+        }
+
+        @case ('done') {
+          <div class="dc-state">
+            <div class="dc-done-ico">✅</div>
+            <h2 class="dc-title center" id="dc-title">Today’s challenge is done!</h2>
+            <p>You scored <strong [style.color]="ringColor(game.dailyScore() ?? 0)">{{ game.dailyScore() }}/10</strong> today.</p>
+            <p class="dc-tomorrow">🔥 {{ game.streak() }} day streak · come back tomorrow for a fresh question.</p>
+            <button class="dc-submit wide" type="button" (click)="close()">Close</button>
+          </div>
+        }
+
+        @case ('error') {
+          <div class="dc-state">
+            <div class="dc-done-ico">⚠️</div>
+            <p>Couldn’t load today’s question.</p>
+            <button class="dc-submit" type="button" (click)="launch()">Retry</button>
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

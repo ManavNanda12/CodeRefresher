@@ -17,6 +17,9 @@ Pick a tech + level, answer **5 random questions from memory**, and a large lang
 - A hint lifeline is available during Test Me: the first hint is free, and each additional hint costs **20 XP**.
 - **AI follow-up probing** — on up to 2 random questions, when you give a real answer the AI reads it and fires **one deeper follow-up** ("ok, but *why*? when would that break?") inline before you move on. If your answer is a non-answer or off-topic, the AI stays silent and you just advance — it never probes `hello world`. Your follow-up reply is folded into grading.
 
+### 🎯 Daily Challenge
+One question **per calendar day, the same for everyone** (picked deterministically from the pooled question bank by the date). For logged-in users it **bounces in** once a day; answer it once, get **AI-graded feedback**, earn **XP + a daily bonus**, and keep your **streak** alive. A "come back tomorrow" state locks it to one attempt per day, and the completion syncs across devices via game state.
+
 ### 📊 Smart Dashboard
 Every round feeds a live, **cross-device** dashboard:
 - **Readiness rings** per technology
@@ -141,9 +144,10 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] Share scorecard (rich link previews · downloadable card · head-to-head challenge)
 - [x] Weekly email digest
 - [x] Light / dark theme
+- [x] AI follow-up probing in Test Me
+- [x] Daily Challenge
 - [ ] More arenas (React, Python, AWS, Docker) & deeper question banks
-- [ ] Daily Challenge
-- [ ] AI-generated questions & follow-up probing
+- [ ] AI-generated questions
 - [ ] Spaced repetition for mastered questions
 
 ---

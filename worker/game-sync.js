@@ -77,5 +77,6 @@ function mergeGame(a, b) {
         ? a.streak || { count: 0, lastActive: "" }
         : b.streak,
     achievements: [...new Set([...(a.achievements || []), ...(b.achievements || [])])],
+    daily: (a.daily?.date || "") >= (b.daily?.date || "") ? a.daily : b.daily,
   };
 }
