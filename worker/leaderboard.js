@@ -46,18 +46,30 @@ function upsert(list, entry) {
   return next.slice(0, TOP_N);
 }
 
-export async function updateLeaderboard(env, userId, rec) {
-  if (!rec) return;
-  const xp = rec.game?.xp || 0;
+/**
+ * Recompute this user's leaderboard entry. Game state (XP) and progress (rounds/best) now
+ * live in SEPARATE KV keys, so this reads both. Callers pass whichever half they just wrote
+ * (via opts.user / opts.game) to avoid a stale re-read; the other half is fetched here.
+ * Back-compat: falls back to the old nested `user.game` for accounts not yet migrated.
+ */
+export async function updateLeaderboard(env, userId, opts = {}) {
+  const user = opts.user || (await env.PROGRESS_KV.get(`user:${userId}`, "json")) || {};
+  const game =
+    opts.game ||
+    (await env.PROGRESS_KV.get(`game:${userId}`, "json")) ||
+    user.game ||
+    {};
+
+  const xp = game.xp || 0;
   // NOTE: the user record stores arenas under `arenas` (not `progress`).
-  const rounds = Object.values(rec.arenas || {}).reduce((s, a) => s + (a?.overall?.rounds || 0), 0);
-  const best = (rec.recentRounds || []).reduce((m, r) => Math.max(m, r.score || 0), 0);
+  const rounds = Object.values(user.arenas || {}).reduce((s, a) => s + (a?.overall?.rounds || 0), 0);
+  const best = (user.recentRounds || []).reduce((m, r) => Math.max(m, r.score || 0), 0);
 
   // Skip users with no activity yet — keeps fresh sign-ups off the boards.
   if (xp === 0 && rounds === 0 && best === 0) return;
 
   const id = shortId(userId);
-  const name = rec.name || displayName(rec.email, userId);
+  const name = user.name || displayName(user.email, userId);
   const level = levelFromXp(xp);
   const base = { id, name, level };
 

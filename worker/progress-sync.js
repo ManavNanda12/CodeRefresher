@@ -63,7 +63,7 @@ export async function handleProgressSync(request, env) {
   userData.lastActive = new Date().toISOString();
 
   await env.PROGRESS_KV.put(`user:${userId}`, JSON.stringify(userData));
-  await updateLeaderboard(env, userId, userData);
+  await updateLeaderboard(env, userId, { user: userData });
 
   return Response.json({ success: true });
 }

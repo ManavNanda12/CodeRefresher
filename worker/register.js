@@ -61,7 +61,7 @@ export async function handleUserRegister(request, env) {
 
   // Refresh the leaderboard so a name change shows up for already-ranked users.
   // (updateLeaderboard skips users with no activity, so new sign-ups won't pollute it.)
-  await updateLeaderboard(env, userId, userData);
+  await updateLeaderboard(env, userId, { user: userData });
 
   return Response.json({ success: true, adopted: false, userId, recoveryCode });
 }

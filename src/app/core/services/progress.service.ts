@@ -133,16 +133,26 @@ export class ProgressService {
       );
   }
 
-  /** Write a KV dashboard payload back into the local caches. */
+  /**
+   * Write a KV dashboard payload back into the local caches. Guarded: KV is eventually
+   * consistent, so a momentarily-empty/stale response must NOT wipe good local data. We only
+   * accept an arena (or the history) when KV is at least as complete as what we hold locally.
+   */
   mergeFromKv(payload: DashboardPayload | null): void {
     if (!payload || !isPlatformBrowser(this.platformId)) return;
     if (payload.arenas) {
       for (const [arena, prog] of Object.entries(payload.arenas)) {
-        this.writeJson(PROGRESS_KEY(arena), prog);
+        const incomingRounds = prog?.overall?.rounds ?? 0;
+        const localRounds = this.getArenaProgress(arena)?.overall.rounds ?? 0;
+        // Keep local if KV looks emptier/staler for this arena (e.g. a sync race wiped it).
+        if (incomingRounds >= localRounds) this.writeJson(PROGRESS_KEY(arena), prog);
       }
     }
     if (Array.isArray(payload.recentRounds)) {
-      this.writeJson(HISTORY_KEY, payload.recentRounds.slice(0, HISTORY_MAX));
+      const localCount = this.getHistory().length;
+      if (payload.recentRounds.length >= localCount) {
+        this.writeJson(HISTORY_KEY, payload.recentRounds.slice(0, HISTORY_MAX));
+      }
     }
     this.revision.update(v => v + 1);
   }

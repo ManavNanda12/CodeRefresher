@@ -1,7 +1,9 @@
 // game-sync.js → POST /api/game/sync  &  GET /api/game/load?userId=…
 //
-// Stores the arena game state (XP, mastery, streak, achievements) inside the
-// existing user record under `.game`, so it follows the user across devices.
+// Stores the arena game state (XP, mastery, streak, achievements) in a DEDICATED
+// `game:{userId}` key, separate from the user/progress record, so a game sync can never
+// clobber rounds/history (and vice-versa). Reads fall back to the legacy nested
+// `user:{id}.game` for accounts created before the split.
 // Writes are batched on the client (KV free tier ≈ 1k writes/day).
 //
 // Add to worker.js:
@@ -17,24 +19,44 @@ export async function handleGameSync(request, env) {
     return Response.json({ success: false, error: "Missing userId or game" }, { status: 400 });
   }
 
-  const rec =
-    (await env.PROGRESS_KV.get(`user:${userId}`, "json")) ||
-    { userId, email: "", arenas: {}, recentRounds: [] };
+  // Game state lives in its OWN key now — game-sync must NEVER read-modify-write the
+  // user/progress record (that race was clobbering rounds). Back-compat: migrate game that
+  // used to be nested inside the user record on first read.
+  const existing =
+    (await env.PROGRESS_KV.get(`game:${userId}`, "json")) ||
+    (await env.PROGRESS_KV.get(`user:${userId}`, "json"))?.game ||
+    null;
 
   // Server-side merge too, so two devices writing close together don't clobber.
-  rec.game = mergeGame(rec.game, game);
-  await env.PROGRESS_KV.put(`user:${userId}`, JSON.stringify(rec));
-  await updateLeaderboard(env, userId, rec);
+  const merged = mergeGame(existing, game);
 
-  return Response.json({ success: true, game: rec.game });
+  // ── Anti-tamper clamp ──────────────────────────────────────────────────────────
+  // XP is authored on the client (localStorage), so we cap it to a server-plausible
+  // ceiling derived from data we already trust: rounds played (≤50 XP each) + questions
+  // mastered (≤25 XP each), plus slack. A tampered localStorage value can no longer top
+  // the leaderboard, and the cap is the most a player could legitimately have earned.
+  const user = (await env.PROGRESS_KV.get(`user:${userId}`, "json")) || {};
+  const rounds = Object.values(user.arenas || {}).reduce((s, a) => s + (a?.overall?.rounds || 0), 0);
+  const masteredCount = Object.values(merged.mastered || {}).filter(Boolean).length;
+  const maxXp = 100 + rounds * 50 + masteredCount * 25;
+  merged.xp = Math.min(merged.xp || 0, maxXp);
+
+  await env.PROGRESS_KV.put(`game:${userId}`, JSON.stringify(merged));
+  await updateLeaderboard(env, userId, { game: merged, user });
+
+  return Response.json({ success: true, game: merged });
 }
 
 export async function handleGameLoad(url, env) {
   const userId = url.searchParams.get("userId");
   if (!userId) return Response.json({ success: false, error: "Missing userId" }, { status: 400 });
 
-  const rec = await env.PROGRESS_KV.get(`user:${userId}`, "json");
-  return Response.json({ success: true, game: rec?.game ?? null });
+  // Prefer the dedicated game key; fall back to the legacy nested copy for old accounts.
+  const game =
+    (await env.PROGRESS_KV.get(`game:${userId}`, "json")) ||
+    (await env.PROGRESS_KV.get(`user:${userId}`, "json"))?.game ||
+    null;
+  return Response.json({ success: true, game });
 }
 
 function mergeGame(a, b) {
