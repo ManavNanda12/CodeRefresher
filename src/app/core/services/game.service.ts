@@ -143,6 +143,36 @@ export class GameService {
     this.checkAchievements();
   }
 
+  /**
+   * Mark a question mastered (idempotent — never toggles off). No XP by default since the
+   * caller (e.g. a Test Me round) already awards round XP. Returns true if newly mastered.
+   */
+  masterQuestion(arena: string, qid: string, xpReward = 0): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const key = `${arena}:${qid}`;
+    if (this.state().mastered[key]) return false; // already mastered → no-op
+    const next = { ...this.state(), mastered: { ...this.state().mastered, [key]: true } };
+    if (xpReward > 0) next.xp += xpReward;
+    this.commit(this.withStreak(next));
+    this.justMastered.set({ arena, qid });
+    this.checkAchievements();
+    return true;
+  }
+
+  /**
+   * Drop mastery for a question (idempotent). Used when a later test shows it's slipped.
+   * Doesn't deduct XP — the user keeps what they earned. Returns true if it was mastered.
+   */
+  unmasterQuestion(arena: string, qid: string): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    const key = `${arena}:${qid}`;
+    if (!this.state().mastered[key]) return false;
+    const mastered = { ...this.state().mastered };
+    delete mastered[key];
+    this.commit({ ...this.state(), mastered });
+    return true;
+  }
+
   /** Award XP from elsewhere (e.g. a finished Test Me round). */
   awardXp(amount: number): void {
     if (!isPlatformBrowser(this.platformId) || amount <= 0) return;

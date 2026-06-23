@@ -108,6 +108,36 @@ export class TechPageComponent {
     return total ? Math.round((this.arenaMastered() / total) * 100) : 0;
   });
 
+  // ── Mastery filter (defaults to "not mastered" so the screen shows what's left) ──
+  masteryFilter = signal<'unmastered' | 'mastered' | 'all'>('unmastered');
+  setFilter(f: 'unmastered' | 'mastered' | 'all'): void {
+    this.masteryFilter.set(f);
+  }
+
+  /** Current items narrowed by the active mastery filter. */
+  readonly visibleItems = computed<RefresherItem[]>(() => {
+    this.game.masteredTotal(); // reactive dep so toggling mastery re-filters live
+    const items = this.currentItems();
+    const f = this.masteryFilter();
+    if (f === 'all') return items;
+    const arena = this.tech();
+    return items.filter(q => {
+      const mastered = this.game.isMastered(arena, questionId(q.question));
+      return f === 'mastered' ? mastered : !mastered;
+    });
+  });
+
+  /** Short, scaling encouragement based on arena-wide mastery. */
+  readonly masteryVibe = computed(() => {
+    const n = this.arenaMastered();
+    const total = this.totalCount();
+    if (total > 0 && n >= total) return 'Master 🏆';
+    if (n === 0) return "Let's go 🚀";
+    if (n < 5) return 'Good start ✨';
+    if (n < 10) return 'Good going 👍';
+    return 'Perfect 🔥';
+  });
+
   constructor() {
     this.challenged = new Set(this.loadChallenged());
 

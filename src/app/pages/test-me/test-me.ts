@@ -4,7 +4,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
 import { ProgressService, RoundRecord } from '../../core/services/progress.service';
-import { GameService } from '../../core/services/game.service';
+import { GameService, questionId } from '../../core/services/game.service';
 import { FocusRoundService } from '../../core/services/focus.service';
 import { UserService } from '../../core/services/user.service';
 import { ShareService, ScoreCard, ShareLinks } from '../../core/services/share.service';
@@ -85,6 +85,8 @@ const LEVEL_META: Record<string, { label: string; badge: string; difficulty: num
 
 const QUIZ_SIZE = 5;
 const HINT_COST_XP = 20; // first hint per round is free; each extra costs this
+const MASTER_ABOVE = 7;    // score strictly above this on a question → auto-master it
+const UNMASTER_BELOW = 5;  // score strictly below this → drop mastery (with a kind nudge)
 const BEST_KEY = 'testme_best_score';
 const TAKEN_KEY = 'testme_total_taken';
 const HISTORY_KEY = 'testme_history';
@@ -109,6 +111,10 @@ export class TestMeComponent {
 
   /** XP earned on the round just finished (shown on the results screen). */
   xpEarned = signal(0);
+
+  /** Mastery changes from the round just graded — drives the results banner. */
+  masteryGained = signal(0);
+  masteryLost = signal(0);
 
   readonly arenas = ARENAS;
   readonly verdictMap = VERDICT_DISPLAY;
@@ -730,6 +736,7 @@ export class TestMeComponent {
     const reveal = () => {
       this.persistStats();
       this.recordProgress();
+      this.syncMasteryFromResults();
       this.stage.set('results');
     };
     if (isPlatformBrowser(this.platformId)) {
@@ -1059,6 +1066,34 @@ export class TestMeComponent {
     const xp = Math.round(results.reduce((s, r) => s + r.score, 0));
     this.xpEarned.set(xp);
     this.game.awardXp(xp);
+  }
+
+  /**
+   * Reconcile question mastery with how the user actually performed this round:
+   *  • score > 7  → master the question (proved it)
+   *  • score < 5  → un-master it if it was mastered (it slipped — nudge them kindly)
+   *  • 5–7        → unchanged
+   * Counts feed the motivational results banner.
+   */
+  private syncMasteryFromResults(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const arena = this.selectedArena();
+    const results = this.results();
+    if (!arena || !results.length) return;
+
+    let gained = 0;
+    let lost = 0;
+    this.questions().forEach((q, i) => {
+      const score = results[i]?.score ?? 0;
+      const qid = questionId(q.question);
+      if (score > MASTER_ABOVE) {
+        if (this.game.masterQuestion(arena.id, qid)) gained++;
+      } else if (score < UNMASTER_BELOW) {
+        if (this.game.unmasterQuestion(arena.id, qid)) lost++;
+      }
+    });
+    this.masteryGained.set(gained);
+    this.masteryLost.set(lost);
   }
 
   // ── time helpers ───────────────────────────────────────────

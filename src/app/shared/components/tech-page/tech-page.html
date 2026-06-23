@@ -82,9 +82,22 @@
         </div>
       </div>
     } @else {
+      <!-- ── Mastery filter + progress vibe ──────────── -->
+      <div class="filter-bar">
+        <div class="filter-pills" role="group" aria-label="Filter by mastery">
+          <button class="filter-pill" [class.active]="masteryFilter() === 'unmastered'" (click)="setFilter('unmastered')">Not Mastered</button>
+          <button class="filter-pill" [class.active]="masteryFilter() === 'mastered'" (click)="setFilter('mastered')">Mastered</button>
+          <button class="filter-pill" [class.active]="masteryFilter() === 'all'" (click)="setFilter('all')">All</button>
+        </div>
+        <div class="filter-meta">
+          <strong>{{ arenaMastered() }}/{{ totalCount() }}</strong> mastered
+          <span class="filter-vibe">{{ masteryVibe() }}</span>
+        </div>
+      </div>
+
       <!-- ── Challenge cards ─────────────────────────── -->
       <div class="cards-grid">
-        @for (item of currentItems(); track item.question; let idx = $index) {
+        @for (item of visibleItems(); track item.question; let idx = $index) {
           <app-card
             [item]="item"
             [index]="idx + 1"
@@ -93,8 +106,16 @@
             [style.--delay]="cardDelay(idx)" />
         } @empty {
           <div class="empty-state">
-            <span class="empty-icon">📭</span>
-            <p>No challenges found for this arena.</p>
+            @if (masteryFilter() === 'unmastered') {
+              <span class="empty-icon">🎉</span>
+              <p>All caught up here — every question in view is mastered. Switch to “All” to revisit them.</p>
+            } @else if (masteryFilter() === 'mastered') {
+              <span class="empty-icon">🎯</span>
+              <p>Nothing mastered here yet — master a few (or score 8+ in Test Me) and they’ll show up.</p>
+            } @else {
+              <span class="empty-icon">📭</span>
+              <p>No challenges found for this arena.</p>
+            }
           </div>
         }
       </div>

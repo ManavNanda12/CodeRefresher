@@ -389,6 +389,17 @@
             </div>
           }
 
+          @if (masteryGained() > 0 || masteryLost() > 0) {
+            <div class="mastery-flash">
+              @if (masteryGained() > 0) {
+                <span class="mf-up">✅ Mastered {{ masteryGained() }} question{{ masteryGained() === 1 ? '' : 's' }} — added to your collection!</span>
+              }
+              @if (masteryLost() > 0) {
+                <span class="mf-down">💪 {{ masteryLost() }} question{{ masteryLost() === 1 ? '' : 's' }} slipped from mastered — no stress, revisit and reclaim {{ masteryLost() === 1 ? 'it' : 'them' }}!</span>
+              }
+            </div>
+          }
+
           <!-- Share your scorecard -->
           <div class="share-card">
             @for (k of [burstKey()]; track k) {
