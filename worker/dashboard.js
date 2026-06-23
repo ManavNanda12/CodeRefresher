@@ -5,25 +5,28 @@
 // normalized payload and an empty-but-valid shape for unknown users (so a brand-new
 // device renders cleanly instead of erroring). Swapping to this is OPTIONAL.
 
+import { isUserId, requireToken } from "./security.js";
+
 export async function handleDashboard(request, env) {
   const url = new URL(request.url);
   const userId = url.searchParams.get("userId");
 
-  if (!userId) {
+  if (!isUserId(userId)) {
     return Response.json({ success: false, error: "Missing userId" }, { status: 400 });
   }
 
-  const data = await env.PROGRESS_KV.get(`user:${userId}`);
+  const { ok, rec } = await requireToken(request, env, userId);
+  if (!ok) return Response.json({ success: false, error: "Forbidden" }, { status: 403 });
 
-  if (!data) {
-    return Response.json({ email: "", lastActive: null, arenas: {}, recentRounds: [] });
+  if (!rec) {
+    return Response.json({ lastActive: null, arenas: {}, recentRounds: [] });
   }
 
-  const userData = JSON.parse(data);
+  // NOTE: email is deliberately NOT returned — the client already has it from the cookie,
+  // so echoing it here would only widen PII exposure.
   return Response.json({
-    email: userData.email || "",
-    lastActive: userData.lastActive || null,
-    arenas: userData.arenas || {},
-    recentRounds: (userData.recentRounds || []).slice(0, 10),
+    lastActive: rec.lastActive || null,
+    arenas: rec.arenas || {},
+    recentRounds: (rec.recentRounds || []).slice(0, 10),
   });
 }

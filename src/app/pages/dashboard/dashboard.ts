@@ -284,8 +284,12 @@ export class DashboardComponent {
       return;
     }
     this.savingEmail.set(true);
-    this.user.changeEmail(email).subscribe(() => {
+    this.user.changeEmail(email).subscribe(res => {
       this.savingEmail.set(false);
+      if (res?.emailInUse) {
+        this.emailError.set('That email is already used by another account.');
+        return;
+      }
       this.emailSaved.set(true);
     });
   }

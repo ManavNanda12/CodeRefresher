@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
@@ -11,6 +11,8 @@ const COOKIE_UID = 'cr_uid';
 const COOKIE_EMAIL = 'cr_email';
 const COOKIE_NAME = 'cr_name';
 const COOKIE_ONBOARDED = 'cr_onboarded';
+const COOKIE_TOKEN = 'cr_tok'; // session secret proving ownership of the userId
+const COOKIE_RC = 'cr_rc';     // current (server-issued) recovery code
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 /** Progress blob mirrored into localStorage after auth (matches DashboardPayload shape). */
@@ -21,13 +23,17 @@ export interface AuthProgress {
 
 export interface RegisterResponse {
   success: boolean;
-  recoveryCode: string;
-  /** True when the email already had an account and we adopted it (no duplicate). */
+  recoveryCode?: string;
+  /** Session token, returned once when freshly minted (first register / migration). */
+  token?: string;
+  /** True when the email already belongs to a different account — restore via recovery code. */
+  emailInUse?: boolean;
+  /** @deprecated email-adoption was removed; always false now. */
   adopted?: boolean;
-  /** The canonical account id — differs from ours when adopted. */
+  /** The canonical account id. */
   userId?: string;
   name?: string;
-  /** The adopted account's progress, to mirror into localStorage. */
+  /** @deprecated adoption removed — no progress is returned from register anymore. */
   progress?: AuthProgress;
 }
 
@@ -36,6 +42,10 @@ export interface RecoverResponse {
   userId: string;
   email: string;
   name?: string;
+  /** Rotated session token for this device. */
+  token?: string;
+  /** Current recovery code (may be upgraded from a legacy one). */
+  recoveryCode?: string;
   /** Full progress blob the client mirrors into localStorage. */
   progress?: unknown;
 }
@@ -57,14 +67,26 @@ export class UserService {
   readonly name = signal<string | null>(null);
   readonly onboarded = signal(false);
 
-  /** Short, shareable secret derived from the UUID — used to restore on another device. */
-  readonly recoveryCode = computed(() => {
-    const id = this.userId();
-    return id ? recoveryCodeFor(id) : '';
-  });
+  /** Session secret proving ownership of the userId (sent on per-user API calls). */
+  readonly token = signal<string | null>(null);
+
+  /** Current recovery code — server-issued (random, high-entropy), persisted in a cookie. */
+  readonly recoveryCode = signal('');
 
   constructor() {
     this.hydrate();
+    // One-time migration: a returning user who has an identity but no session token yet
+    // (created before tokens existed) silently re-registers to mint one + upgrade their
+    // recovery code. register() preserves all server-side progress.
+    if (isPlatformBrowser(this.platformId) && this.userId() && this.onboarded() && !this.token() && this.email()) {
+      this.register(this.email() as string).subscribe();
+    }
+  }
+
+  /** Authorization header for per-user API calls, or {} when we hold no token. */
+  authHeader(): Record<string, string> {
+    const t = this.token();
+    return t ? { Authorization: `Bearer ${t}` } : {};
   }
 
   /** True once the user has given an email and we hold an id. */
@@ -78,6 +100,7 @@ export class UserService {
    * (identity is still usable locally and will sync on the next round).
    */
   register(email: string, name?: string): Observable<RegisterResponse> {
+    const hadIdentity = !!this.userId();
     const id = this.userId() ?? generateUuid();
     const clean = email.trim();
     const cleanName = (name ?? this.name() ?? '').trim().slice(0, 24);
@@ -88,24 +111,40 @@ export class UserService {
     this.onboarded.set(true);
     this.writeCookies(id, clean, this.name());
 
-    const code = recoveryCodeFor(id);
     const body: Record<string, string> = { userId: id, email: clean };
     if (this.name()) body['name'] = this.name() as string;
     return this.http
-      .post<RegisterResponse>(`${WORKER_BASE}/api/user/register`, body)
+      .post<RegisterResponse>(`${WORKER_BASE}/api/user/register`, body, { headers: this.authHeader() })
       .pipe(
         map(res => {
-          // The email already had an account — switch our identity to it so we don't
-          // run as a duplicate. localStorage is reconciled by the caller (onboarding).
-          if (res?.userId && res.userId !== this.userId()) {
-            this.userId.set(res.userId);
-            if (res.name) this.name.set(res.name);
-            this.writeCookies(res.userId, this.email() ?? clean, this.name());
-          }
+          if (res?.token) this.setToken(res.token);
+          if (res?.recoveryCode) this.setRecoveryCode(res.recoveryCode);
+          if (res?.name) this.name.set(res.name);
           return res;
         }),
-        catchError(() => of({ success: false, recoveryCode: code })),
+        catchError(err => {
+          // 409 → the email belongs to a DIFFERENT account. Don't keep a fresh empty
+          // identity; roll back so the user can restore it with their recovery code.
+          if (err?.status === 409) {
+            if (!hadIdentity) this.signOut();
+            return of({ success: false, emailInUse: true } as RegisterResponse);
+          }
+          // Other failures (e.g. offline): keep the optimistic identity and sync later.
+          return of({ success: false } as RegisterResponse);
+        }),
       );
+  }
+
+  /** Persist the session token (signal + cookie). */
+  private setToken(token: string): void {
+    this.token.set(token);
+    this.setCookie(COOKIE_TOKEN, token);
+  }
+
+  /** Persist the current recovery code (signal + cookie). */
+  private setRecoveryCode(code: string): void {
+    this.recoveryCode.set(code);
+    this.setCookie(COOKIE_RC, encodeURIComponent(code));
   }
 
   /** Update the email on the existing profile (reuses register's upsert by userId). */
@@ -128,9 +167,8 @@ export class UserService {
       this.signOut();
       return of(true);
     }
-    const recoveryCode = recoveryCodeFor(userId);
     return this.http
-      .post(`${WORKER_BASE}/api/user/delete`, { userId, recoveryCode })
+      .post(`${WORKER_BASE}/api/user/delete`, { userId, recoveryCode: this.recoveryCode() }, { headers: this.authHeader() })
       .pipe(
         map(() => {
           this.signOut();
@@ -156,6 +194,8 @@ export class UserService {
             this.name.set(res.name ?? null);
             this.onboarded.set(true);
             this.writeCookies(res.userId, res.email ?? '', res.name ?? null);
+            if (res.token) this.setToken(res.token);
+            if (res.recoveryCode) this.setRecoveryCode(res.recoveryCode);
           }
           return res;
         }),
@@ -169,10 +209,14 @@ export class UserService {
     this.email.set(null);
     this.name.set(null);
     this.onboarded.set(false);
+    this.token.set(null);
+    this.recoveryCode.set('');
     this.deleteCookie(COOKIE_UID);
     this.deleteCookie(COOKIE_EMAIL);
     this.deleteCookie(COOKIE_NAME);
     this.deleteCookie(COOKIE_ONBOARDED);
+    this.deleteCookie(COOKIE_TOKEN);
+    this.deleteCookie(COOKIE_RC);
   }
 
   // ── cookie plumbing (SSR-safe) ─────────────────────────────
@@ -185,6 +229,10 @@ export class UserService {
     const name = this.readCookie(COOKIE_NAME);
     if (name) this.name.set(decodeURIComponent(name));
     this.onboarded.set(this.readCookie(COOKIE_ONBOARDED) === 'true');
+    const tok = this.readCookie(COOKIE_TOKEN);
+    if (tok) this.token.set(tok);
+    const rc = this.readCookie(COOKIE_RC);
+    if (rc) this.recoveryCode.set(decodeURIComponent(rc));
   }
 
   private writeCookies(uid: string, email: string, name?: string | null): void {
@@ -210,11 +258,6 @@ export class UserService {
     const match = this.doc.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
     return match ? match[1] : null;
   }
-}
-
-/** `cr_` + first 8 hex of the UUID — short enough to share, used as the KV recovery key. */
-export function recoveryCodeFor(uuid: string): string {
-  return 'cr_' + uuid.replace(/-/g, '').slice(0, 8);
 }
 
 /** crypto.randomUUID with a tiny fallback for ancient browsers. */

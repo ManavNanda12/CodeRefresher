@@ -128,7 +128,7 @@ export default {
       return withCors(request, await handleGameSync(request, env));
     }
     if (p === "/api/game/load" && method === "GET") {
-      return withCors(request, await handleGameLoad(url, env));
+      return withCors(request, await handleGameLoad(request, env));
     }
     if (p === "/api/leaderboard" && method === "GET") {
       return withCors(request, await handleLeaderboard(env));

@@ -12,12 +12,16 @@
 //   if (p === "/api/game/load" && method === "GET")  return withCors(await handleGameLoad(url, env));
 
 import { updateLeaderboard } from "./leaderboard.js";
+import { isUserId, requireToken } from "./security.js";
 
 export async function handleGameSync(request, env) {
   const { userId, game } = await request.json();
-  if (!userId || !game) {
+  if (!isUserId(userId) || !game) {
     return Response.json({ success: false, error: "Missing userId or game" }, { status: 400 });
   }
+
+  const auth = await requireToken(request, env, userId);
+  if (!auth.ok) return Response.json({ success: false, error: "Forbidden" }, { status: 403 });
 
   // Game state lives in its OWN key now — game-sync must NEVER read-modify-write the
   // user/progress record (that race was clobbering rounds). Back-compat: migrate game that
@@ -35,7 +39,7 @@ export async function handleGameSync(request, env) {
   // ceiling derived from data we already trust: rounds played (≤50 XP each) + questions
   // mastered (≤25 XP each), plus slack. A tampered localStorage value can no longer top
   // the leaderboard, and the cap is the most a player could legitimately have earned.
-  const user = (await env.PROGRESS_KV.get(`user:${userId}`, "json")) || {};
+  const user = auth.rec || {};
   const rounds = Object.values(user.arenas || {}).reduce((s, a) => s + (a?.overall?.rounds || 0), 0);
   const masteredCount = Object.values(merged.mastered || {}).filter(Boolean).length;
   const maxXp = 100 + rounds * 50 + masteredCount * 25;
@@ -47,14 +51,17 @@ export async function handleGameSync(request, env) {
   return Response.json({ success: true, game: merged });
 }
 
-export async function handleGameLoad(url, env) {
-  const userId = url.searchParams.get("userId");
-  if (!userId) return Response.json({ success: false, error: "Missing userId" }, { status: 400 });
+export async function handleGameLoad(request, env) {
+  const userId = new URL(request.url).searchParams.get("userId");
+  if (!isUserId(userId)) return Response.json({ success: false, error: "Missing userId" }, { status: 400 });
+
+  const auth = await requireToken(request, env, userId);
+  if (!auth.ok) return Response.json({ success: false, error: "Forbidden" }, { status: 403 });
 
   // Prefer the dedicated game key; fall back to the legacy nested copy for old accounts.
   const game =
     (await env.PROGRESS_KV.get(`game:${userId}`, "json")) ||
-    (await env.PROGRESS_KV.get(`user:${userId}`, "json"))?.game ||
+    auth.rec?.game ||
     null;
   return Response.json({ success: true, game });
 }

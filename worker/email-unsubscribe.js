@@ -10,15 +10,17 @@
 //     return handleUnsubscribe(request, env);
 //   }
 
+import { isUserId, safeEqual } from "./security.js";
+
 export async function handleUnsubscribe(request, env) {
   const url = new URL(request.url);
   const userId = url.searchParams.get("u");
   const code = url.searchParams.get("c");
 
-  if (!userId || !code) return htmlResponse("Invalid unsubscribe link.", 400);
+  if (!isUserId(userId) || !code) return htmlResponse("Invalid unsubscribe link.", 400);
 
   const expected = `cr_${userId.replace(/-/g, "").slice(0, 8)}`;
-  if (code !== expected) return htmlResponse("Invalid unsubscribe link.", 403);
+  if (!safeEqual(code, expected)) return htmlResponse("Invalid unsubscribe link.", 403);
 
   const rec = await env.PROGRESS_KV.get(`user:${userId}`, "json");
   if (!rec) return htmlResponse("We couldn't find that account.", 404);

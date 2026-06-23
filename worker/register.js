@@ -1,67 +1,95 @@
 // register.js → POST /api/user/register
 //
-// Body: { userId, email, name? }
-//   - One email = one account. We keep an `email:{lowercased}` → userId index so a
-//     returning user who re-enters their email ADOPTS the existing account instead
-//     of silently creating a duplicate. (No password — this app is low-stakes; the
-//     recovery code remains the explicit cross-device restore.)
-//   - preserves existing progress if the user already exists (don't wipe on re-register)
-//   - stores an optional display name (used by the leaderboard)
-// Doubles as the "update profile" call — re-registering with a new email/name upserts it.
+// Body: { userId, email, name? }   ·  optional header: Authorization: Bearer {token}
+//   - One email = one account. We keep an `email:{lowercased}` → userId index.
+//   - Mints a 256-bit session TOKEN on first registration (stored as a hash) and a strong
+//     random RECOVERY CODE (not derivable from the userId). Both are returned ONCE so the
+//     client can persist them.
+//   - SECURITY: registering with an email that already belongs to a DIFFERENT account no
+//     longer hands that account over — the caller must restore it with its recovery code.
+//   - Doubles as "update profile": once an account has a token, updates require that token.
+//   - Legacy accounts (no token / derived recovery code) are upgraded on first call.
 
 import { updateLeaderboard } from "./leaderboard.js";
+import {
+  isUserId,
+  safeEqual,
+  sha256Hex,
+  randomToken,
+  randomRecoveryCode,
+  bearerToken,
+} from "./security.js";
 
-const recoveryCodeFor = (id) => `cr_${id.replace(/-/g, "").slice(0, 8)}`;
+const legacyRecoveryCodeFor = (id) => `cr_${id.replace(/-/g, "").slice(0, 8)}`;
 const normEmail = (e) => String(e || "").trim().toLowerCase();
 
 export async function handleUserRegister(request, env) {
   const { userId, email, name } = await request.json();
 
-  if (!userId || !email) {
+  if (!isUserId(userId) || !email || typeof email !== "string") {
     return Response.json({ success: false, error: "Missing fields" }, { status: 400 });
   }
 
   const emailKey = `email:${normEmail(email)}`;
 
-  // ── Already an account for this email? Adopt it (no duplicate). ──
+  // ── Email already belongs to a DIFFERENT account ──
+  // Never surrender an account just because the caller knows the email. Tell the client to
+  // restore via recovery code instead. (A same-userId re-register falls through below.)
   const ownerId = await env.PROGRESS_KV.get(emailKey);
   if (ownerId && ownerId !== userId) {
-    const ownerRaw = await env.PROGRESS_KV.get(`user:${ownerId}`);
-    if (ownerRaw) {
-      const owner = JSON.parse(ownerRaw);
-      // Let the caller set/update their display name on the adopted account.
-      if (typeof name === "string" && name.trim()) {
-        owner.name = name.trim().slice(0, 24);
-        await env.PROGRESS_KV.put(`user:${ownerId}`, JSON.stringify(owner));
-      }
-      return Response.json({
-        success: true,
-        adopted: true,
-        userId: ownerId,
-        recoveryCode: recoveryCodeFor(ownerId),
-        name: owner.name || "",
-        progress: { arenas: owner.arenas || {}, recentRounds: owner.recentRounds || [] },
-      });
-    }
-    // Stale index (owner record gone) — fall through and (re)claim it below.
+    return Response.json(
+      { success: false, error: "email_in_use", emailInUse: true },
+      { status: 409 },
+    );
   }
-
-  const recoveryCode = recoveryCodeFor(userId);
 
   const existing = await env.PROGRESS_KV.get(`user:${userId}`);
   const userData = existing
-    ? { ...JSON.parse(existing), email, recoveryCode } // keep arenas/recentRounds/game
-    : { userId, email, recoveryCode, arenas: {}, recentRounds: [] };
+    ? JSON.parse(existing) // keep arenas/recentRounds/game
+    : { userId, email, arenas: {}, recentRounds: [] };
 
+  // ── Ownership check on an already-secured account ──
+  // If this account already carries a token, the caller must present a matching one —
+  // stops anyone who merely knows userId+email from overwriting the profile or rebinding it.
+  if (userData.tokenHash) {
+    const token = bearerToken(request);
+    const hash = token ? await sha256Hex(token) : "";
+    if (!token || !safeEqual(hash, userData.tokenHash)) {
+      return Response.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+  }
+
+  userData.email = email;
   if (typeof name === "string" && name.trim()) userData.name = name.trim().slice(0, 24);
 
+  // ── Mint a session token on first secure registration ──
+  let newToken = null;
+  if (!userData.tokenHash) {
+    newToken = randomToken();
+    userData.tokenHash = await sha256Hex(newToken);
+  }
+
+  // ── Recovery code: mint a strong random one; retire any legacy derivable code ──
+  let newRecoveryCode = null;
+  const legacy = legacyRecoveryCodeFor(userId);
+  if (!userData.recoveryCode || userData.recoveryCode === legacy) {
+    newRecoveryCode = randomRecoveryCode();
+    userData.recoveryCode = newRecoveryCode;
+    await env.PROGRESS_KV.put(`recovery:${newRecoveryCode}`, userId);
+    await env.PROGRESS_KV.delete(`recovery:${legacy}`); // old derivable code can no longer restore
+  }
+
   await env.PROGRESS_KV.put(`user:${userId}`, JSON.stringify(userData));
-  await env.PROGRESS_KV.put(`recovery:${recoveryCode}`, userId);
   await env.PROGRESS_KV.put(emailKey, userId); // claim the email for this account
 
   // Refresh the leaderboard so a name change shows up for already-ranked users.
-  // (updateLeaderboard skips users with no activity, so new sign-ups won't pollute it.)
   await updateLeaderboard(env, userId, { user: userData });
 
-  return Response.json({ success: true, adopted: false, userId, recoveryCode });
+  return Response.json({
+    success: true,
+    adopted: false,
+    userId,
+    ...(newToken ? { token: newToken } : {}),
+    ...(newRecoveryCode ? { recoveryCode: newRecoveryCode } : {}),
+  });
 }

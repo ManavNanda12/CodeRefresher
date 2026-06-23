@@ -78,12 +78,15 @@ export class OnboardingModalComponent {
     this.submitting.set(true);
     this.user.register(email, this.nameInput().trim()).subscribe(res => {
       this.submitting.set(false);
-      // Email already had an account → we adopted it; rebind to its data.
-      if (res?.adopted) {
-        this.applyAuthAndReload(res.progress);
-      } else {
-        this.close();
+      // Email already belongs to an account → can't adopt it from an email alone.
+      // Send the user to the recovery-code flow to restore it securely.
+      if (res?.emailInUse) {
+        this.codeInput.set('');
+        this.mode.set('recover');
+        this.error.set('That email already has an account. Enter your recovery code to restore it.');
+        return;
       }
+      this.close();
     });
   }
 

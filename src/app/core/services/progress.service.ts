@@ -113,7 +113,7 @@ export class ProgressService {
     // Send the email too: if register ever failed, the worker fills the gap so the
     // user stays reachable. The worker only sets it when the record's email is empty.
     this.http
-      .post(`${WORKER_BASE}/api/progress/sync`, { userId, email: this.user.email(), round })
+      .post(`${WORKER_BASE}/api/progress/sync`, { userId, email: this.user.email(), round }, { headers: this.user.authHeader() })
       .pipe(catchError(() => of(null)))
       .subscribe();
   }
@@ -126,7 +126,7 @@ export class ProgressService {
     const userId = this.user.userId();
     if (!userId) return of(null);
     return this.http
-      .get<DashboardPayload>(`${WORKER_BASE}/api/progress/dashboard?userId=${encodeURIComponent(userId)}`)
+      .get<DashboardPayload>(`${WORKER_BASE}/api/progress/dashboard?userId=${encodeURIComponent(userId)}`, { headers: this.user.authHeader() })
       .pipe(
         tap(payload => this.mergeFromKv(payload)),
         catchError(() => of(null)),

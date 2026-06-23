@@ -301,7 +301,7 @@ export class GameService {
     this.syncTimer = null;
     fetch(`${WORKER_BASE}/api/game/sync`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...this.user.authHeader() },
       body: JSON.stringify({ userId, game: this.state() }),
       keepalive,
     }).catch(() => {/* offline — localStorage still holds it */ });
@@ -311,7 +311,7 @@ export class GameService {
   private loadFromKv(): void {
     const userId = this.user.userId();
     if (!userId) return;
-    fetch(`${WORKER_BASE}/api/game/load?userId=${encodeURIComponent(userId)}`)
+    fetch(`${WORKER_BASE}/api/game/load?userId=${encodeURIComponent(userId)}`, { headers: this.user.authHeader() })
       .then(r => (r.ok ? r.json() : null))
       .then(res => {
         const remote = res?.game as GameState | undefined | null;

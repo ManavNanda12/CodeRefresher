@@ -9,10 +9,12 @@
 //     return handleAdminUsers(request, env);
 //   }
 
+import { safeEqual } from "./security.js";
+
 export async function handleAdminUsers(request, env) {
   const auth = request.headers.get("Authorization") || "";
   const token = auth.replace(/^Bearer\s+/i, "");
-  if (!env.ADMIN_SECRET || token !== env.ADMIN_SECRET) {
+  if (!env.ADMIN_SECRET || !safeEqual(token, env.ADMIN_SECRET)) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 

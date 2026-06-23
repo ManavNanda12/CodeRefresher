@@ -8,9 +8,11 @@
 // weak-spots can render. Math is identical to the client (progress.service.ts).
 
 import { updateLeaderboard } from "./leaderboard.js";
+import { isUserId, requireToken } from "./security.js";
 
-const SCORES_MAX = 20;   // keep last N scores per module
-const HISTORY_MAX = 30;  // keep last N rounds
+const SCORES_MAX = 20;     // keep last N scores per module
+const HISTORY_MAX = 30;    // keep last N rounds
+const QUESTIONS_MAX = 50;  // cap per-round questions so a crafted payload can't bloat KV
 
 function round2(n) {
   return Math.round(n * 10) / 10;
@@ -19,15 +21,19 @@ function round2(n) {
 export async function handleProgressSync(request, env) {
   const { userId, email, round } = await request.json();
 
-  if (!userId || !round || !Array.isArray(round.questions)) {
+  if (!isUserId(userId) || !round || !Array.isArray(round.questions)) {
     return Response.json({ success: false, error: "Missing or invalid round" }, { status: 400 });
   }
 
+  // Cap the questions array before it touches KV — a crafted client could otherwise
+  // send thousands and bloat the stored record.
+  round.questions = round.questions.slice(0, QUESTIONS_MAX);
+
+  const { ok, rec } = await requireToken(request, env, userId);
+  if (!ok) return Response.json({ success: false, error: "Forbidden" }, { status: 403 });
+
   // Fall back to a fresh record so a dropped register call never loses progress.
-  const existing = await env.PROGRESS_KV.get(`user:${userId}`);
-  const userData = existing
-    ? JSON.parse(existing)
-    : { userId, email: "", arenas: {}, recentRounds: [] };
+  const userData = rec || { userId, email: "", arenas: {}, recentRounds: [] };
 
   // Self-heal: if register never landed, capture the email from the sync so the
   // user is still reachable. Only fill when empty — never clobber a saved email.
