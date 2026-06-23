@@ -207,6 +207,22 @@
                 }
               </div>
 
+              <!-- Interviewer follow-up (up to 2 random questions; shown only if the AI probes) -->
+              @if (followupLoading()) {
+                <div class="followup loading">
+                  <span class="fu-spark">💬</span> The interviewer is reading your answer…
+                </div>
+              } @else if (currentFollowup(); as fq) {
+                <div class="followup">
+                  <div class="fu-head"><span class="fu-ico">🎙️</span> Follow-up</div>
+                  <p class="fu-q">{{ fq }}</p>
+                  <textarea class="q-input fu-input" rows="3"
+                            [value]="currentFollowupAnswer()"
+                            (input)="updateFollowupAnswer($any($event.target).value)"
+                            placeholder="Answer the follow-up — or click Next to skip it."></textarea>
+                </div>
+              }
+
               <div class="q-foot">
                 <div class="q-meta-left">
                   <span class="q-chars">{{ currentAnswer().length }} chars</span>
@@ -215,12 +231,14 @@
                 <div class="q-nav">
                   <button class="btn-soft" type="button" (click)="prev()" [disabled]="currentIndex() === 0">← Prev</button>
                   @if (!isLast()) {
-                    <button class="btn-accent" type="button" (click)="next()">
-                      {{ currentAnswered() ? 'Next →' : 'Skip →' }}
+                    <button class="btn-accent" type="button" (click)="next()" [disabled]="followupLoading()">
+                      @if (followupLoading()) { ⏳ Checking… }
+                      @else { {{ currentAnswered() ? 'Next →' : 'Skip →' }} }
                     </button>
                   } @else {
-                    <button class="btn-submit" type="button" (click)="submitQuiz()" [disabled]="answeredCount() === 0">
-                      ⚡ Submit · {{ answeredCount() }}/{{ total() }} answered
+                    <button class="btn-submit" type="button" (click)="submitQuiz()" [disabled]="answeredCount() === 0 || followupLoading()">
+                      @if (followupLoading()) { ⏳ Checking… }
+                      @else { ⚡ Submit · {{ answeredCount() }}/{{ total() }} answered }
                     </button>
                   }
                 </div>
@@ -421,7 +439,7 @@
                       <span class="mini-score" [style.color]="ringColor(r.score)">{{ r.score }}</span>
                     </div>
                     <div class="rq-info">
-                      <span class="rq-module">{{ q.icon }} {{ q.module }} @if (isHinted(i)) { <span class="rq-hinted">💡 hint used</span> }</span>
+                      <span class="rq-module">{{ q.icon }} {{ q.module }} @if (isHinted(i)) { <span class="rq-hinted">💡 hint used</span> } @if (isFollowedUp(i)) { <span class="rq-hinted probed">💬 probed</span> }</span>
                       <span class="rq-q">{{ q.question }}</span>
                     </div>
                     <span class="rq-verdict" [style.color]="verdictStyle(r.verdict).text">
@@ -440,6 +458,13 @@
                         <div class="fb-block your">
                           <span class="fb-label">💻 Your code</span>
                           <pre class="code"><code>{{ codes()[i] }}</code></pre>
+                        </div>
+                      }
+                      @if (followups()[i]; as fq) {
+                        <div class="fb-block followup-fb">
+                          <span class="fb-label">💬 Interviewer follow-up</span>
+                          <p class="fu-q-result">{{ fq }}</p>
+                          <p>{{ (followupAnswers()[i] ?? '').trim() || '— (you skipped this)' }}</p>
                         </div>
                       }
                       <div class="fb-block ok">

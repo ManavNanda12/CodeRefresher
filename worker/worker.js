@@ -16,6 +16,7 @@ import { handleUnsubscribe } from "./email-unsubscribe.js";
 import { handleGameSync, handleGameLoad } from "./game-sync.js";
 import { handleLeaderboard } from "./leaderboard.js";
 import { handleHint } from "./hint.js";
+import { handleFollowup } from "./followup.js";
 import { handleShareCreate, handleSharePage, handleShareImage, handleShareImageGet } from "./share.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
@@ -94,6 +95,12 @@ export default {
     if (p === "/api/hint" && method === "POST") {
       if (await rateLimited(request, env, "hint", 120)) return withCors(request, tooMany());
       return withCors(request, await handleHint(request, env));
+    }
+
+    // ── /api/followup (Test Me interviewer probe) ──
+    if (p === "/api/followup" && method === "POST") {
+      if (await rateLimited(request, env, "followup", 120)) return withCors(request, tooMany());
+      return withCors(request, await handleFollowup(request, env));
     }
 
     // ── progress + user endpoints ──

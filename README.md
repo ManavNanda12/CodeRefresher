@@ -15,6 +15,7 @@ Curated interview questions for **Angular**, **.NET / ASP.NET Core**, and **SQL*
 Pick a tech + level, answer **5 random questions from memory**, and a large language model grades each answer **0–10 against an expert response** — returning a verdict, your **strengths**, **what you missed**, and a **tip**. Answers can include prose and optional code, and the quiz validates each question independently so empty or failed evaluations are handled gracefully. A playful anti-cheat guard watches for tab switches during a live round and shows funny warning messages when you look away.
 
 - A hint lifeline is available during Test Me: the first hint is free, and each additional hint costs **20 XP**.
+- **AI follow-up probing** — on up to 2 random questions, when you give a real answer the AI reads it and fires **one deeper follow-up** ("ok, but *why*? when would that break?") inline before you move on. If your answer is a non-answer or off-topic, the AI stays silent and you just advance — it never probes `hello world`. Your follow-up reply is folded into grading.
 
 ### 📊 Smart Dashboard
 Every round feeds a live, **cross-device** dashboard:

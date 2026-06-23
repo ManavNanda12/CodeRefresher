@@ -148,6 +148,19 @@ export class TestMeComponent {
   editorOpen = signal<Set<number>>(new Set());
   currentIndex = signal(0);
 
+  // ── Interviewer follow-up (up to 2 random questions get an AI probe) ──────────
+  /** Question indices eligible for a probe this round (fixed at quiz build). */
+  followupIndices = signal<Set<number>>(new Set());
+  /** index → AI follow-up text — present ONLY when the AI chose to probe. */
+  followups = signal<Record<number, string>>({});
+  /** index → the user's answer to the follow-up. */
+  followupAnswers = signal<Record<number, string>>({});
+  /** index set: we've already asked the AI (it probed OR declined) — so Next now advances. */
+  followupResolved = signal<Set<number>>(new Set());
+  followupLoading = signal(false);
+  /** Client pre-filter: don't even call the AI on a near-empty answer like "hi". */
+  private readonly MIN_PROBE_CHARS = 25;
+
   results = signal<EvalResult[]>([]);
   evalProgress = signal(0); // 0..QUIZ_SIZE, drives the grading animation
 
@@ -209,6 +222,25 @@ export class TestMeComponent {
   readonly currentAnswered = computed(() => this.currentAnswer().trim().length > 0);
   readonly allAnswered = computed(() => this.answeredCount() === this.total() && this.total() > 0);
   readonly skippedCount = computed(() => this.total() - this.answeredCount());
+
+  // ── Follow-up derived state ────────────────────────────────
+  readonly currentIsEligible = computed(() => this.followupIndices().has(this.currentIndex()));
+  readonly currentFollowup = computed<string | null>(() => this.followups()[this.currentIndex()] ?? null);
+  readonly currentFollowupAnswer = computed(() => this.followupAnswers()[this.currentIndex()] ?? '');
+  /** Combined prose + code for the current question — what we'd send the AI to judge. */
+  private readonly currentProbeSource = computed(() =>
+    `${this.currentAnswer().trim()} ${this.currentCode().trim()}`.trim(),
+  );
+  /**
+   * True when clicking Next should ASK the AI instead of advancing. Passing this gate only
+   * means "worth asking" — the AI still decides whether to probe. Once it answers (probe or
+   * decline) the index is `resolved`, so this flips false and Next advances.
+   */
+  readonly pendingFollowup = computed(() =>
+    this.currentIsEligible() &&
+    !this.followupResolved().has(this.currentIndex()) &&
+    this.currentProbeSource().replace(/\s+/g, '').length >= this.MIN_PROBE_CHARS,
+  );
 
   readonly overallScore = computed(() => {
     const r = this.results();
@@ -318,6 +350,8 @@ export class TestMeComponent {
     this.startedAt = this.now();
     this.resetHints();
     this.resetShare();
+    this.resetFollowups();
+    this.pickFollowupIndices();
     this.stage.set('quiz');
   }
 
@@ -375,6 +409,8 @@ export class TestMeComponent {
     this.startedAt = this.now();
     this.resetHints();
     this.resetShare();
+    this.resetFollowups();
+    this.pickFollowupIndices();
     this.stage.set('quiz');
   }
 
@@ -526,7 +562,41 @@ export class TestMeComponent {
 
   next(): void {
     this.hintConfirm.set(false);
+    if (this.pendingFollowup()) { this.askFollowup(this.currentIndex()); return; }
     if (!this.isLast()) this.currentIndex.update(i => i + 1);
+  }
+
+  /**
+   * Ask the AI whether this answer deserves a probe. Two outcomes:
+   *  • probe text → reveal it inline and STAY (user answers, clicks Next again to advance)
+   *  • declined   → mark resolved and ADVANCE immediately (answer wasn't substantive)
+   * Either way the index is `resolved`, so we never re-ask it.
+   */
+  private askFollowup(index: number): void {
+    const q = this.questions()[index];
+    if (!q || this.followupLoading()) return;
+    this.followupLoading.set(true);
+    const userAnswer = this.currentProbeSource(); // prose + code, so the AI judges the full answer
+    this.testMe.getFollowup(q.question, userAnswer, q.answer ?? '').subscribe(probe => {
+      this.followupResolved.update(s => { const n = new Set(s); n.add(index); return n; });
+      this.followupLoading.set(false);
+      if (probe) {
+        this.followups.update(f => ({ ...f, [index]: probe })); // probe → reveal, stay put
+      } else {
+        this.advanceAfterFollowup(index);                       // declined → just move on
+      }
+    });
+  }
+
+  /** Advance (or submit, if last) after the AI declined — guarding against mid-flight nav. */
+  private advanceAfterFollowup(index: number): void {
+    if (this.currentIndex() !== index) return; // user navigated away while the request was in flight
+    if (this.isLast()) this.submitQuiz();
+    else this.currentIndex.update(i => i + 1);
+  }
+
+  updateFollowupAnswer(value: string): void {
+    this.followupAnswers.update(a => ({ ...a, [this.currentIndex()]: value }));
   }
 
   prev(): void {
@@ -572,8 +642,32 @@ export class TestMeComponent {
     this.hintConfirm.set(false);
   }
 
+  // ── Follow-up lifecycle ────────────────────────────────────
+  /** Choose up to 2 random question indices as probe-eligible for this round. */
+  private pickFollowupIndices(): void {
+    const n = this.total();
+    const idx = Array.from({ length: n }, (_, i) => i);
+    for (let i = idx.length - 1; i > 0; i--) {       // Fisher–Yates shuffle
+      const j = Math.floor(Math.random() * (i + 1));
+      [idx[i], idx[j]] = [idx[j], idx[i]];
+    }
+    this.followupIndices.set(new Set(idx.slice(0, Math.min(2, n))));
+  }
+
+  private resetFollowups(): void {
+    this.followups.set({});
+    this.followupAnswers.set({});
+    this.followupResolved.set(new Set());
+    this.followupLoading.set(false);
+  }
+
   isHinted(i: number): boolean {
     return this.hintedIndices().has(i);
+  }
+
+  /** Was this question actually probed (AI gave a follow-up)? Drives the results badge. */
+  isFollowedUp(i: number): boolean {
+    return !!this.followups()[i];
   }
 
   /**
@@ -585,14 +679,28 @@ export class TestMeComponent {
     return this.questions().map((_q, i) => {
       const answer = (this.answers()[i] ?? '').trim();
       const code = (this.codes()[i] ?? '').trim();
-      if (!code) return answer;
-      const block = '```' + lang + '\n' + code + '\n```';
-      return answer ? `${answer}\n\n${block}` : block;
+      let out = answer;
+      if (code) {
+        const block = '```' + lang + '\n' + code + '\n```';
+        out = out ? `${out}\n\n${block}` : block;
+      }
+      // Fold in the interviewer follow-up exchange so the grader rewards the deeper reasoning.
+      // Only when the probe was both asked AND answered (skipped probes don't penalise).
+      const followupQ = this.followups()[i];
+      const followupA = (this.followupAnswers()[i] ?? '').trim();
+      if (followupQ && followupA) {
+        out = `${out}\n\n[Interviewer follow-up] ${followupQ}\n[My answer] ${followupA}`;
+      }
+      return out;
     });
   }
 
   // ── Stage 4: evaluate ──────────────────────────────────────
   submitQuiz(): void {
+    // Last question is probe-eligible? Run the AI check first. If it declines,
+    // advanceAfterFollowup() re-calls submitQuiz() (now ungated) and the round proceeds.
+    if (this.pendingFollowup()) { this.askFollowup(this.currentIndex()); return; }
+
     const elapsedMs = this.now() - this.startedAt;
     this.elapsedSeconds = Math.max(0, Math.round(elapsedMs / 1000));
     this.elapsedLabel.set(this.formatElapsed(elapsedMs));
@@ -800,6 +908,8 @@ export class TestMeComponent {
     this.startedAt = this.now();
     this.resetHints();
     this.resetShare();
+    this.resetFollowups();
+    this.pickFollowupIndices();
     this.stage.set('quiz');
   }
 
@@ -828,6 +938,8 @@ export class TestMeComponent {
     this.currentIndex.set(0);
     this.resetHints();
     this.resetShare();
+    this.resetFollowups();
+    this.followupIndices.set(new Set());
     this.opponent.set(null);
     this.stage.set('pick-tech');
   }

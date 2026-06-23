@@ -70,6 +70,20 @@ export class TestMeService {
       );
   }
 
+  /**
+   * Interviewer follow-up probe. Returns the AI's follow-up question, or `null` when the AI
+   * declines to probe (non-answer / off-topic) or the call fails. `null` always means
+   * "just advance, don't show a probe" — we never invent a generic follow-up.
+   */
+  getFollowup(question: string, userAnswer: string, correctAnswer: string): Observable<string | null> {
+    return this.http
+      .post<{ followup: string | null }>(`${this.base}/api/followup`, { question, userAnswer, correctAnswer })
+      .pipe(
+        map(r => (r?.followup && r.followup.trim()) ? r.followup.trim() : null),
+        catchError(() => of(null)),
+      );
+  }
+
   /** Evaluate a single answer against the ground-truth answer. */
   evaluate(questionData: any, userAnswer: string): Observable<EvalResult> {
     return this.http.post<EvalResult>(this.apiUrl, {

@@ -499,6 +499,34 @@
 @keyframes hintIn { from { opacity: 0; transform: translateY(-8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes hintPop { 0% { transform: scale(0.2) rotate(-25deg); opacity: 0; } 60% { transform: scale(1.35) rotate(8deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
 
+/* ── Interviewer follow-up (indigo, distinct from amber hints) ── */
+.followup {
+  margin-top: 1.1rem; padding: 0.95rem 1.1rem; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.16), rgba(129,140,248,0.06));
+  border: 1px solid rgba(129,140,248,0.4);
+  box-shadow: 0 0 26px -8px rgba(99,102,241,0.45);
+  animation: hintIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+.followup.loading {
+  display: flex; align-items: center; gap: 0.55rem;
+  font-size: 0.9rem; color: #c4b5fd; font-weight: 600;
+}
+.fu-spark { display: inline-block; animation: hintPop 0.6s cubic-bezier(0.34,1.56,0.64,1) both; }
+.fu-head {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.78rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+  color: #a5b4fc; margin-bottom: 0.5rem;
+}
+.fu-ico { filter: drop-shadow(0 0 6px #818cf8); }
+.fu-q { font-size: 0.95rem; line-height: 1.6; color: #e2e8f0; margin: 0 0 0.7rem; font-weight: 600; }
+.fu-input { background: rgba(7,13,28,0.7); }
+.fu-input:focus { border-color: #a5b4fc; box-shadow: 0 0 0 3px rgba(129,140,248,0.2); }
+
+/* Results badge + recap block */
+.rq-hinted.probed { color: #a5b4fc; }
+.fb-block.followup-fb { border-left: 2px solid rgba(129,140,248,0.5); }
+.fu-q-result { font-weight: 600; color: #c4b5fd; margin: 0 0 0.35rem; }
+
 /* Lifeline confirmation modal */
 .ll-backdrop {
   position: fixed; inset: 0; z-index: 1600;
