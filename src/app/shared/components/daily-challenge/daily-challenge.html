@@ -20,6 +20,7 @@
         <span class="dc-streak">🔥 {{ game.streak() }} day streak</span>
       </div>
 
+      <div class="dc-body">
       @switch (stage()) {
 
         @case ('loading') {
@@ -107,6 +108,7 @@
           </div>
         }
       }
+      </div>
     </div>
   </div>
 }

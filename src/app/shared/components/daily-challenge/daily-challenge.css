@@ -32,13 +32,20 @@
 @keyframes dcFade { from { opacity: 0; } to { opacity: 1; } }
 
 .dc-modal {
-  position: relative; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
+  position: relative; width: 100%; max-width: 540px; max-height: 90vh;
+  display: flex; flex-direction: column; overflow: hidden;
   background: linear-gradient(160deg, #141d33, #0b1124);
   border: 1px solid rgba(129,140,248,0.4); border-radius: 24px;
   padding: 1.9rem 1.6rem 1.5rem; color: #e2e8f0;
   box-shadow: 0 36px 90px rgba(0,0,0,0.6);
   /* the bounce-back: overshoot then settle */
   animation: dcBounce 0.62s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+/* Header stays put; only the body scrolls when content (e.g. a result) is tall. */
+.dc-body {
+  position: relative; z-index: 1; flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  /* nudge the scrollbar to the modal edge without crowding the text */
+  margin-right: -0.7rem; padding-right: 0.7rem;
 }
 @keyframes dcBounce {
   0%   { opacity: 0; transform: translateY(40px) scale(0.82); }
@@ -61,8 +68,11 @@
 .dc-x:hover { background: rgba(255,255,255,0.14); color: #fff; }
 
 .dc-head {
-  position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between;
+  position: relative; z-index: 1; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
   gap: 0.75rem; margin-bottom: 1.1rem; flex-wrap: wrap;
+  /* keep the streak clear of the absolutely-positioned ✕ button */
+  padding-right: 2.5rem;
 }
 .dc-kicker {
   font-size: 0.78rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
@@ -134,3 +144,20 @@
 .dc-expert p { font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; margin-top: 0.5rem; }
 .dc-analogy { color: #a5b4fc !important; }
 .dc-tomorrow { font-size: 0.86rem; color: #94a3b8; margin-top: 1rem; }
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .dc-backdrop { padding: 0.75rem; align-items: flex-end; }
+  .dc-modal {
+    max-width: 100%; max-height: 92vh;
+    padding: 1.5rem 1.1rem 1.2rem; border-radius: 20px;
+  }
+  .dc-head { padding-right: 2.25rem; margin-bottom: 0.9rem; }
+  .dc-kicker { font-size: 0.72rem; }
+  .dc-streak { font-size: 0.76rem; }
+  .dc-title { font-size: 1.08rem; }
+  .dc-score-num { font-size: 2.8rem; }
+  .dc-foot { flex-direction: column; align-items: stretch; }
+  .dc-submit { margin-left: 0; width: 100%; }
+  .dc-fab { right: 14px; bottom: 14px; font-size: 0.8rem; padding: 0.6rem 1rem; }
+}
