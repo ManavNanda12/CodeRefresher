@@ -1,0 +1,130 @@
+<!-- BACKGROUND — reuses the site-wide arena background (same as Test Me / Dashboard) -->
+<div class="arena-bg-fx" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+<main class="wrap">
+  <!-- HEADER -->
+  <header class="hero">
+    <div class="brain" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.5 2A2.5 2.5 0 0 0 7 4.5v.5a2.5 2.5 0 0 0-2 4 2.5 2.5 0 0 0 .5 4.5A2.5 2.5 0 0 0 7 18.5 2.5 2.5 0 0 0 9.5 21 2.5 2.5 0 0 0 12 18.5V4.5A2.5 2.5 0 0 0 9.5 2Z"></path>
+        <path d="M14.5 2A2.5 2.5 0 0 1 17 4.5v.5a2.5 2.5 0 0 1 2 4 2.5 2.5 0 0 1-.5 4.5A2.5 2.5 0 0 1 17 18.5 2.5 2.5 0 0 1 14.5 21 2.5 2.5 0 0 1 12 18.5"></path>
+      </svg>
+      <svg class="spark s1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6z"></path></svg>
+      <svg class="spark s2" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6z"></path></svg>
+    </div>
+    <div class="hero-text">
+      <h1>Ask <span class="grad">My Notes</span></h1>
+      <p class="sub">Chat with your own notes — AI answers only from what you save.</p>
+    </div>
+  </header>
+
+  <!-- NOTES PANEL -->
+  <section class="panel" aria-label="Your notes">
+    <div class="panel-head">
+      <div class="panel-title"><span class="dot"></span> Your notes</div>
+      <div class="count-chip" [class.show]="showCountChip()">
+        <span class="pulse"></span> <b>{{ savedCount() }}</b>&nbsp;notes saved
+      </div>
+    </div>
+    <textarea
+      class="notes"
+      [class.shake]="shakeNotes()"
+      [ngModel]="notesText()"
+      (ngModelChange)="notesText.set($event)"
+      (keydown)="onNotesKeydown($event)"
+      placeholder="Paste your study notes here…&#10;&#10;Tip: put each fact or idea on its own line — the AI saves one note per line."
+    ></textarea>
+    <div class="notes-foot">
+      <span class="char-counter"><b>{{ charCount() }}</b> chars · <b>{{ noteCount() }}</b> notes detected</span>
+      <div class="save-row">
+        <span class="success-pill" [class.pop]="showPill()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>{{ pillText() }}</span>
+        </span>
+        <button class="btn" (click)="onSave()" [disabled]="saving()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          {{ saving() ? 'Saving…' : 'Save Notes' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ASK PANEL -->
+  <section class="panel" aria-label="Ask a question">
+    <div class="panel-head">
+      <div class="panel-title"><span class="dot"></span> Ask a question</div>
+    </div>
+    <div class="ask-row">
+      <div class="ask-input-wrap">
+        <input
+          type="text"
+          class="question"
+          [ngModel]="question()"
+          (ngModelChange)="question.set($event)"
+          (keydown)="onQuestionKeydown($event)"
+          [disabled]="asking()"
+          placeholder="Ask a question about your notes…"
+          autocomplete="off"
+        />
+      </div>
+      <button class="btn" (click)="onAsk()" [disabled]="asking()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"></path><path d="M22 2 15 22l-4-9-9-4 20-7z"></path></svg>
+        Ask
+      </button>
+    </div>
+  </section>
+
+  <!-- ANSWER AREA -->
+  <section class="answer-area" aria-live="polite">
+    @switch (view()) {
+      @case ('thinking') {
+        <div class="thinking">
+          <div class="think-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2 1 3.5 2 5l1 3h8l1-3c1-1.5 2-3 2-5a7 7 0 0 0-7-7z"/><path d="M9 21h6"/></svg></div>
+          <div class="dots"><span></span><span></span><span></span></div>
+          <div class="think-label">Searching your notes…</div>
+        </div>
+      }
+      @case ('answer') {
+        <div class="answer-card enter">
+          <div class="answer-head">
+            <div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 2 1 3.5 2 5l1 3h8l1-3c1-1.5 2-3 2-5a7 7 0 0 0-7-7z"/><path d="M9 21h6"/></svg></div>
+            <span class="lbl">Answer from your notes</span>
+          </div>
+          <div class="answer-text" [class.no-match]="noMatch()">{{ displayedAnswer() }}@if (isTyping()) {<span class="caret"></span>}</div>
+
+          @if (sources().length) {
+            <div class="sources">
+              <div class="sources-label">Sources · {{ sources().length }} note{{ sources().length > 1 ? 's' : '' }}</div>
+              <div class="chips">
+                @for (s of sources(); track s.n; let i = $index) {
+                  <div class="chip" [style.--i]="i">
+                    <span class="snum">#{{ s.n }}</span>
+                    <span class="stext">{{ shortSource(s.text) }}</span>
+                    <span class="full">{{ s.text }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @default {
+        <div class="empty">
+          <div class="ill" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <path d="M12 7v4"></path><path d="M12 14h.01"></path>
+            </svg>
+          </div>
+          <h3>{{ view() === 'empty-ready' ? 'Ready when you are' : 'Nothing to answer yet' }}</h3>
+          <p>{{ view() === 'empty-ready' ? 'Your notes are saved. Ask me anything above.' : 'Save some notes, then ask me anything — I\'ll only answer from what you\'ve saved.' }}</p>
+        </div>
+      }
+    }
+  </section>
+</main>

@@ -17,6 +17,8 @@ import { handleGameSync, handleGameLoad } from "./game-sync.js";
 import { handleLeaderboard } from "./leaderboard.js";
 import { handleHint } from "./hint.js";
 import { handleFollowup } from "./followup.js";
+import { handleEmbedDemo } from "./embed-demo.js";
+import { handleRagIngest, handleRagQuery, handleRagAsk } from "./rag-demo.js";
 import { handleShareCreate, handleSharePage, handleShareImage, handleShareImageGet } from "./share.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
@@ -89,6 +91,22 @@ export default {
     if (p === "/api/evaluate") {
       if (method === "POST") return withCors(request, await evaluateHandler(request, env));
       return withCors(request, new Response("Method not allowed", { status: 405 }));
+    }
+
+    // ── /api/embed-demo (RAG Step 1 — learn embeddings) ──
+    if (p === "/api/embed-demo" && method === "POST") {
+      return withCors(request, await handleEmbedDemo(request, env));
+    }
+
+    // ── RAG Step 2 — store + search vectors in Vectorize ──
+    if (p === "/api/rag-ingest" && method === "POST") {
+      return withCors(request, await handleRagIngest(request, env));
+    }
+    if (p === "/api/rag-query" && method === "POST") {
+      return withCors(request, await handleRagQuery(request, env));
+    }
+    if (p === "/api/rag-ask" && method === "POST") {
+      return withCors(request, await handleRagAsk(request, env));
     }
 
     // ── /api/hint (Test Me lifeline) ──

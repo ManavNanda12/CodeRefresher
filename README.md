@@ -17,6 +17,18 @@ Pick a tech + level, answer **5 random questions from memory**, and a large lang
 - A hint lifeline is available during Test Me: the first hint is free, and each additional hint costs **20 XP**.
 - **AI follow-up probing** — on up to 2 random questions, when you give a real answer the AI reads it and fires **one deeper follow-up** ("ok, but *why*? when would that break?") inline before you move on. If your answer is a non-answer or off-topic, the AI stays silent and you just advance — it never probes `hello world`. Your follow-up reply is folded into grading.
 
+### 🧠 Ask My Notes — chat with your own notes (RAG)
+Paste your own study notes — or your résumé — and ask questions in plain English. An LLM answers **only from what you saved**, never invented facts, and **shows the exact notes it used** as cited sources. Built as a real **Retrieval-Augmented Generation** pipeline on Cloudflare's edge:
+
+```
+question → embed (Workers AI · bge-base-en-v1.5) → Vectorize.query (cosine, per-user namespace)
+        → inject closest notes into the prompt → LLaMA 3.3 70B "answer using ONLY these" → answer + sources
+```
+
+- **Semantic retrieval** — notes are embedded into vectors and stored in **Cloudflare Vectorize**; questions match by *meaning*, not keywords.
+- **Grounded** — a relevance threshold returns *"not in your notes"* instead of hallucinating when nothing matches.
+- **Per-user isolation** — each user's notes live in their own Vectorize **namespace** (keyed on `userId`).
+
 ### 🎯 Daily Challenge
 One question **per calendar day, the same for everyone** (picked deterministically from the pooled question bank by the date). For logged-in users it **bounces in** once a day; answer it once, get **AI-graded feedback**, earn **XP + a daily bonus**, and keep your **streak** alive. A "come back tomorrow" state locks it to one attempt per day, and the completion syncs across devices via game state.
 
@@ -64,7 +76,8 @@ A signature dark **arena** theme with an opt-in **daylight** mode (browse surfac
 | Routing | Lazy routes + `withViewTransitions()` |
 | Styling | Plain CSS — custom-property design tokens, `color-mix()`, keyframe animations |
 | Backend | **Cloudflare Worker** + **Workers KV** (progress, game state, users, shared scorecards) |
-| AI grading | LLM via the Worker (`/api/evaluate`) |
+| AI grading & generation | **Groq · LLaMA 3.3 70B** via the Worker (grading, hints, follow-ups, Ask My Notes) |
+| RAG / vector search | **Cloudflare Vectorize** (vector DB) + **Workers AI** embeddings (`bge-base-en-v1.5`) |
 | Email | **GitHub Actions** cron + `nodemailer` (SMTP), transport-swappable to Resend |
 | Persistence | Cookie (identity) + localStorage (fast cache) + KV (source of truth) |
 
@@ -78,6 +91,7 @@ Browser (Angular SSR)
   ├─ localStorage: progress + game state (instant, offline-first cache)
   └─ HTTPS → Cloudflare Worker
                 ├─ /api/evaluate              → AI grades a Test Me answer
+                ├─ /api/rag-ingest|query|ask  → Ask My Notes (embed → Vectorize → LLaMA)
                 ├─ /api/user/register|recover|delete
                 ├─ /api/progress/sync|dashboard   → per-module stats + history
                 ├─ /api/game/sync|load            → XP / mastery / streak (batched writes)
@@ -128,7 +142,11 @@ npm run build        # production (SSR) build
 ### Backend (Cloudflare)
 1. Create a KV namespace `CODEREFRESHER_PROGRESS`, bind it as `PROGRESS_KV`.
 2. Deploy the Worker with the routes in `worker/worker.js` (keep your `GROK_API_KEY`, set `ADMIN_SECRET`).
-3. For weekly emails, add the GitHub Actions secrets listed in `worker/EMAIL-SETUP.md`.
+3. For **Ask My Notes**, bind **Workers AI** as `AI`, create a Vectorize index and bind it as `VECTORIZE`:
+   ```bash
+   npx wrangler vectorize create coderefresher-notes --dimensions=768 --metric=cosine
+   ```
+4. For weekly emails, add the GitHub Actions secrets listed in `worker/EMAIL-SETUP.md`.
 
 Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP.md`](worker/EMAIL-SETUP.md)
 
@@ -146,6 +164,7 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] Light / dark theme
 - [x] AI follow-up probing in Test Me
 - [x] Daily Challenge
+- [x] Ask My Notes — RAG over your own notes (Vectorize + LLaMA 3.3)
 - [ ] More arenas (React, Python, AWS, Docker) & deeper question banks
 - [ ] AI-generated questions
 - [ ] Spaced repetition for mastered questions

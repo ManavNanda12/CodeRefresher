@@ -165,6 +165,7 @@ export class HomeComponent {
     { icon: '📚', title: 'Structured Q&A', desc: 'Curated questions for Angular, .NET & SQL, split by experience level — each with a code example and a plain-English analogy.', tag: 'Learn' },
     { icon: '🧪', title: 'AI Test Me', desc: 'Answer from memory and our AI grades every answer 0–10 against an expert response, with your strengths, gaps and a tip.', tag: 'Practice' },
     { icon: '💬', title: 'AI Follow-up Probing', desc: 'Give a strong answer and the AI digs deeper with a real interviewer-style follow-up — “ok, but why?” — just like the real room.', tag: 'Practice' },
+    { icon: '🧠', title: 'Ask My Notes (RAG)', desc: 'Paste your own notes and chat with them — an AI that answers ONLY from what you saved, with cited sources. Powered by vector search (Cloudflare Vectorize) + LLaMA 3.3.', tag: 'AI' },
     { icon: '🗓️', title: 'Daily Challenge', desc: 'One fresh question a day — the same for everyone. Answer once for instant AI feedback, bonus XP, and to keep your streak alive.', tag: 'Daily' },
     { icon: '📊', title: 'Smart Dashboard', desc: 'Readiness rings per technology, a module heatmap, your weak spots and recent rounds — progress at a glance.', tag: 'Track' },
     { icon: '🎯', title: 'Adaptive Focus Rounds', desc: 'One tap builds a quiz weighted toward your weakest and untested modules. Drill exactly what needs work.', tag: 'Improve' },

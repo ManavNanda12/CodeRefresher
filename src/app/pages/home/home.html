@@ -240,6 +240,36 @@
   </div>
 </section>
 
+<!-- ── Ask My Notes peek (NEW) ────────────────────────── -->
+<section class="peek-section">
+  <div class="peek-card reveal">
+    <div class="peek-right">
+      <span class="ai-badge">🧠 Ask My Notes <span class="new-tag">NEW</span></span>
+      <h3 class="ai-title">Chat with your own notes</h3>
+      <p class="ai-desc">
+        Paste your study notes — or your résumé — and ask questions in plain English.
+        An AI answers <strong>only from what you saved</strong>, never made-up facts, and
+        <strong>shows the exact notes it used</strong>. Built with real
+        <strong>Retrieval-Augmented Generation</strong>: vector search on Cloudflare Vectorize
+        + LLaMA 3.3.
+      </p>
+      <a routerLink="/ask-notes" class="btn-primary">Try Ask My Notes →</a>
+    </div>
+
+    <div class="peek-left" aria-hidden="true">
+      <div class="notes-mock">
+        <div class="nm-note">📝 “Call unsubscribe in ngOnDestroy to clean up subscriptions.”</div>
+        <div class="nm-q">❓ How do I avoid memory leaks with observables?</div>
+        <div class="nm-a">
+          <span class="nm-a-lbl">Answer from your notes</span>
+          To avoid memory leaks, unsubscribe in <code>ngOnDestroy</code> to clean up your Observable subscriptions.
+          <div class="nm-src"><span class="nm-chip">#1 unsubscribe in ngOnDestroy…</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── Final CTA ──────────────────────────────────────── -->
 <section class="cta-band" (click)="burst($event)">
   <div class="cta-inner reveal">

@@ -40,7 +40,8 @@ export class LayoutComponent {
     { path: '/sql',     label: 'SQL',     icon: '🗄️' },
     { path: '/test-me',     label: 'Test Me',     icon: '🧪' },
     { path: '/dashboard',   label: 'Dashboard',   icon: '📊' },
-    { path: '/leaderboard', label: 'Leaderboard', icon: '🏆', badge: 'NEW' },
+    { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+    { path: '/ask-notes',   label: 'Ask My Notes', icon: '🧠', badge: 'NEW' },
   ];
 
   onThemeToggle(e: MouseEvent): void {
