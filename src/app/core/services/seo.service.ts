@@ -23,7 +23,11 @@ export class SeoService {
   private readonly OG_IMAGE  = `${this.BASE_URL}/og-image.png`;
 
   update(config: SeoConfig): void {
-    const fullTitle = `${config.title} | ${this.SITE_NAME}`;
+    // Append the brand once. If a page already includes it in its title
+    // (e.g. the homepage leads with "CodeRefresher — …"), don't double it.
+    const fullTitle = config.title.includes(this.SITE_NAME)
+      ? config.title
+      : `${config.title} | ${this.SITE_NAME}`;
     const url       = `${this.BASE_URL}${this.canonicalPath()}`;
 
     // Drop any page-specific structured data from the previous route.
