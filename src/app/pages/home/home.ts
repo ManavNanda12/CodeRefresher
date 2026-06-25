@@ -53,8 +53,8 @@ export class HomeComponent {
     inject(SeoService).update({
       title: 'CodeRefresher — Gamified Interview Practice',
       description:
-        'CodeRefresher is a gamified, AI-powered interview prep app for Angular, .NET and SQL — AI-graded quizzes with interviewer-style follow-ups, a daily challenge, hint lifelines, animated XP level-ups, and a progress dashboard to improve readiness.',
-      keywords: 'CodeRefresher, gamified interview practice, angular interview questions, ai mock interview, daily coding challenge, angular interview game, coding interview prep',
+        'CodeRefresher is a gamified, AI-powered interview prep app for Angular, React, Next.js, NestJS, .NET and SQL — AI-graded quizzes with interviewer-style follow-ups, a daily challenge, hint lifelines, animated XP level-ups, and a progress dashboard to improve readiness.',
+      keywords: 'CodeRefresher, gamified interview practice, angular interview questions, react interview questions, next.js interview questions, nestjs interview questions, ai mock interview, daily coding challenge, coding interview prep',
     });
 
     // Runs only in the browser, after the first render — SSR-safe.
@@ -85,8 +85,8 @@ export class HomeComponent {
       const so = new IntersectionObserver(
         entries => {
           if (entries[0].isIntersecting) {
-            this.animate(this.statQuestions, 45, 1200);
-            this.animate(this.statTech, 3, 900);
+            this.animate(this.statQuestions, 650, 1200);
+            this.animate(this.statTech, 6, 900);
             this.animate(this.statLevels, 4, 1000);
             so.disconnect();
           }
@@ -208,6 +208,39 @@ export class HomeComponent {
       gradient: 'linear-gradient(135deg, #0050a0 0%, #0ea5e9 100%)',
       path: '/sql',
       delay: '240ms',
+    },
+    {
+      id: 'react',
+      icon: '⚛️',
+      name: 'React',
+      description: 'JSX, components, props, state, hooks, context, custom hooks, Suspense and performance — everything to ace React interviews.',
+      tag: 'Frontend Library',
+      count: '100+ Questions',
+      gradient: 'linear-gradient(135deg, #087ea4 0%, #61dafb 100%)',
+      path: '/react',
+      delay: '330ms',
+    },
+    {
+      id: 'nextjs',
+      icon: '🔼',
+      name: 'Next.js',
+      description: 'App Router, Server Components, SSR/SSG/ISR, data fetching, route handlers, server actions, caching and deployment.',
+      tag: 'Fullstack Framework',
+      count: '100+ Questions',
+      gradient: 'linear-gradient(135deg, #111827 0%, #4b5563 100%)',
+      path: '/nextjs',
+      delay: '420ms',
+    },
+    {
+      id: 'nestjs',
+      icon: '🐱',
+      name: 'NestJS',
+      description: 'Controllers, providers, modules, dependency injection, pipes, guards, interceptors, microservices and testing.',
+      tag: 'Backend Framework',
+      count: '100+ Questions',
+      gradient: 'linear-gradient(135deg, #a1132e 0%, #e0234e 100%)',
+      path: '/nestjs',
+      delay: '510ms',
     },
   ];
 }

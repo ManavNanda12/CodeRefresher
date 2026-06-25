@@ -22,6 +22,9 @@ const ARENAS: { id: string; name: string; accent: string }[] = [
   { id: 'angular', name: 'Angular', accent: '#ff4857' },
   { id: 'dotnet', name: '.NET', accent: '#9333ea' },
   { id: 'sql', name: 'SQL', accent: '#0ea5e9' },
+  { id: 'react', name: 'React', accent: '#61dafb' },
+  { id: 'nextjs', name: 'Next.js', accent: '#6b7280' },
+  { id: 'nestjs', name: 'NestJS', accent: '#e0234e' },
 ];
 
 @Injectable({ providedIn: 'root' })

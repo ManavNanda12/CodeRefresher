@@ -24,6 +24,9 @@ const ARENA_META: ArenaMeta[] = [
   { id: 'angular', name: 'Angular', icon: '⚡', accent: '#ff4857', gradient: 'linear-gradient(135deg, #c3002f 0%, #ff4857 100%)' },
   { id: 'dotnet',  name: '.NET',    icon: '🔷', accent: '#9333ea', gradient: 'linear-gradient(135deg, #512bd4 0%, #9333ea 100%)' },
   { id: 'sql',     name: 'SQL',     icon: '🗄️', accent: '#0ea5e9', gradient: 'linear-gradient(135deg, #0050a0 0%, #0ea5e9 100%)' },
+  { id: 'react',   name: 'React',   icon: '⚛️', accent: '#61dafb', gradient: 'linear-gradient(135deg, #087ea4 0%, #61dafb 100%)' },
+  { id: 'nextjs',  name: 'Next.js', icon: '🔼', accent: '#6b7280', gradient: 'linear-gradient(135deg, #111827 0%, #4b5563 100%)' },
+  { id: 'nestjs',  name: 'NestJS',  icon: '🐱', accent: '#e0234e', gradient: 'linear-gradient(135deg, #a1132e 0%, #e0234e 100%)' },
 ];
 
 const LEVEL_NAME: Record<string, string> = {

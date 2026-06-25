@@ -7,6 +7,9 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'angular', renderMode: RenderMode.Prerender },
   { path: 'dotnet', renderMode: RenderMode.Prerender },
   { path: 'sql', renderMode: RenderMode.Prerender },
+  { path: 'react', renderMode: RenderMode.Prerender },
+  { path: 'nextjs', renderMode: RenderMode.Prerender },
+  { path: 'nestjs', renderMode: RenderMode.Prerender },
   { path: 'test-me', renderMode: RenderMode.Prerender },
 
   // Personalized / dynamic pages. They're noindex and depend on browser-only

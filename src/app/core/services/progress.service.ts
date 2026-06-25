@@ -5,7 +5,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { UserService, WORKER_BASE } from './user.service';
 
-export const ARENA_IDS = ['angular', 'dotnet', 'sql'] as const;
+export const ARENA_IDS = ['angular', 'dotnet', 'sql', 'react', 'nextjs', 'nestjs'] as const;
 export type ArenaId = (typeof ARENA_IDS)[number];
 
 /** One graded question inside a finished round. */

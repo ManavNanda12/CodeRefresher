@@ -1,6 +1,6 @@
 # CodeRefresher 🏟️
 
-An interview-prep **arena** built with **Angular 22**. Don't just *read* about Angular, .NET & SQL — **refresh** structured Q&A, **test** yourself against an AI examiner, **track** your readiness on a live dashboard, and **level up** as you clear the gaps.
+An interview-prep **arena** built with **Angular 22**. Don't just *read* about Angular, .NET, SQL, React, Next.js & NestJS — **refresh** structured Q&A, **test** yourself against an AI examiner, **track** your readiness on a live dashboard, and **level up** as you clear the gaps.
 
 > Learn → Test → Track → Improve. A complete, gamified prep loop — free forever, no sign-up to browse.
 
@@ -9,7 +9,7 @@ An interview-prep **arena** built with **Angular 22**. Don't just *read* about A
 ## ✨ Features
 
 ### 📚 Structured Q&A ("Arenas")
-Curated interview questions for **Angular**, **.NET / ASP.NET Core**, and **SQL**, split by experience tier (0–1 / 1–2 / 2–3 / 4+ years). Every question ships with a detailed answer, a syntax-highlighted **code example**, and a plain-English **analogy** so concepts actually stick. Each card is a **challenge card** — difficulty tier, XP value, and a **"Master ✓"** toggle.
+Curated interview questions for **Angular**, **.NET / ASP.NET Core**, **SQL**, **React**, **Next.js**, and **NestJS** (100 Q&A each for the latter three), split by experience tier (0–1 / 1–2 / 2–3 / 4+ years). Every question ships with a detailed answer, a syntax-highlighted **code example**, and a plain-English **analogy** so concepts actually stick. Each card is a **challenge card** — difficulty tier, XP value, and a **"Master ✓"** toggle.
 
 ### 🧪 Test Me — AI-graded mock interview
 Pick a tech + level, answer **5 random questions from memory**, and a large language model grades each answer **0–10 against an expert response** — returning a verdict, your **strengths**, **what you missed**, and a **tip**. Answers can include prose and optional code, and the quiz validates each question independently so empty or failed evaluations are handled gracefully. A playful anti-cheat guard watches for tab switches during a live round and shows funny warning messages when you look away.
@@ -120,8 +120,10 @@ src/app/
   shared/components/     layout (header HUD + footer) · card (challenge card)
                          · tech-page (arena) · onboarding-modal · game-events
                          (level-up crate + toasts)
-  pages/                 home · angular · dotnet · sql · test-me · dashboard · leaderboard
-public/data/             angular.json · dotnet.json · sql.json   (Q&A content)
+  pages/                 home · angular · dotnet · sql · react · nextjs · nestjs
+                         · test-me · dashboard · leaderboard · ask-notes
+public/data/             angular.json · dotnet.json · sql.json · react.json
+                         · nextjs.json · nestjs.json   (Q&A content)
 worker/                  Worker endpoint reference files + KV/EMAIL setup docs
 scripts/                 send-weekly-digest.mjs
 .github/workflows/       weekly-digest.yml
@@ -165,7 +167,8 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] AI follow-up probing in Test Me
 - [x] Daily Challenge
 - [x] Ask My Notes — RAG over your own notes (Vectorize + LLaMA 3.3)
-- [ ] More arenas (React, Python, AWS, Docker) & deeper question banks
+- [x] More arenas — React, Next.js & NestJS (100 Q&A each)
+- [ ] Further arenas (Python, AWS, Docker) & deeper question banks
 - [ ] AI-generated questions
 - [ ] Spaced repetition for mastered questions
 

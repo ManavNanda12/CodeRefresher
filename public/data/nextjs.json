@@ -1,0 +1,681 @@
+{
+  "categories": {
+    "0-1": {
+      "modules": {
+        "Next.js Fundamentals": {
+          "icon": "🔼",
+          "questions": [
+            {
+              "question": "What is Next.js?",
+              "answer": "Next.js is a React framework built on top of React that adds features like server-side rendering, static site generation, file-based routing, API routes, and built-in optimizations for images, fonts, and scripts.",
+              "simpleExample": "React is the engine; Next.js is the whole car built around that engine so you can actually drive somewhere without assembling the rest yourself."
+            },
+            {
+              "question": "How is Next.js different from plain React (Create React App)?",
+              "answer": "Plain React is a client-side library that renders entirely in the browser, while Next.js adds server rendering, routing, data fetching conventions, and production optimizations out of the box. Next.js can render on the server or at build time, improving SEO and performance.",
+              "simpleExample": "Plain React is a bag of LEGO bricks. Next.js is a LEGO kit with instructions, extra tools, and a baseplate already set up."
+            },
+            {
+              "question": "What are the main features of Next.js?",
+              "answer": "Key features include file-based routing, multiple rendering strategies (SSR, SSG, ISR), Server Components, Server Actions, API routes/route handlers, automatic code splitting, and built-in image, font, and script optimization.",
+              "simpleExample": "It's a Swiss Army knife for web apps: routing, rendering, data, and optimization tools all folded into one handle."
+            },
+            {
+              "question": "How do you create a new Next.js app?",
+              "answer": "You use the create-next-app CLI, which scaffolds a project with sensible defaults and prompts you for options like TypeScript, ESLint, Tailwind, and the App Router.",
+              "codeExample": "npx create-next-app@latest my-app\ncd my-app\nnpm run dev",
+              "simpleExample": "It's like ordering a furnished apartment instead of an empty room; everything is already set up when you walk in."
+            },
+            {
+              "question": "What is the difference between the Pages Router and the App Router?",
+              "answer": "The Pages Router (in the pages/ directory) is the older system using getServerSideProps/getStaticProps and client components by default. The App Router (in the app/ directory, stable since Next 13.4) uses React Server Components, nested layouts, and Server Actions as the modern default.",
+              "simpleExample": "Pages Router is the old neighborhood map; App Router is the new GPS with live traffic and smarter routing."
+            },
+            {
+              "question": "Does Next.js support TypeScript out of the box?",
+              "answer": "Yes, Next.js has built-in TypeScript support; create-next-app can scaffold a TypeScript project and Next.js auto-generates a tsconfig and type definitions. You just rename files to .ts/.tsx and Next.js handles the rest.",
+              "codeExample": "npx create-next-app@latest --typescript\n// pages and components use .tsx files",
+              "simpleExample": "It's like a car that already speaks your language; you don't have to install a translator before driving."
+            }
+          ]
+        },
+        "Routing (Pages & App Router)": {
+          "icon": "🧭",
+          "questions": [
+            {
+              "question": "How does file-based routing work in Next.js?",
+              "answer": "Routes are derived from the file system. In the Pages Router, files in pages/ map to URLs; in the App Router, folders under app/ define routes and a page.js/page.tsx file makes a route publicly accessible.",
+              "codeExample": "// App Router\napp/page.tsx        -> /\napp/about/page.tsx  -> /about\napp/blog/page.tsx   -> /blog",
+              "simpleExample": "Your folders are like rooms in a house, and the URL is just the path you walk to reach each room."
+            },
+            {
+              "question": "How do you create a dynamic route?",
+              "answer": "You wrap a folder or file name in square brackets. In the App Router, app/blog/[slug]/page.tsx matches /blog/anything and the segment value is passed in as a param.",
+              "codeExample": "// app/blog/[slug]/page.tsx\nexport default function Post({ params }) {\n  return <h1>Post: {params.slug}</h1>;\n}",
+              "simpleExample": "It's a fill-in-the-blank address: /blog/____ where the blank can be any word."
+            },
+            {
+              "question": "What is a catch-all route?",
+              "answer": "A catch-all route uses [...slug] to match multiple path segments, and an optional catch-all uses [[...slug]] to also match the base path. It is useful for docs or CMS-driven nested paths.",
+              "codeExample": "// app/docs/[...slug]/page.tsx\n// matches /docs/a, /docs/a/b, /docs/a/b/c\nexport default function Docs({ params }) {\n  return <div>{params.slug.join('/')}</div>;\n}",
+              "simpleExample": "It's like a mail forwarding rule that catches anything addressed to the whole building, no matter how many floors deep."
+            },
+            {
+              "question": "What is the special file page.tsx used for in the App Router?",
+              "answer": "page.tsx (or page.js) defines the unique UI for a route segment and makes that segment publicly routable. Without a page file, a folder is just a route segment with no public URL.",
+              "codeExample": "// app/dashboard/page.tsx\nexport default function Dashboard() {\n  return <h1>Dashboard</h1>;\n}",
+              "simpleExample": "A folder is a room, but page.tsx is the door that lets visitors actually enter it."
+            },
+            {
+              "question": "What is a layout in the App Router?",
+              "answer": "A layout.tsx file wraps its route segment and all children, preserving shared UI like headers or sidebars across navigations without re-rendering. The root layout is required and must include html and body tags.",
+              "codeExample": "// app/layout.tsx\nexport default function RootLayout({ children }) {\n  return (\n    <html><body>\n      <nav>Menu</nav>\n      {children}\n    </body></html>\n  );\n}",
+              "simpleExample": "A layout is the picture frame that stays put while you swap out the photo (the page) inside it."
+            },
+            {
+              "question": "How do route groups work and why use them?",
+              "answer": "Route groups wrap a folder name in parentheses like (marketing). They organize routes and let you apply different layouts without affecting the URL path, since the group name is omitted from the URL.",
+              "codeExample": "// app/(marketing)/about/page.tsx -> /about\n// app/(shop)/cart/page.tsx -> /cart\n// the (marketing) and (shop) names are invisible in the URL",
+              "simpleExample": "It's like sorting papers into labeled binders for your own organization, but the labels never show up on the printed page."
+            },
+            {
+              "question": "How does nested routing work?",
+              "answer": "Nested folders create nested URL segments, and each level can have its own layout. Layouts compose from the root down, so deeper pages inherit all parent layouts.",
+              "codeExample": "// app/dashboard/layout.tsx wraps\n// app/dashboard/settings/page.tsx -> /dashboard/settings",
+              "simpleExample": "Like Russian nesting dolls: each folder sits inside the previous one, and outer shells wrap every doll inside."
+            }
+          ]
+        },
+        "Pages, Links & Navigation": {
+          "icon": "🔗",
+          "questions": [
+            {
+              "question": "How do you navigate between pages in Next.js?",
+              "answer": "You use the built-in Link component from next/link for client-side navigation, which prefetches and avoids full page reloads. For programmatic navigation you use the useRouter hook.",
+              "codeExample": "import Link from 'next/link';\n\nexport default function Nav() {\n  return <Link href=\"/about\">About</Link>;\n}",
+              "simpleExample": "Link is like a teleport pad inside the app; you jump rooms without re-entering the whole building."
+            },
+            {
+              "question": "Why use the Link component instead of a plain anchor tag?",
+              "answer": "Link enables client-side navigation and automatic prefetching of the destination, so transitions are fast and don't reload the entire page. A plain anchor triggers a full server round-trip and reloads all assets.",
+              "codeExample": "<Link href=\"/about\">About</Link>\n// vs full reload:\n<a href=\"/about\">About</a>",
+              "simpleExample": "Link is an internal elevator; a plain link is walking out the front door and back in through reception."
+            },
+            {
+              "question": "What is prefetching in Next.js?",
+              "answer": "Prefetching is when Next.js loads the code and data for a linked route in the background before the user clicks, making navigation feel instant. Links in the viewport are prefetched automatically in production.",
+              "simpleExample": "It's like a waiter starting to prepare your likely next dish before you've even finished ordering it."
+            },
+            {
+              "question": "How do you navigate programmatically in the App Router?",
+              "answer": "You import useRouter from next/navigation (not next/router) and call methods like push, replace, back, and refresh. This hook only works in Client Components.",
+              "codeExample": "'use client';\nimport { useRouter } from 'next/navigation';\n\nexport default function Btn() {\n  const router = useRouter();\n  return <button onClick={() => router.push('/home')}>Go</button>;\n}",
+              "simpleExample": "It's a remote control that lets your code change the channel instead of waiting for a click."
+            },
+            {
+              "question": "How do you read route parameters and query strings in the App Router?",
+              "answer": "Dynamic segment params are passed to Server Components via the params prop, and query strings come from the searchParams prop in pages or the useSearchParams hook in Client Components.",
+              "codeExample": "// Server Component\nexport default function Page({ params, searchParams }) {\n  return <p>{params.id} {searchParams.tab}</p>;\n}",
+              "simpleExample": "params is the room number on the door; searchParams are the extra sticky notes attached to your request."
+            },
+            {
+              "question": "What is the not-found.tsx file?",
+              "answer": "not-found.tsx defines custom UI shown when a route segment cannot be found or when notFound() is called in code. It replaces the default 404 page for that segment.",
+              "codeExample": "// app/not-found.tsx\nexport default function NotFound() {\n  return <h1>404 - Page not found</h1>;\n}",
+              "simpleExample": "It's the friendly 'oops, wrong door' sign instead of a blank brick wall when a page doesn't exist."
+            }
+          ]
+        },
+        "Static Assets & Styling": {
+          "icon": "🎨",
+          "questions": [
+            {
+              "question": "Where do you put static assets like images in Next.js?",
+              "answer": "Static files go in the public/ folder at the project root and are served from the base URL. A file at public/logo.png is available at /logo.png.",
+              "codeExample": "// public/logo.png\n<img src=\"/logo.png\" alt=\"Logo\" />",
+              "simpleExample": "public/ is the lobby display case; anything you put there is visible to everyone at the front address."
+            },
+            {
+              "question": "How do you add global CSS in Next.js?",
+              "answer": "You import a global stylesheet once in the root layout (App Router) or _app.js (Pages Router). Global CSS can only be imported from those entry points.",
+              "codeExample": "// app/layout.tsx\nimport './globals.css';",
+              "simpleExample": "Global CSS is the house paint applied to every room; you choose it once at the main entrance."
+            },
+            {
+              "question": "What are CSS Modules and how do you use them?",
+              "answer": "CSS Modules are stylesheets named *.module.css that scope class names locally to the component that imports them, preventing naming collisions. Next.js supports them out of the box.",
+              "codeExample": "// styles.module.css -> .title { color: blue; }\nimport styles from './styles.module.css';\n<h1 className={styles.title}>Hi</h1>",
+              "simpleExample": "Each component gets its own labeled toolbox so its 'hammer' never gets confused with another component's hammer."
+            },
+            {
+              "question": "How do you use Tailwind CSS with Next.js?",
+              "answer": "You can enable Tailwind during create-next-app or install it manually, configure tailwind.config, and import its directives in your global CSS. Then you apply utility classes directly in JSX.",
+              "codeExample": "// globals.css\n@tailwind base;\n@tailwind components;\n@tailwind utilities;\n// usage\n<div className=\"p-4 text-blue-500\">Hi</div>",
+              "simpleExample": "Tailwind is a box of pre-cut stickers; instead of mixing paint you just slap on labeled utility stickers."
+            },
+            {
+              "question": "Does Next.js support Sass/SCSS?",
+              "answer": "Yes, Next.js has built-in Sass support; you just install the sass package and rename files to .scss or .sass. You can use both global SCSS and SCSS modules.",
+              "codeExample": "npm install --save-dev sass\n// styles.module.scss\n.box { .title { color: red; } }",
+              "simpleExample": "It's the same painting job but with fancier brushes that let you nest and reuse strokes more easily."
+            },
+            {
+              "question": "How can you apply styles conditionally based on a value?",
+              "answer": "You build the className string dynamically using template literals or a helper like clsx/classnames, toggling classes based on state or props. This works the same in Next.js as in React.",
+              "codeExample": "<button className={isActive ? 'btn active' : 'btn'}>\n  Click\n</button>",
+              "simpleExample": "It's like choosing which jacket to wear based on the weather; the rule picks the right one automatically."
+            }
+          ]
+        }
+      }
+    },
+    "1-2": {
+      "modules": {
+        "Rendering: SSR, SSG & ISR": {
+          "icon": "🖥️",
+          "questions": [
+            {
+              "question": "What is Server-Side Rendering (SSR)?",
+              "answer": "SSR generates the HTML for a page on the server for each request, then sends it to the browser. It ensures fresh data and good SEO, at the cost of slightly slower responses than static pages.",
+              "codeExample": "// App Router: dynamic fetch makes it SSR\nexport default async function Page() {\n  const data = await fetch(url, { cache: 'no-store' });\n  return <div>{/* render */}</div>;\n}",
+              "simpleExample": "SSR is a chef cooking your meal fresh the moment you order it, every single time."
+            },
+            {
+              "question": "What is Static Site Generation (SSG)?",
+              "answer": "SSG pre-renders pages to HTML at build time, so they can be served instantly from a CDN without per-request computation. It's ideal for content that doesn't change often, like marketing or docs pages.",
+              "codeExample": "// App Router default: fetch is cached -> static\nexport default async function Page() {\n  const data = await fetch(url); // cached at build\n  return <div>{/* render */}</div>;\n}",
+              "simpleExample": "SSG is like printing a stack of brochures ahead of time so you can hand one out instantly."
+            },
+            {
+              "question": "What is Incremental Static Regeneration (ISR)?",
+              "answer": "ISR lets statically generated pages be regenerated in the background after a defined time interval (or on demand) without rebuilding the whole site. You get static speed with periodically fresh content.",
+              "codeExample": "// App Router\nexport const revalidate = 60; // regenerate every 60s\nexport default async function Page() { /* ... */ }",
+              "simpleExample": "It's a printed brochure that quietly reprints itself every hour so the info never goes too stale."
+            },
+            {
+              "question": "How do you choose between SSR, SSG, and ISR?",
+              "answer": "Use SSG for content that rarely changes, ISR for content that changes periodically but tolerates slight staleness, and SSR for highly dynamic or user-specific data that must be fresh on every request.",
+              "simpleExample": "Brochure (SSG) for evergreen info, reprinted-hourly flyer (ISR) for news, live chef (SSR) for custom orders."
+            },
+            {
+              "question": "What is client-side rendering and when is it appropriate?",
+              "answer": "Client-side rendering loads a minimal shell and fetches/renders data in the browser after hydration. It's appropriate for highly interactive, user-specific dashboards or behind-login content where SEO doesn't matter.",
+              "codeExample": "'use client';\nimport useSWR from 'swr';\nfunction Profile() {\n  const { data } = useSWR('/api/me', fetcher);\n  return <div>{data?.name}</div>;\n}",
+              "simpleExample": "It's handing someone an empty notebook plus a pen so they fill in the pages themselves after arriving."
+            },
+            {
+              "question": "What is hydration in Next.js?",
+              "answer": "Hydration is the process where React attaches event listeners and makes server-rendered HTML interactive in the browser. The static HTML shows up first, then JavaScript 'hydrates' it into a live app.",
+              "simpleExample": "The server delivers a painted statue, and hydration is the spark that brings it to life so it can move and respond."
+            },
+            {
+              "question": "How do you force a page to be dynamically rendered in the App Router?",
+              "answer": "You can export the route segment config 'dynamic = force-dynamic', use cache: no-store on fetches, or read dynamic functions like cookies() or headers(). Any of these opt the route out of static rendering.",
+              "codeExample": "export const dynamic = 'force-dynamic';\nexport default async function Page() { /* always SSR */ }",
+              "simpleExample": "It's flipping a switch that tells the kitchen to always cook fresh, never serve from the warming tray."
+            }
+          ]
+        },
+        "Data Fetching": {
+          "icon": "📥",
+          "questions": [
+            {
+              "question": "How do you fetch data in a Server Component?",
+              "answer": "You can use async/await directly in the component and call fetch or any data source. There's no need for useEffect or special hooks because the component runs on the server.",
+              "codeExample": "export default async function Page() {\n  const res = await fetch('https://api.example.com/posts');\n  const posts = await res.json();\n  return <ul>{posts.map(p => <li key={p.id}>{p.title}</li>)}</ul>;\n}",
+              "simpleExample": "You just ask for the data right where you need it, like grabbing ingredients straight from the pantry while cooking."
+            },
+            {
+              "question": "What were getServerSideProps and getStaticProps used for?",
+              "answer": "In the Pages Router, getServerSideProps fetched data on every request (SSR) and getStaticProps fetched data at build time (SSG). The App Router replaces them with async Server Components and fetch caching options.",
+              "codeExample": "// Pages Router\nexport async function getStaticProps() {\n  const data = await fetchData();\n  return { props: { data } };\n}",
+              "simpleExample": "They were the old order forms; the App Router lets you just ask the kitchen directly instead of filling out a form."
+            },
+            {
+              "question": "What is getStaticPaths and what replaced it?",
+              "answer": "getStaticPaths in the Pages Router told Next.js which dynamic paths to pre-render at build time. In the App Router, generateStaticParams serves the same purpose for dynamic segments.",
+              "codeExample": "// App Router\nexport async function generateStaticParams() {\n  const posts = await getPosts();\n  return posts.map(p => ({ slug: p.slug }));\n}",
+              "simpleExample": "It's the guest list telling the printer which named brochures to print ahead of the event."
+            },
+            {
+              "question": "How does fetch caching work in the App Router?",
+              "answer": "By default fetch responses are cached, making the route static. You opt out with cache: no-store for fresh data, or set next: revalidate to cache for a time window (ISR-style).",
+              "codeExample": "fetch(url);                       // cached (default)\nfetch(url, { cache: 'no-store' }); // never cached\nfetch(url, { next: { revalidate: 60 } }); // 60s",
+              "simpleExample": "The default keeps a copy in the fridge; no-store always cooks fresh; revalidate tosses the leftovers after a set time."
+            },
+            {
+              "question": "How do you fetch data on the client side in Next.js?",
+              "answer": "In Client Components you use hooks like useEffect with fetch, or data libraries such as SWR or React Query for caching and revalidation. The component must include the 'use client' directive.",
+              "codeExample": "'use client';\nimport useSWR from 'swr';\nconst { data, error } = useSWR('/api/data', url => fetch(url).then(r => r.json()));",
+              "simpleExample": "The browser itself calls the kitchen after the page loads, like ordering dessert once you're already seated."
+            },
+            {
+              "question": "How do you handle parallel and sequential data fetching?",
+              "answer": "For parallel fetches you start requests together and await them with Promise.all to avoid waterfalls. Sequential fetching is when one request depends on another's result and must wait.",
+              "codeExample": "const [a, b] = await Promise.all([\n  fetch('/api/a').then(r => r.json()),\n  fetch('/api/b').then(r => r.json())\n]);",
+              "simpleExample": "Parallel is sending two runners at once; sequential is one runner who must return before the next can start."
+            }
+          ]
+        },
+        "API Routes / Route Handlers": {
+          "icon": "🛣️",
+          "questions": [
+            {
+              "question": "What are Route Handlers in the App Router?",
+              "answer": "Route Handlers are files named route.ts inside app/ that define API endpoints using Web Request/Response APIs. You export functions named after HTTP methods like GET, POST, PUT, and DELETE.",
+              "codeExample": "// app/api/hello/route.ts\nexport async function GET() {\n  return Response.json({ message: 'Hello' });\n}",
+              "simpleExample": "It's a service window in your app where the browser can drop off and pick up data, separate from the visible pages."
+            },
+            {
+              "question": "How do API routes differ between the Pages Router and App Router?",
+              "answer": "Pages Router uses files in pages/api/ with a (req, res) handler based on Node's http objects. App Router uses route.ts files with Web-standard Request and Response objects and method-named exports.",
+              "codeExample": "// Pages Router\nexport default function handler(req, res) {\n  res.status(200).json({ ok: true });\n}",
+              "simpleExample": "Old window used the building's custom intercom; the new window uses a universal standard phone everyone understands."
+            },
+            {
+              "question": "How do you read the request body in a Route Handler?",
+              "answer": "You await methods on the Request object such as request.json() for JSON, request.text() for raw text, or request.formData() for form submissions.",
+              "codeExample": "export async function POST(request) {\n  const body = await request.json();\n  return Response.json({ received: body });\n}",
+              "simpleExample": "It's opening the envelope the visitor handed you and reading whatever message is inside."
+            },
+            {
+              "question": "How do you read query parameters in a Route Handler?",
+              "answer": "You use the request's URL with the URL or nextUrl object and access searchParams to read query values. Each parameter is read by name.",
+              "codeExample": "export async function GET(request) {\n  const { searchParams } = new URL(request.url);\n  const id = searchParams.get('id');\n  return Response.json({ id });\n}",
+              "simpleExample": "Query params are the extra notes pinned to the request slip, and you read them off by their label."
+            },
+            {
+              "question": "How do you set status codes and headers in a Route Handler?",
+              "answer": "You pass an options object to Response or NextResponse specifying status and headers. This lets you return custom codes like 201 or 404 and set things like content type.",
+              "codeExample": "export async function POST() {\n  return Response.json({ created: true }, {\n    status: 201,\n    headers: { 'X-Custom': 'value' }\n  });\n}",
+              "simpleExample": "It's stamping the reply envelope with a status label and attaching extra tags before sending it back."
+            },
+            {
+              "question": "Can Route Handlers connect to a database?",
+              "answer": "Yes, Route Handlers run on the server so they can safely query databases, call external APIs, and use secrets. You should reuse connections and never expose credentials to the client.",
+              "codeExample": "export async function GET() {\n  const users = await db.user.findMany();\n  return Response.json(users);\n}",
+              "simpleExample": "The service window is behind the counter, so it can reach into the locked back room where the records are kept."
+            }
+          ]
+        },
+        "Image & Font Optimization": {
+          "icon": "🖼️",
+          "questions": [
+            {
+              "question": "What does the next/image component do?",
+              "answer": "The Image component automatically optimizes images by resizing, serving modern formats like WebP, lazy loading, and preventing layout shift. It improves performance and Core Web Vitals.",
+              "codeExample": "import Image from 'next/image';\n<Image src=\"/photo.jpg\" alt=\"Photo\" width={600} height={400} />",
+              "simpleExample": "It's an automatic photo editor that shrinks, compresses, and reformats your pictures so they load fast."
+            },
+            {
+              "question": "Why must you provide width and height (or fill) to next/image?",
+              "answer": "Dimensions let Next.js reserve space before the image loads, preventing cumulative layout shift. Alternatively, the fill prop makes the image expand to its positioned parent container.",
+              "codeExample": "<Image src=\"/p.jpg\" alt=\"\" fill style={{ objectFit: 'cover' }} />",
+              "simpleExample": "It's like saving a parking spot in advance so other cars don't jump into the space while you arrive."
+            },
+            {
+              "question": "How do you load images from an external domain with next/image?",
+              "answer": "You must whitelist the external host in next.config under images.remotePatterns (or domains). This is a security measure to prevent arbitrary remote optimization.",
+              "codeExample": "// next.config.js\nmodule.exports = {\n  images: { remotePatterns: [{ hostname: 'cdn.example.com' }] }\n};",
+              "simpleExample": "It's a guest list at the door; only image sources you explicitly invite are allowed in to be optimized."
+            },
+            {
+              "question": "What is the difference between priority and lazy loading on images?",
+              "answer": "By default images lazy load when near the viewport. Adding the priority prop preloads an image immediately, which is recommended for above-the-fold hero images that affect LCP.",
+              "codeExample": "<Image src=\"/hero.jpg\" alt=\"\" width={1200} height={600} priority />",
+              "simpleExample": "Priority is putting the headline photo on the front page; lazy loading waits to develop the rest until you flip to them."
+            },
+            {
+              "question": "How does next/font optimize fonts?",
+              "answer": "next/font self-hosts fonts at build time, removing external network requests to font providers and eliminating layout shift by preloading and using size-adjust. It supports Google Fonts and local fonts.",
+              "codeExample": "import { Inter } from 'next/font/google';\nconst inter = Inter({ subsets: ['latin'] });\n<body className={inter.className}>",
+              "simpleExample": "Instead of borrowing letters from a distant library each visit, it keeps the whole alphabet in your own desk drawer."
+            },
+            {
+              "question": "What problem does font optimization solve?",
+              "answer": "It eliminates the flash of unstyled or invisible text and the layout shift caused by fonts loading late, while also avoiding extra requests to third-party font CDNs for better privacy and speed.",
+              "simpleExample": "It stops the page from doing a costume change mid-show; the text shows up dressed correctly from the start."
+            }
+          ]
+        }
+      }
+    },
+    "2-3": {
+      "modules": {
+        "App Router & Server Components": {
+          "icon": "🧬",
+          "questions": [
+            {
+              "question": "What are React Server Components (RSC)?",
+              "answer": "Server Components render exclusively on the server and never ship their JavaScript to the browser, reducing bundle size. They can directly access server resources like databases and are the default in the App Router.",
+              "codeExample": "// Server Component (default, no directive)\nexport default async function Page() {\n  const data = await db.query();\n  return <div>{data.title}</div>;\n}",
+              "simpleExample": "They're like a kitchen that fully prepares the plate before sending it out; the diner never sees the cooking tools."
+            },
+            {
+              "question": "What is the 'use client' directive?",
+              "answer": "Placing 'use client' at the top of a file marks the component (and its imports) as a Client Component, enabling state, effects, and browser APIs. Its JavaScript is shipped to and runs in the browser.",
+              "codeExample": "'use client';\nimport { useState } from 'react';\nexport default function Counter() {\n  const [n, setN] = useState(0);\n  return <button onClick={() => setN(n + 1)}>{n}</button>;\n}",
+              "simpleExample": "It's a sign that says 'this part needs to run in the customer's hands,' like a remote control they actually press."
+            },
+            {
+              "question": "When should you use a Server Component vs a Client Component?",
+              "answer": "Use Server Components by default for data fetching, accessing secrets, and reducing bundle size. Switch to Client Components only when you need interactivity, state, effects, or browser-only APIs.",
+              "simpleExample": "Cook in the kitchen (server) whenever you can; only hand customers the controls (client) when they truly need to push buttons."
+            },
+            {
+              "question": "Can a Server Component import a Client Component and vice versa?",
+              "answer": "A Server Component can import and render a Client Component, but a Client Component cannot import a Server Component directly. You pass Server Components into Client Components as children/props instead.",
+              "codeExample": "// Server Component\n<ClientWrapper>\n  <ServerContent />\n</ClientWrapper>",
+              "simpleExample": "The kitchen can hand a finished plate to the waiter, but the waiter can't reach back into the kitchen to cook."
+            },
+            {
+              "question": "What are the special files loading.tsx and error.tsx?",
+              "answer": "loading.tsx provides instant loading UI via React Suspense while a segment loads, and error.tsx is a Client Component error boundary that catches runtime errors in a segment. Both are automatic per route segment.",
+              "codeExample": "// app/dashboard/loading.tsx\nexport default function Loading() {\n  return <p>Loading...</p>;\n}",
+              "simpleExample": "loading.tsx is the 'please wait' sign; error.tsx is the staff member who steps in calmly when something breaks."
+            },
+            {
+              "question": "Why can't you use useState or useEffect in a Server Component?",
+              "answer": "Server Components render once on the server and have no client-side lifecycle, so React hooks that rely on browser runtime and re-rendering don't apply. Those hooks require a Client Component.",
+              "simpleExample": "You can't use a TV remote inside a printed photo; interactivity hooks only work where there's a live screen."
+            },
+            {
+              "question": "How do you share data fetching to avoid duplicate requests across components?",
+              "answer": "Next.js automatically dedupes identical fetch calls within a single render pass via request memoization. For non-fetch functions you can wrap them in React's cache() to memoize results.",
+              "codeExample": "import { cache } from 'react';\nexport const getUser = cache(async (id) => db.user.find(id));",
+              "simpleExample": "If three cooks ask for the same ingredient at once, the pantry only fetches it once and shares it around."
+            }
+          ]
+        },
+        "Server Actions & Mutations": {
+          "icon": "⚡",
+          "questions": [
+            {
+              "question": "What are Server Actions?",
+              "answer": "Server Actions are asynchronous functions marked with 'use server' that run on the server and can be called from components, including directly from form submissions. They let you mutate data without manually writing API endpoints.",
+              "codeExample": "async function createPost(formData) {\n  'use server';\n  await db.post.create({ title: formData.get('title') });\n}",
+              "simpleExample": "It's a button that quietly sends your order straight to the back office without you building a separate order desk."
+            },
+            {
+              "question": "How do you use a Server Action with a form?",
+              "answer": "You pass the Server Action to a form's action prop, and the form data is sent to the server when submitted. This works even without JavaScript via progressive enhancement.",
+              "codeExample": "export default function Form() {\n  async function save(formData) {\n    'use server';\n    await db.save(formData.get('name'));\n  }\n  return <form action={save}><input name=\"name\" /></form>;\n}",
+              "simpleExample": "The form is wired directly to the back office, so pressing submit hands your slip straight to the clerk."
+            },
+            {
+              "question": "How do you revalidate data after a Server Action mutation?",
+              "answer": "You call revalidatePath or revalidateTag inside the action to purge the cache for affected routes or tags, so the UI shows fresh data. This avoids stale content after a write.",
+              "codeExample": "import { revalidatePath } from 'next/cache';\nasync function add(formData) {\n  'use server';\n  await db.add(formData);\n  revalidatePath('/posts');\n}",
+              "simpleExample": "After updating the records, you tear down the old posted notice so a fresh, correct one gets put up."
+            },
+            {
+              "question": "How do Server Actions improve over traditional API routes for mutations?",
+              "answer": "They co-locate mutation logic with the component, remove boilerplate of fetch calls and endpoint wiring, provide type safety, and support progressive enhancement. You write one function instead of an endpoint plus client fetch.",
+              "simpleExample": "Instead of building a whole post office and writing addressed letters, you just hand the note directly to the clerk beside you."
+            },
+            {
+              "question": "How do you handle pending UI state with Server Actions?",
+              "answer": "In Client Components you use the useFormStatus hook for pending state of a form, or the useActionState (formerly useFormState) hook to track action results and pending status. This gives loading feedback.",
+              "codeExample": "'use client';\nimport { useFormStatus } from 'react-dom';\nfunction Submit() {\n  const { pending } = useFormStatus();\n  return <button disabled={pending}>Save</button>;\n}",
+              "simpleExample": "It's a 'processing...' light that turns on while the clerk is still working on your slip in the back."
+            },
+            {
+              "question": "Are Server Actions secure, and what should you watch out for?",
+              "answer": "Server Actions create a public POST endpoint behind the scenes, so you must validate and authorize inputs as you would any API. Never trust client-supplied data and always check authentication inside the action.",
+              "codeExample": "async function deletePost(id) {\n  'use server';\n  const user = await auth();\n  if (!user) throw new Error('Unauthorized');\n  await db.delete(id);\n}",
+              "simpleExample": "Even though the slip comes from inside, the clerk must still check ID before acting; never assume the sender is trusted."
+            }
+          ]
+        },
+        "Middleware": {
+          "icon": "🧱",
+          "questions": [
+            {
+              "question": "What is Middleware in Next.js?",
+              "answer": "Middleware is code in a middleware.ts file at the project root that runs before a request is completed, letting you rewrite, redirect, set headers, or respond. It runs on the Edge runtime by default.",
+              "codeExample": "// middleware.ts\nimport { NextResponse } from 'next/server';\nexport function middleware(request) {\n  return NextResponse.next();\n}",
+              "simpleExample": "It's a security guard at the entrance who checks and can redirect every visitor before they reach a room."
+            },
+            {
+              "question": "What are common use cases for Middleware?",
+              "answer": "Common uses include authentication checks, redirects, A/B testing, internationalization routing, bot protection, and setting custom headers or cookies. It runs on every matched request before rendering.",
+              "simpleExample": "The guard can check your badge, point you to the right floor, or stamp your hand before you go in."
+            },
+            {
+              "question": "How do you limit which routes Middleware runs on?",
+              "answer": "You export a config object with a matcher specifying path patterns. This restricts Middleware to specific routes and improves performance by skipping irrelevant requests.",
+              "codeExample": "export const config = {\n  matcher: ['/dashboard/:path*', '/profile']\n};",
+              "simpleExample": "You tell the guard to only stand watch at certain doors instead of inspecting everyone in the whole building."
+            },
+            {
+              "question": "What is the difference between a redirect and a rewrite in Middleware?",
+              "answer": "A redirect changes the URL in the browser and sends the user to a new location, while a rewrite serves content from a different path without changing the visible URL. Rewrites are invisible to the user.",
+              "codeExample": "NextResponse.redirect(new URL('/login', request.url));\nNextResponse.rewrite(new URL('/internal', request.url));",
+              "simpleExample": "A redirect physically walks you to another room; a rewrite secretly swaps the room's contents while you stay put."
+            },
+            {
+              "question": "What are the limitations of Middleware running on the Edge?",
+              "answer": "Edge Middleware cannot use Node.js-specific APIs, must stay small and fast, and has limited access to certain libraries. It should not do heavy work like database queries; keep it to lightweight routing logic.",
+              "simpleExample": "The guard works fast and light; you wouldn't ask them to cook a full meal, just to check badges quickly."
+            },
+            {
+              "question": "How do you read and set cookies in Middleware?",
+              "answer": "You read cookies from request.cookies and set them on a NextResponse via response.cookies.set. This is useful for sessions, feature flags, or locale preferences.",
+              "codeExample": "const token = request.cookies.get('token');\nconst res = NextResponse.next();\nres.cookies.set('seen', 'true');\nreturn res;",
+              "simpleExample": "The guard can read the wristband you're wearing and clip a new tag on you before letting you through."
+            }
+          ]
+        },
+        "Caching & Revalidation": {
+          "icon": "♻️",
+          "questions": [
+            {
+              "question": "What are the main caching layers in the Next.js App Router?",
+              "answer": "Next.js has several caches: the Request Memoization cache (per render), the Data Cache (persistent fetch results), the Full Route Cache (rendered HTML/RSC payload), and the Router Cache (client-side navigation). Each serves a different scope and lifetime.",
+              "simpleExample": "It's like a chain of fridges: a counter tray for now, a pantry for the week, a freezer for long-term, and your lunchbox for the trip."
+            },
+            {
+              "question": "What is the Data Cache?",
+              "answer": "The Data Cache persistently stores the results of fetch requests across requests and deployments until revalidated. It is what enables static rendering and ISR by reusing fetched data.",
+              "codeExample": "fetch(url, { next: { revalidate: 3600 } }); // cached 1h",
+              "simpleExample": "It's the pantry that keeps ingredients fresh between meals so you don't shop again for every dish."
+            },
+            {
+              "question": "What is the difference between time-based and on-demand revalidation?",
+              "answer": "Time-based revalidation refreshes cached data after a set interval using the revalidate option. On-demand revalidation purges immediately when you call revalidatePath or revalidateTag, typically after a mutation.",
+              "codeExample": "// time-based\nexport const revalidate = 60;\n// on-demand\nrevalidateTag('products');",
+              "simpleExample": "Time-based is restocking shelves every hour on a timer; on-demand is restocking the instant something sells out."
+            },
+            {
+              "question": "How do cache tags work for revalidation?",
+              "answer": "You attach tags to fetch requests via the next.tags option, then call revalidateTag(tag) to invalidate all fetches sharing that tag. This lets you revalidate related data across many routes at once.",
+              "codeExample": "fetch(url, { next: { tags: ['products'] } });\n// later\nrevalidateTag('products');",
+              "simpleExample": "It's labeling boxes 'kitchen,' so when you say 'refresh kitchen' every box with that label gets restocked together."
+            },
+            {
+              "question": "What is the Full Route Cache?",
+              "answer": "The Full Route Cache stores the rendered HTML and React Server Component payload of statically rendered routes at build time, served instantly without re-rendering. It is invalidated by revalidation or new deployments.",
+              "simpleExample": "It's the freezer full of pre-made meals you can microwave instantly instead of cooking from scratch each time."
+            },
+            {
+              "question": "How do you opt out of caching entirely for a fetch?",
+              "answer": "You pass cache: no-store to a fetch call, or set the segment config dynamic to force-dynamic. This forces fresh data on every request and makes the route dynamically rendered.",
+              "codeExample": "const res = await fetch(url, { cache: 'no-store' });",
+              "simpleExample": "It's a 'cook fresh every time, never store leftovers' rule for that specific dish."
+            }
+          ]
+        }
+      }
+    },
+    "4+": {
+      "modules": {
+        "Performance & Streaming": {
+          "icon": "🚀",
+          "questions": [
+            {
+              "question": "What is streaming in Next.js and how does it improve performance?",
+              "answer": "Streaming sends HTML to the browser in chunks as it becomes ready instead of waiting for the whole page, using React Suspense. The user sees content sooner, improving perceived performance and Time to First Byte.",
+              "codeExample": "import { Suspense } from 'react';\n<Suspense fallback={<Spinner />}>\n  <SlowComponent />\n</Suspense>",
+              "simpleExample": "It's a restaurant bringing out appetizers immediately instead of making you wait for the entire meal at once."
+            },
+            {
+              "question": "How does Suspense enable selective hydration and streaming?",
+              "answer": "Suspense boundaries let Next.js stream and hydrate parts of the page independently, so fast sections render immediately while slow data-dependent sections stream in later with their fallback shown first. This prevents one slow query from blocking the whole page.",
+              "codeExample": "<Suspense fallback={<Skeleton />}>\n  <Reviews productId={id} />\n</Suspense>",
+              "simpleExample": "Each table in the restaurant gets served as its food is ready, rather than the whole room waiting on the slowest dish."
+            },
+            {
+              "question": "What is Partial Prerendering (PPR)?",
+              "answer": "Partial Prerendering combines a static shell served instantly from the edge with dynamic holes streamed in at request time, all in a single HTTP response. It gives you static speed plus dynamic content without choosing one strategy per route.",
+              "codeExample": "// experimental\nexport const experimental_ppr = true;\n// static shell + <Suspense> dynamic holes",
+              "simpleExample": "The stage and scenery are pre-built and shown instantly, while the live actors stream in to fill their marked spots."
+            },
+            {
+              "question": "How do you minimize JavaScript bundle size in Next.js?",
+              "answer": "You favor Server Components, dynamically import heavy client code with next/dynamic, code-split via routes, and avoid large client libraries. Less client JavaScript means faster hydration and interactivity.",
+              "codeExample": "import dynamic from 'next/dynamic';\nconst Chart = dynamic(() => import('./Chart'), { ssr: false });",
+              "simpleExample": "It's packing only what you'll actually use on the trip instead of dragging your whole closet to the airport."
+            },
+            {
+              "question": "What are Core Web Vitals and how does Next.js help with them?",
+              "answer": "Core Web Vitals are LCP (loading), INP (interactivity), and CLS (visual stability). Next.js improves them through image/font optimization, automatic code splitting, prefetching, streaming, and reserving layout space.",
+              "simpleExample": "They're the report card for speed, responsiveness, and steadiness; Next.js does much of the studying for you automatically."
+            },
+            {
+              "question": "How can a loading waterfall hurt performance and how do you avoid it?",
+              "answer": "A waterfall happens when sequential dependent fetches each wait for the previous, stacking latency. You avoid it by fetching in parallel with Promise.all, preloading data, and hoisting independent fetches up the tree.",
+              "codeExample": "// avoid: await a; await b;\n// prefer:\nconst [a, b] = await Promise.all([getA(), getB()]);",
+              "simpleExample": "A waterfall is filling buckets one after another; parallel fetching opens all the taps at the same time."
+            }
+          ]
+        },
+        "Deployment & Edge Runtime": {
+          "icon": "🌍",
+          "questions": [
+            {
+              "question": "What is the difference between the Node.js runtime and the Edge runtime?",
+              "answer": "The Node.js runtime is a full Node environment with all APIs, good for heavy work and most libraries. The Edge runtime is a lightweight, globally distributed environment with a limited Web-standard API set, optimized for low latency near users.",
+              "codeExample": "export const runtime = 'edge'; // or 'nodejs'",
+              "simpleExample": "Node is a fully equipped central warehouse; the Edge is small kiosks placed near every neighborhood for quick pickup."
+            },
+            {
+              "question": "When should you choose the Edge runtime over Node.js?",
+              "answer": "Choose Edge for latency-sensitive, lightweight tasks like auth checks, redirects, geolocation, and personalization that run globally. Choose Node.js when you need full APIs, heavy computation, or libraries incompatible with Edge.",
+              "simpleExample": "Use the corner kiosk for a quick stamp; go to the big warehouse when you need the heavy machinery."
+            },
+            {
+              "question": "How do you deploy a Next.js app?",
+              "answer": "Next.js deploys natively on Vercel with zero config, but it can run anywhere via a Node server (next build then next start), a Docker container, or static export for static-only apps. Adapters exist for other platforms too.",
+              "codeExample": "next build\nnext start\n# or static export\nnext build && next export",
+              "simpleExample": "Vercel is the matching power outlet, but with an adapter you can plug the app into many other walls."
+            },
+            {
+              "question": "What is the standalone output mode and why use it?",
+              "answer": "Setting output to standalone produces a minimal self-contained build with only the files and node_modules needed to run, ideal for small Docker images. It greatly reduces deployment size.",
+              "codeExample": "// next.config.js\nmodule.exports = { output: 'standalone' };",
+              "simpleExample": "It packs a compact travel kit with just the essentials instead of shipping your entire home."
+            },
+            {
+              "question": "How do you handle environment variables in Next.js?",
+              "answer": "Server-only variables are read from process.env and stay private, while variables prefixed with NEXT_PUBLIC_ are inlined into the client bundle and exposed to the browser. Secrets must never use the public prefix.",
+              "codeExample": "process.env.DATABASE_URL        // server only\nprocess.env.NEXT_PUBLIC_API_URL  // exposed to client",
+              "simpleExample": "Plain variables stay in the locked back office; NEXT_PUBLIC_ ones get printed on the public flyer for all to see."
+            },
+            {
+              "question": "What are the constraints of static export (output: export)?",
+              "answer": "Static export produces pure HTML/CSS/JS with no server, so features needing a runtime like SSR, ISR, Route Handlers, rewrites, and Server Actions are unavailable. It suits fully static sites hosted on any CDN.",
+              "simpleExample": "It's printing the whole site as a stack of posters; great for display, but the posters can't talk back or update live."
+            }
+          ]
+        },
+        "SEO & Metadata": {
+          "icon": "🔍",
+          "questions": [
+            {
+              "question": "How do you add metadata in the App Router?",
+              "answer": "You export a static metadata object or an async generateMetadata function from a layout or page. Next.js renders the corresponding head tags like title and description automatically.",
+              "codeExample": "export const metadata = {\n  title: 'My Page',\n  description: 'A great page'\n};",
+              "simpleExample": "It's filling out the label on a product box so search engines and browsers know exactly what's inside."
+            },
+            {
+              "question": "How do you generate dynamic metadata based on fetched data?",
+              "answer": "You export an async generateMetadata function that receives params and returns a metadata object, fetching whatever it needs. Fetch calls are deduped with the page's own data fetching.",
+              "codeExample": "export async function generateMetadata({ params }) {\n  const post = await getPost(params.slug);\n  return { title: post.title };\n}",
+              "simpleExample": "It's printing a custom label per item based on what's actually packed in that particular box."
+            },
+            {
+              "question": "How do you handle Open Graph and Twitter card metadata?",
+              "answer": "You include openGraph and twitter keys in the metadata object, specifying title, description, images, and type. Next.js outputs the proper og: and twitter: meta tags for rich social previews.",
+              "codeExample": "export const metadata = {\n  openGraph: { title: 'Hi', images: ['/og.png'] },\n  twitter: { card: 'summary_large_image' }\n};",
+              "simpleExample": "It's the polished preview thumbnail and caption that shows up when someone shares your link in a chat."
+            },
+            {
+              "question": "How do you generate a sitemap and robots file in Next.js?",
+              "answer": "You add app/sitemap.ts and app/robots.ts files that export functions returning sitemap entries or robots rules. Next.js serves them at /sitemap.xml and /robots.txt automatically.",
+              "codeExample": "// app/sitemap.ts\nexport default function sitemap() {\n  return [{ url: 'https://site.com', lastModified: new Date() }];\n}",
+              "simpleExample": "The sitemap is a guided map handed to search crawlers; robots.txt is the sign saying which doors they may open."
+            },
+            {
+              "question": "How do you set canonical URLs and why do they matter?",
+              "answer": "You set alternates.canonical in the metadata object to tell search engines the preferred URL for duplicate or parameterized pages. This consolidates ranking signals and avoids duplicate-content penalties.",
+              "codeExample": "export const metadata = {\n  alternates: { canonical: 'https://site.com/post' }\n};",
+              "simpleExample": "It's pointing to the 'official copy' of a document so everyone references the same master instead of duplicates."
+            },
+            {
+              "question": "How do you create dynamic Open Graph images at the edge?",
+              "answer": "You use the ImageResponse API from next/og in an opengraph-image.tsx file or route to render JSX into an image at request time. This generates social preview images dynamically without a separate design tool.",
+              "codeExample": "import { ImageResponse } from 'next/og';\nexport default function OG() {\n  return new ImageResponse(<div style={{fontSize:48}}>Hello</div>);\n}",
+              "simpleExample": "It's an automatic thumbnail printer that draws a fresh share image on demand from a template."
+            }
+          ]
+        },
+        "Advanced Patterns & Architecture": {
+          "icon": "🏛️",
+          "questions": [
+            {
+              "question": "What are parallel routes and when are they useful?",
+              "answer": "Parallel routes use named slots prefixed with @ to render multiple independent pages in the same layout simultaneously. They're useful for dashboards, split views, and modals that load and stream independently.",
+              "codeExample": "// app/layout.tsx receives slots\nexport default function Layout({ children, team, analytics }) {\n  return <>{children}{team}{analytics}</>;\n}",
+              "simpleExample": "It's a dashboard with several TV screens, each showing its own channel at the same time in one room."
+            },
+            {
+              "question": "What are intercepting routes and a common use case?",
+              "answer": "Intercepting routes use conventions like (.) or (..) to load a route within the current layout, for example showing a photo in a modal while keeping the URL shareable. A hard refresh then loads the full standalone page.",
+              "codeExample": "// app/feed/(..)photo/[id]/page.tsx\n// intercepts /photo/[id] to show a modal over the feed",
+              "simpleExample": "Clicking a thumbnail pops a preview overlay, but sharing that link still opens the full dedicated page directly."
+            },
+            {
+              "question": "How would you structure a large Next.js application?",
+              "answer": "A common approach groups by feature/domain using route groups, colocates components and data access near their routes, keeps shared UI and utilities in dedicated folders, and isolates Client Components to minimize the client bundle. A clear server/client boundary and a data-access layer keep it maintainable.",
+              "simpleExample": "It's organizing a big office by department, with shared supply rooms, instead of one giant pile of desks."
+            },
+            {
+              "question": "How do you implement authentication in the modern App Router?",
+              "answer": "You typically store a session in an httpOnly cookie, verify it in a data-access layer or in Middleware for coarse route protection, and re-check authorization inside Server Components and Server Actions. The key principle is checking auth close to the data, not relying on Middleware alone.",
+              "codeExample": "async function getData() {\n  const session = await verifySession();\n  if (!session) redirect('/login');\n  return db.query();\n}",
+              "simpleExample": "Check the badge again at each secure door, not just at the lobby, so no one slips past a single missed guard."
+            },
+            {
+              "question": "What is the recommended way to handle errors at different levels?",
+              "answer": "Use error.tsx boundaries per segment for recoverable UI errors, global-error.tsx for root layout errors, not-found.tsx for 404s, and throw notFound() or handle thrown errors in Server Actions. Granular boundaries keep failures contained to their part of the tree.",
+              "codeExample": "// app/error.tsx\n'use client';\nexport default function Error({ error, reset }) {\n  return <button onClick={reset}>Retry</button>;\n}",
+              "simpleExample": "It's having a first-aid kit in each room so one accident doesn't shut down the whole building."
+            },
+            {
+              "question": "How do you avoid leaking sensitive server data to the client?",
+              "answer": "Keep secrets in server-only modules, use the server-only package to fail the build if server code is imported on the client, only pass serializable safe props to Client Components, and use a data-access layer to control what is exposed. Tainting APIs can also flag sensitive values.",
+              "codeExample": "import 'server-only';\nexport async function getSecretData() {\n  return db.query(process.env.SECRET);\n}",
+              "simpleExample": "Keep the safe combination in the locked back room and only hand customers the finished product, never the keys."
+            },
+            {
+              "question": "What is the difference between revalidatePath and router.refresh?",
+              "answer": "revalidatePath runs on the server to purge the server-side cache for a path so future requests rebuild it, while router.refresh runs on the client to re-fetch the current route's server data and re-render without losing client state. They are often used together after mutations.",
+              "codeExample": "// server\nrevalidatePath('/posts');\n// client\nrouter.refresh();",
+              "simpleExample": "revalidatePath restocks the warehouse; router.refresh tells your current shopping cart to grab the updated items now."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

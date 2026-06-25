@@ -1,0 +1,679 @@
+{
+  "categories": {
+    "0-1": {
+      "modules": {
+        "NestJS Fundamentals": {
+          "icon": "🐱",
+          "questions": [
+            {
+              "question": "What is NestJS?",
+              "answer": "NestJS is a progressive Node.js framework for building efficient, scalable server-side applications using TypeScript. It is heavily inspired by Angular and uses the same core concepts like modules, decorators, and dependency injection.",
+              "simpleExample": "If Angular is the framework you use to build the front of a restaurant, NestJS is the same blueprint applied to the kitchen (the backend) -- same layout, same rules, just on the server."
+            },
+            {
+              "question": "What HTTP platform does NestJS use under the hood?",
+              "answer": "By default NestJS uses Express as its HTTP server platform, but you can swap it for Fastify for higher performance. NestJS abstracts the platform so most of your code stays the same.",
+              "codeExample": "import { NestFactory } from '@nestjs/core';\nimport { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';\n\nconst app = await NestFactory.create<NestFastifyApplication>(\n  AppModule,\n  new FastifyAdapter(),\n);",
+              "simpleExample": "NestJS is the driver, and Express or Fastify is the car. You can change cars without learning to drive again."
+            },
+            {
+              "question": "How do you create a new NestJS project?",
+              "answer": "You use the Nest CLI command 'nest new project-name', similar to how Angular uses 'ng new'. The CLI scaffolds a ready-to-run project with a sample module, controller, and service.",
+              "codeExample": "npm i -g @nestjs/cli\nnest new my-app\ncd my-app\nnpm run start:dev",
+              "simpleExample": "Just like 'ng new' builds an Angular skeleton for you, 'nest new' builds a backend skeleton you can run immediately."
+            },
+            {
+              "question": "What is the entry point of a NestJS application?",
+              "answer": "The entry point is main.ts, which uses NestFactory to create an application instance from the root module and starts listening on a port. It is the backend equivalent of Angular's main.ts that bootstraps the root module.",
+              "codeExample": "import { NestFactory } from '@nestjs/core';\nimport { AppModule } from './app.module';\n\nasync function bootstrap() {\n  const app = await NestFactory.create(AppModule);\n  await app.listen(3000);\n}\nbootstrap();",
+              "simpleExample": "main.ts is the ignition key -- it starts the whole engine from the root module, exactly like Angular's bootstrap."
+            },
+            {
+              "question": "What are the main building blocks of a NestJS application?",
+              "answer": "The core building blocks are Modules, Controllers, and Providers (services). Modules group related code, controllers handle incoming requests, and providers contain business logic.",
+              "simpleExample": "Modules are rooms, controllers are the receptionists taking requests, and providers are the workers doing the actual job behind the scenes."
+            },
+            {
+              "question": "What is a decorator in NestJS?",
+              "answer": "A decorator is a special function prefixed with @ that attaches metadata to classes, methods, or parameters, telling NestJS how to treat them. NestJS uses the exact same TypeScript decorators concept as Angular.",
+              "codeExample": "@Controller('users')\nexport class UsersController {\n  @Get()\n  findAll() {\n    return [];\n  }\n}",
+              "simpleExample": "A decorator is a sticky label on a box that tells the warehouse 'this is fragile' or 'this goes to shipping' -- just like @Component or @Injectable in Angular."
+            },
+            {
+              "question": "What is the difference between NestJS and Express?",
+              "answer": "Express is a minimal, unopinionated HTTP library, while NestJS is a full framework that adds structure, dependency injection, modules, and TypeScript support on top of Express. NestJS gives you architecture out of the box; Express leaves it to you.",
+              "simpleExample": "Express is a pile of LEGO bricks; NestJS is a LEGO kit with instructions and labeled bags so everyone builds the same way."
+            }
+          ]
+        },
+        "Controllers & Routing": {
+          "icon": "🎮",
+          "questions": [
+            {
+              "question": "What is a controller in NestJS?",
+              "answer": "A controller is a class decorated with @Controller that handles incoming HTTP requests and returns responses. It defines routes and delegates business logic to services.",
+              "codeExample": "@Controller('cats')\nexport class CatsController {\n  @Get()\n  findAll(): string {\n    return 'This returns all cats';\n  }\n}",
+              "simpleExample": "A controller is the receptionist at a desk: it takes the request, figures out who should handle it, and hands back the reply."
+            },
+            {
+              "question": "How do you define a route path in a controller?",
+              "answer": "You pass a path prefix to the @Controller decorator and a path to the HTTP method decorator. The final route is the prefix joined with the method path.",
+              "codeExample": "@Controller('users')\nexport class UsersController {\n  @Get('profile')\n  getProfile() {\n    return 'profile';\n  }\n}\n// Maps to GET /users/profile",
+              "simpleExample": "The @Controller path is the street name and the @Get path is the house number -- together they form the full address."
+            },
+            {
+              "question": "What HTTP method decorators does NestJS provide?",
+              "answer": "NestJS provides @Get, @Post, @Put, @Patch, @Delete, @Options, @Head, and @All decorators. Each maps a method to the matching HTTP verb.",
+              "codeExample": "@Post()\ncreate() { return 'created'; }\n\n@Delete(':id')\nremove() { return 'deleted'; }",
+              "simpleExample": "These decorators are like signs on a door saying which kind of knock (GET, POST, DELETE) the room responds to."
+            },
+            {
+              "question": "How do you read route parameters in NestJS?",
+              "answer": "You use the @Param decorator to extract values from the URL path. You can grab a single named parameter or the whole params object.",
+              "codeExample": "@Get(':id')\nfindOne(@Param('id') id: string) {\n  return `User ${id}`;\n}",
+              "simpleExample": "@Param is like reading the table number off a customer's ticket so you know which table to serve."
+            },
+            {
+              "question": "How do you access query string parameters?",
+              "answer": "You use the @Query decorator to extract query string values from the URL. You can read a specific key or the entire query object.",
+              "codeExample": "@Get()\nfindAll(@Query('page') page: string) {\n  return `Page ${page}`;\n}\n// GET /users?page=2",
+              "simpleExample": "Query params are the optional notes after the '?' -- like saying 'I want page 2' when asking for a list."
+            },
+            {
+              "question": "How do you access the request body?",
+              "answer": "You use the @Body decorator to extract the parsed request body, usually typed with a DTO class. NestJS parses the JSON body automatically.",
+              "codeExample": "@Post()\ncreate(@Body() createUserDto: CreateUserDto) {\n  return createUserDto;\n}",
+              "simpleExample": "@Body is opening the package a customer mailed in and reading what's inside."
+            }
+          ]
+        },
+        "Providers & Services": {
+          "icon": "🧰",
+          "questions": [
+            {
+              "question": "What is a provider in NestJS?",
+              "answer": "A provider is any class that can be injected as a dependency, such as services, repositories, or factories. Providers are marked with the @Injectable decorator and managed by Nest's IoC container.",
+              "codeExample": "@Injectable()\nexport class CatsService {\n  findAll() {\n    return ['Tom', 'Felix'];\n  }\n}",
+              "simpleExample": "A provider is a worker the framework keeps on staff and hands to whoever needs them -- just like an Angular service."
+            },
+            {
+              "question": "What does the @Injectable decorator do?",
+              "answer": "It marks a class as a provider that can be managed and injected by Nest's dependency injection system. Without it, Nest cannot resolve the class as a dependency.",
+              "codeExample": "@Injectable()\nexport class LoggerService {\n  log(msg: string) {\n    console.log(msg);\n  }\n}",
+              "simpleExample": "@Injectable is the badge that lets a worker into the building so the framework knows it can assign them to teams."
+            },
+            {
+              "question": "Why should controllers delegate logic to services?",
+              "answer": "Controllers should stay thin and focus on handling requests, while services hold reusable business logic. This separation makes code testable, reusable, and easier to maintain.",
+              "codeExample": "@Controller('cats')\nexport class CatsController {\n  constructor(private catsService: CatsService) {}\n\n  @Get()\n  findAll() {\n    return this.catsService.findAll();\n  }\n}",
+              "simpleExample": "The receptionist (controller) shouldn't cook the food -- they pass the order to the kitchen (service)."
+            },
+            {
+              "question": "How is a service injected into a controller?",
+              "answer": "You declare the service as a constructor parameter, and Nest automatically provides an instance. This is the same constructor-based dependency injection used in Angular.",
+              "codeExample": "constructor(private readonly usersService: UsersService) {}",
+              "simpleExample": "You just ask for the service in the constructor and the framework delivers it, like ordering a part and it arrives ready to use."
+            },
+            {
+              "question": "How do you make a service available to other modules?",
+              "answer": "You add the provider to the 'exports' array of its module so other modules that import it can use it. Without exporting, the provider stays private to its own module.",
+              "codeExample": "@Module({\n  providers: [UsersService],\n  exports: [UsersService],\n})\nexport class UsersModule {}",
+              "simpleExample": "Exporting a service is like putting a tool on the shared shelf so other rooms can borrow it."
+            },
+            {
+              "question": "How do you register a provider in a module?",
+              "answer": "You add the provider class to the 'providers' array of the @Module decorator. Nest then makes it available for injection within that module.",
+              "codeExample": "@Module({\n  controllers: [CatsController],\n  providers: [CatsService],\n})\nexport class CatsModule {}",
+              "simpleExample": "Listing a provider in 'providers' is like adding a worker to the room's staff roster."
+            }
+          ]
+        },
+        "Modules & Project Structure": {
+          "icon": "📦",
+          "questions": [
+            {
+              "question": "What is a module in NestJS?",
+              "answer": "A module is a class decorated with @Module that organizes related controllers, providers, imports, and exports into a cohesive feature unit. Every NestJS app has at least a root module.",
+              "codeExample": "@Module({\n  controllers: [CatsController],\n  providers: [CatsService],\n})\nexport class CatsModule {}",
+              "simpleExample": "A module is a room that holds everything for one feature -- just like an Angular NgModule groups related components and services."
+            },
+            {
+              "question": "What is the root module in NestJS?",
+              "answer": "The root module, usually named AppModule, is the top-level module that Nest uses to build the application graph. It imports all feature modules.",
+              "codeExample": "@Module({\n  imports: [UsersModule, AuthModule],\n})\nexport class AppModule {}",
+              "simpleExample": "The root module is the main floor plan that connects all the rooms together, like Angular's AppModule."
+            },
+            {
+              "question": "What are the four properties of the @Module decorator?",
+              "answer": "The @Module decorator accepts controllers, providers, imports, and exports. Controllers handle requests, providers are injectables, imports bring in other modules, and exports share providers.",
+              "codeExample": "@Module({\n  imports: [],\n  controllers: [],\n  providers: [],\n  exports: [],\n})\nexport class FeatureModule {}",
+              "simpleExample": "It's like a room's setup form: who works here (providers), who answers the door (controllers), which rooms we connect to (imports), and what we lend out (exports)."
+            },
+            {
+              "question": "How do you share functionality between modules?",
+              "answer": "You export providers from one module and import that module into another. The importing module can then inject the exported providers.",
+              "codeExample": "@Module({\n  providers: [AuthService],\n  exports: [AuthService],\n})\nexport class AuthModule {}",
+              "simpleExample": "One room lends a tool by exporting it, and another room borrows it by importing the room -- like sharing Angular services across modules."
+            },
+            {
+              "question": "What is a typical folder structure for a NestJS feature?",
+              "answer": "A feature folder usually contains a module file, a controller file, a service file, and a dto folder, plus optional entities. This keeps each domain self-contained and easy to navigate.",
+              "codeExample": "users/\n  users.module.ts\n  users.controller.ts\n  users.service.ts\n  dto/create-user.dto.ts\n  entities/user.entity.ts",
+              "simpleExample": "Each feature gets its own labeled drawer with everything it needs inside, instead of scattering files everywhere."
+            },
+            {
+              "question": "How do you import a module into another module?",
+              "answer": "You add the module class to the 'imports' array of the @Module decorator. This makes the imported module's exported providers available.",
+              "codeExample": "@Module({\n  imports: [UsersModule],\n  controllers: [OrdersController],\n})\nexport class OrdersModule {}",
+              "simpleExample": "Importing a module is like connecting a hallway between two rooms so one can use what the other lends out."
+            }
+          ]
+        }
+      }
+    },
+    "1-2": {
+      "modules": {
+        "Dependency Injection": {
+          "icon": "💉",
+          "questions": [
+            {
+              "question": "What is dependency injection in NestJS?",
+              "answer": "Dependency injection is a design pattern where a class receives its dependencies from an external source rather than creating them itself. Nest's IoC container creates and supplies these dependencies automatically.",
+              "codeExample": "@Injectable()\nexport class OrdersService {\n  constructor(private readonly db: DatabaseService) {}\n}",
+              "simpleExample": "Instead of a chef growing their own vegetables, the supplier delivers them -- the chef just asks for what they need, exactly like Angular DI."
+            },
+            {
+              "question": "What is the IoC container?",
+              "answer": "IoC stands for Inversion of Control, and the container is the part of Nest that creates, manages, and injects provider instances. It resolves the entire dependency graph at startup.",
+              "simpleExample": "The IoC container is the warehouse manager who keeps all the workers and hands the right one to whoever asks."
+            },
+            {
+              "question": "What is the @Inject decorator used for?",
+              "answer": "The @Inject decorator explicitly tells Nest which provider to inject using a custom token. It is needed when the dependency isn't a class type, such as a string-based token.",
+              "codeExample": "constructor(@Inject('PAYMENT_GATEWAY') private gateway: Gateway) {}",
+              "simpleExample": "When the worker can't be identified just by type, @Inject is you calling them by their exact name tag."
+            },
+            {
+              "question": "What is a useFactory provider?",
+              "answer": "A useFactory provider uses a function to dynamically create the dependency, optionally injecting other providers. It is ideal when construction logic depends on runtime values.",
+              "codeExample": "{\n  provide: 'CONNECTION',\n  useFactory: (config: ConfigService) => createConnection(config.dbUrl),\n  inject: [ConfigService],\n}",
+              "simpleExample": "useFactory is a custom-build recipe that mixes other ingredients to produce the final item."
+            },
+            {
+              "question": "What are the provider scopes in NestJS?",
+              "answer": "NestJS supports three scopes: DEFAULT (singleton), REQUEST (new instance per request), and TRANSIENT (new instance per consumer). Singleton is the default and most performant.",
+              "codeExample": "@Injectable({ scope: Scope.REQUEST })\nexport class RequestService {}",
+              "simpleExample": "Singleton is one shared tool, request-scoped is a fresh tool for each customer, and transient is a brand-new tool for everyone who asks."
+            },
+            {
+              "question": "What is a circular dependency and how do you resolve it?",
+              "answer": "A circular dependency occurs when two providers depend on each other, which Nest cannot resolve directly. You fix it using forwardRef() on both sides.",
+              "codeExample": "constructor(\n  @Inject(forwardRef(() => CatsService))\n  private catsService: CatsService,\n) {}",
+              "simpleExample": "Two workers each waiting for the other to start is a deadlock; forwardRef is a handshake that says 'go ahead, I'll catch up'."
+            },
+            {
+              "question": "How does NestJS DI compare to Angular DI?",
+              "answer": "Both use constructor injection, decorators, and a hierarchical provider system, so the mental model is nearly identical. The main difference is NestJS resolves dependencies on the server at startup rather than in the browser.",
+              "simpleExample": "It's the same wiring diagram you already know from Angular, just plugged into the server instead of the browser."
+            }
+          ]
+        },
+        "Pipes & Validation": {
+          "icon": "🚰",
+          "questions": [
+            {
+              "question": "What is a pipe in NestJS?",
+              "answer": "A pipe is a class that transforms or validates incoming data before it reaches the route handler. Pipes operate on the arguments of controller methods.",
+              "codeExample": "@Get(':id')\nfindOne(@Param('id', ParseIntPipe) id: number) {\n  return id;\n}",
+              "simpleExample": "A pipe is a security checkpoint that inspects and reshapes data before it enters the building -- conceptually like an Angular pipe but for incoming requests."
+            },
+            {
+              "question": "What is the ValidationPipe?",
+              "answer": "The ValidationPipe automatically validates incoming payloads against a DTO class using class-validator decorators. It throws a 400 error when validation fails.",
+              "codeExample": "app.useGlobalPipes(new ValidationPipe());",
+              "simpleExample": "The ValidationPipe is an inspector that checks every parcel against a checklist and rejects the bad ones automatically."
+            },
+            {
+              "question": "What is a DTO and why is it used with pipes?",
+              "answer": "A DTO (Data Transfer Object) is a class that defines the shape of incoming data and carries validation decorators. The ValidationPipe uses the DTO to validate request bodies.",
+              "codeExample": "export class CreateUserDto {\n  @IsString()\n  name: string;\n\n  @IsEmail()\n  email: string;\n}",
+              "simpleExample": "A DTO is the order form with required fields marked -- the pipe checks that the customer filled it out correctly."
+            },
+            {
+              "question": "How do you create a custom pipe?",
+              "answer": "You create a class that implements PipeTransform and define a transform method that receives the value and metadata. You then attach it to a parameter, method, or globally.",
+              "codeExample": "@Injectable()\nexport class TrimPipe implements PipeTransform {\n  transform(value: string) {\n    return value.trim();\n  }\n}",
+              "simpleExample": "A custom pipe is your own inspector with personalized rules, like one that trims whitespace off every name."
+            },
+            {
+              "question": "What does the transform option in ValidationPipe do?",
+              "answer": "The transform option automatically converts incoming plain objects into instances of the DTO class and coerces primitive types. This means query params become numbers or booleans as declared.",
+              "codeExample": "new ValidationPipe({ transform: true })",
+              "simpleExample": "transform is the inspector also re-packaging the contents into the exact box type your code expects."
+            },
+            {
+              "question": "What library does NestJS validation rely on?",
+              "answer": "NestJS validation relies on the class-validator and class-transformer libraries. Class-validator provides decorators like @IsString, and class-transformer converts plain objects to class instances.",
+              "codeExample": "import { IsString, IsInt, Min } from 'class-validator';",
+              "simpleExample": "class-validator is the rulebook of allowed values, and class-transformer is the machine that reshapes raw input into proper objects."
+            }
+          ]
+        },
+        "Middleware": {
+          "icon": "🧱",
+          "questions": [
+            {
+              "question": "What is middleware in NestJS?",
+              "answer": "Middleware is a function or class that runs before the route handler and has access to the request and response objects. It is essentially the same concept as Express middleware.",
+              "codeExample": "@Injectable()\nexport class LoggerMiddleware implements NestMiddleware {\n  use(req: Request, res: Response, next: NextFunction) {\n    console.log('Request...');\n    next();\n  }\n}",
+              "simpleExample": "Middleware is a security guard in the lobby who checks everyone before they reach the office -- and waves them through with next()."
+            },
+            {
+              "question": "How do you apply middleware in NestJS?",
+              "answer": "You implement the NestModule interface in a module and configure middleware in the configure method using a MiddlewareConsumer. You then specify which routes it applies to.",
+              "codeExample": "export class AppModule implements NestModule {\n  configure(consumer: MiddlewareConsumer) {\n    consumer.apply(LoggerMiddleware).forRoutes('users');\n  }\n}",
+              "simpleExample": "You tell the building which guard works which doors using the configure method."
+            },
+            {
+              "question": "What is the difference between functional and class middleware?",
+              "answer": "Functional middleware is a plain function, while class middleware is a class implementing NestMiddleware that supports dependency injection. Use class middleware when you need to inject services.",
+              "codeExample": "export function logger(req, res, next) {\n  console.log('Request...');\n  next();\n}",
+              "simpleExample": "Functional middleware is a quick freelance guard; class middleware is a staffed guard who can radio the team (inject services)."
+            },
+            {
+              "question": "How do you apply global middleware?",
+              "answer": "You apply global middleware using app.use() in main.ts, which runs for every request. Global middleware via app.use cannot use dependency injection, unlike module-bound class middleware.",
+              "codeExample": "const app = await NestFactory.create(AppModule);\napp.use(logger);",
+              "simpleExample": "Global middleware is a guard at the single main gate everyone must pass through."
+            },
+            {
+              "question": "When should you use middleware versus a guard or interceptor?",
+              "answer": "Use middleware for low-level, platform-related concerns like logging, CORS, or body parsing that don't need Nest's execution context. Use guards for authorization and interceptors for transforming responses.",
+              "simpleExample": "Middleware handles generic lobby tasks like signing the visitor log; guards decide who's allowed in, and interceptors gift-wrap what leaves."
+            },
+            {
+              "question": "Does NestJS middleware support async operations?",
+              "answer": "Yes, middleware can be asynchronous, allowing you to await operations before calling next(). You can use async/await inside the use method or function.",
+              "codeExample": "async use(req, res, next) {\n  await someAsyncCheck();\n  next();\n}",
+              "simpleExample": "The guard can make a quick phone call to verify a visitor before letting them proceed."
+            }
+          ]
+        },
+        "Configuration & Environment": {
+          "icon": "⚙️",
+          "questions": [
+            {
+              "question": "How do you manage configuration in NestJS?",
+              "answer": "NestJS provides the @nestjs/config package, which loads environment variables and exposes them through a ConfigService. It centralizes configuration access across the app.",
+              "codeExample": "@Module({\n  imports: [ConfigModule.forRoot()],\n})\nexport class AppModule {}",
+              "simpleExample": "ConfigModule is the central settings panel for the whole building, instead of scattered sticky notes with passwords."
+            },
+            {
+              "question": "How do you read a config value with ConfigService?",
+              "answer": "You inject ConfigService and call its get method with the key name. You can provide a default value and a type parameter for safety.",
+              "codeExample": "constructor(private config: ConfigService) {}\n\ngetPort() {\n  return this.config.get<number>('PORT', 3000);\n}",
+              "simpleExample": "ConfigService.get is like asking the front desk 'what's the WiFi password?' and getting the current value."
+            },
+            {
+              "question": "How do you make ConfigModule available globally?",
+              "answer": "You set the isGlobal option to true in forRoot, so you don't have to import ConfigModule in every feature module. The ConfigService then becomes injectable everywhere.",
+              "codeExample": "ConfigModule.forRoot({ isGlobal: true });",
+              "simpleExample": "isGlobal makes the settings panel accessible from every room without rewiring each one."
+            },
+            {
+              "question": "How do you validate environment variables at startup?",
+              "answer": "You pass a validation schema (using Joi) or a validate function to ConfigModule.forRoot. If validation fails, the app refuses to start.",
+              "codeExample": "ConfigModule.forRoot({\n  validationSchema: Joi.object({\n    PORT: Joi.number().default(3000),\n  }),\n});",
+              "simpleExample": "It's like checking all the building's safety systems before opening -- if a critical switch is missing, the doors stay locked."
+            },
+            {
+              "question": "Why should you avoid using process.env directly?",
+              "answer": "Using ConfigService instead of process.env gives you type safety, validation, defaults, and testability. Direct process.env access scatters untyped string lookups across the codebase.",
+              "simpleExample": "Reading process.env everywhere is like leaving passwords on random sticky notes; ConfigService is the secure, organized vault."
+            },
+            {
+              "question": "How do you handle different configs per environment?",
+              "answer": "You use different .env files (like .env.development and .env.production) and select the right one via envFilePath or NODE_ENV. This keeps secrets and settings separated per environment.",
+              "simpleExample": "Like having separate keychains for the test office and the real office, so you never accidentally use production keys in testing."
+            }
+          ]
+        }
+      }
+    },
+    "2-3": {
+      "modules": {
+        "Guards & Authentication": {
+          "icon": "🛡️",
+          "questions": [
+            {
+              "question": "What is a guard in NestJS?",
+              "answer": "A guard is a class implementing CanActivate that decides whether a request is allowed to proceed to the route handler. It is primarily used for authentication and authorization.",
+              "codeExample": "@Injectable()\nexport class AuthGuard implements CanActivate {\n  canActivate(context: ExecutionContext): boolean {\n    const req = context.switchToHttp().getRequest();\n    return Boolean(req.headers.authorization);\n  }\n}",
+              "simpleExample": "A guard is the bouncer at the door who checks your ID before letting you in -- conceptually like an Angular route guard."
+            },
+            {
+              "question": "What is the ExecutionContext in a guard?",
+              "answer": "ExecutionContext provides details about the current request, including the handler, class, and underlying request object. It works across HTTP, WebSockets, and microservices.",
+              "codeExample": "const request = context.switchToHttp().getRequest();",
+              "simpleExample": "ExecutionContext is the full case file about who's knocking and which door, so the guard can decide fairly."
+            },
+            {
+              "question": "How do you apply a guard to a route?",
+              "answer": "You use the @UseGuards decorator at the method, controller, or global level. Global guards are registered via app.useGlobalGuards or APP_GUARD.",
+              "codeExample": "@UseGuards(AuthGuard)\n@Get('profile')\ngetProfile() {}",
+              "simpleExample": "@UseGuards is posting a bouncer at a specific door, a whole floor, or the entire building."
+            },
+            {
+              "question": "What is Passport and how does NestJS use it?",
+              "answer": "Passport is a popular authentication library, and @nestjs/passport integrates it through strategies and guards. NestJS wraps Passport strategies in guards like AuthGuard('jwt').",
+              "codeExample": "@UseGuards(AuthGuard('jwt'))\n@Get('me')\nme() {}",
+              "simpleExample": "Passport is a set of standard ID-checking procedures, and NestJS clips them onto its bouncers."
+            },
+            {
+              "question": "What is a JWT strategy in NestJS?",
+              "answer": "A JWT strategy validates JSON Web Tokens from incoming requests, extracting and verifying the token, then attaching the user to the request. It extends PassportStrategy with the JWT strategy.",
+              "codeExample": "@Injectable()\nexport class JwtStrategy extends PassportStrategy(Strategy) {\n  validate(payload: any) {\n    return { userId: payload.sub };\n  }\n}",
+              "simpleExample": "The JWT strategy is the bouncer who checks a tamper-proof wristband (token) and reads who you are from it."
+            },
+            {
+              "question": "How do you implement role-based access control?",
+              "answer": "You create a roles guard that reads required roles from metadata (set via a custom @Roles decorator) using the Reflector. The guard compares them against the authenticated user's roles.",
+              "codeExample": "const roles = this.reflector.get<string[]>('roles', context.getHandler());\nreturn roles.includes(user.role);",
+              "simpleExample": "It's a bouncer checking not just that you have an ID, but that your wristband color matches the VIP section."
+            },
+            {
+              "question": "Where do guards run in the request lifecycle?",
+              "answer": "Guards run after middleware but before interceptors and pipes. This ordering lets them block unauthorized requests early before any payload processing.",
+              "simpleExample": "The bouncer (guard) checks you right after the lobby greeter, before you reach the gift-wrapping desk (interceptors) or inspection table (pipes)."
+            }
+          ]
+        },
+        "Interceptors": {
+          "icon": "🔌",
+          "questions": [
+            {
+              "question": "What is an interceptor in NestJS?",
+              "answer": "An interceptor is a class implementing NestInterceptor that can run logic before and after a route handler executes. It can transform responses, add logging, or handle timeouts.",
+              "codeExample": "@Injectable()\nexport class LoggingInterceptor implements NestInterceptor {\n  intercept(context: ExecutionContext, next: CallHandler) {\n    return next.handle().pipe(tap(() => console.log('After...')));\n  }\n}",
+              "simpleExample": "An interceptor wraps the handler like gift-wrapping a package on the way out and inspecting it on the way in -- much like Angular HTTP interceptors."
+            },
+            {
+              "question": "What is the CallHandler in an interceptor?",
+              "answer": "CallHandler represents the route handler and its handle() method returns an Observable of the response. Calling next.handle() invokes the actual handler.",
+              "codeExample": "return next.handle().pipe(map(data => ({ data })));",
+              "simpleExample": "next.handle() is the button that lets the request continue into the kitchen and gives you back the dish to garnish."
+            },
+            {
+              "question": "How can interceptors transform a response?",
+              "answer": "Interceptors use RxJS operators like map to reshape the data returned by the handler before it's sent to the client. This is commonly used to wrap responses in a consistent envelope.",
+              "codeExample": "return next.handle().pipe(\n  map(data => ({ success: true, data })),\n);",
+              "simpleExample": "It's like wrapping every outgoing dish in the same branded box with a 'success' sticker before it leaves the kitchen."
+            },
+            {
+              "question": "How do you apply an interceptor?",
+              "answer": "You use the @UseInterceptors decorator at the method, controller, or global level, or register globally with APP_INTERCEPTOR. Global interceptors apply to every handler.",
+              "codeExample": "@UseInterceptors(LoggingInterceptor)\n@Get()\nfindAll() {}",
+              "simpleExample": "@UseInterceptors clips the gift-wrapping station onto one door, a whole floor, or the entire building's exit."
+            },
+            {
+              "question": "What is the ClassSerializerInterceptor?",
+              "answer": "The ClassSerializerInterceptor transforms returned objects using class-transformer decorators like @Exclude, hiding sensitive fields. It is commonly used to strip passwords from entities before sending them.",
+              "codeExample": "@UseInterceptors(ClassSerializerInterceptor)\n@Get()\nfindOne() {\n  return new User();\n}",
+              "simpleExample": "It's like a final editor who blacks out confidential fields (passwords) before the document leaves the office."
+            },
+            {
+              "question": "How can you build a caching interceptor?",
+              "answer": "A caching interceptor checks a store for a cached response before calling the handler, returning the cached value if present, otherwise caching the new result. NestJS also provides a built-in CacheInterceptor.",
+              "codeExample": "const cached = this.cache.get(key);\nif (cached) return of(cached);\nreturn next.handle().pipe(tap(res => this.cache.set(key, res)));",
+              "simpleExample": "It's a waiter who, before bothering the kitchen, checks if the same popular dish is already plated and ready to serve."
+            }
+          ]
+        },
+        "Exception Filters": {
+          "icon": "🚨",
+          "questions": [
+            {
+              "question": "What is an exception filter in NestJS?",
+              "answer": "An exception filter is a class implementing ExceptionFilter that catches thrown exceptions and controls the response sent to the client. It centralizes error handling logic.",
+              "codeExample": "@Catch(HttpException)\nexport class HttpExceptionFilter implements ExceptionFilter {\n  catch(exception: HttpException, host: ArgumentsHost) {\n    // build custom response\n  }\n}",
+              "simpleExample": "An exception filter is the complaints department that catches every problem and decides how to politely respond to the customer."
+            },
+            {
+              "question": "What is HttpException?",
+              "answer": "HttpException is the base class for HTTP-related errors, taking a response body and a status code. NestJS provides many subclasses like NotFoundException and BadRequestException.",
+              "codeExample": "throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);",
+              "simpleExample": "HttpException is a pre-formatted complaint slip you fill in with the problem and the right error code."
+            },
+            {
+              "question": "What does the @Catch decorator do?",
+              "answer": "The @Catch decorator specifies which exception types the filter should handle. Leaving it empty catches all exceptions.",
+              "codeExample": "@Catch(NotFoundException)\nexport class NotFoundFilter implements ExceptionFilter {}",
+              "simpleExample": "@Catch is the sign on the complaints desk saying which kinds of problems this clerk handles."
+            },
+            {
+              "question": "How do you apply an exception filter?",
+              "answer": "You use the @UseFilters decorator at the method or controller level, or register globally with app.useGlobalFilters or APP_FILTER. Global filters catch exceptions across the whole app.",
+              "codeExample": "@UseFilters(new HttpExceptionFilter())\n@Get()\nfindAll() {}",
+              "simpleExample": "You can assign a complaints clerk to one desk, one department, or the whole company."
+            },
+            {
+              "question": "Why use a global exception filter?",
+              "answer": "A global exception filter standardizes error responses across the entire application, ensuring consistent error formats and centralized logging. It avoids repeating error handling in every controller.",
+              "simpleExample": "One company-wide complaints policy ensures every customer gets the same professional response, instead of each clerk improvising."
+            },
+            {
+              "question": "Where do exception filters run in the request lifecycle?",
+              "answer": "Exception filters run last, catching anything thrown by guards, pipes, interceptors, or the handler. They are the final layer before the response is sent.",
+              "simpleExample": "The complaints desk is the final stop -- it catches whatever went wrong anywhere along the visit and crafts the reply."
+            }
+          ]
+        },
+        "Custom Decorators": {
+          "icon": "🏷️",
+          "questions": [
+            {
+              "question": "What is a custom decorator in NestJS?",
+              "answer": "A custom decorator is a reusable function created to attach metadata or extract data, reducing boilerplate. NestJS provides helpers like createParamDecorator and SetMetadata.",
+              "codeExample": "export const User = createParamDecorator(\n  (data, ctx: ExecutionContext) => {\n    return ctx.switchToHttp().getRequest().user;\n  },\n);",
+              "simpleExample": "A custom decorator is your own reusable label, like creating a shortcut stamp you can press on any handler -- just like building Angular custom decorators."
+            },
+            {
+              "question": "What is createParamDecorator used for?",
+              "answer": "createParamDecorator builds custom parameter decorators that extract specific data from the request. A common example is a @CurrentUser decorator that pulls the authenticated user.",
+              "codeExample": "@Get()\nprofile(@User() user: UserEntity) {\n  return user;\n}",
+              "simpleExample": "It's like creating a custom 'fetch me the logged-in customer' button you can press in any handler."
+            },
+            {
+              "question": "What is SetMetadata used for?",
+              "answer": "SetMetadata attaches custom metadata to a route handler or controller that guards or interceptors can later read with the Reflector. It is the foundation for features like role-based access.",
+              "codeExample": "export const Roles = (...roles: string[]) => SetMetadata('roles', roles);",
+              "simpleExample": "SetMetadata pins a note to a door ('VIPs only') that the bouncer reads later to decide who gets in."
+            },
+            {
+              "question": "How do you combine multiple decorators into one?",
+              "answer": "You use the applyDecorators function to bundle several decorators into a single reusable decorator. This is great for grouping auth, swagger, and metadata decorators.",
+              "codeExample": "export function Auth(...roles: string[]) {\n  return applyDecorators(\n    SetMetadata('roles', roles),\n    UseGuards(AuthGuard, RolesGuard),\n  );\n}",
+              "simpleExample": "applyDecorators is bundling several stamps into one combo stamp so you press once instead of five times."
+            },
+            {
+              "question": "Why are custom decorators useful for clean code?",
+              "answer": "Custom decorators encapsulate repetitive extraction or metadata logic into a single, expressive name, improving readability and reuse. They keep controllers declarative and DRY.",
+              "simpleExample": "Instead of writing the same five lines to grab the user in every handler, you press one labeled button -- cleaner and consistent."
+            },
+            {
+              "question": "How would you build an @IsPublic decorator to skip auth?",
+              "answer": "You create a decorator using SetMetadata to flag routes as public, then check that flag in your auth guard with the Reflector. If the flag is present, the guard allows the request.",
+              "codeExample": "export const IsPublic = () => SetMetadata('isPublic', true);",
+              "simpleExample": "@IsPublic pins a 'no ID needed' sign to a door, and the bouncer reads it and waves people through."
+            }
+          ]
+        }
+      }
+    },
+    "4+": {
+      "modules": {
+        "Database (TypeORM / Prisma)": {
+          "icon": "🗄️",
+          "questions": [
+            {
+              "question": "How does NestJS integrate with TypeORM?",
+              "answer": "NestJS uses the @nestjs/typeorm package, configured with TypeOrmModule.forRoot for the connection and forFeature to register entities per module. Repositories are then injected into services.",
+              "codeExample": "@Module({\n  imports: [TypeOrmModule.forFeature([User])],\n})\nexport class UsersModule {}",
+              "simpleExample": "TypeOrmModule.forRoot sets up the warehouse connection once, and forFeature gives each department the shelves (entities) it needs."
+            },
+            {
+              "question": "How do you inject a repository in NestJS?",
+              "answer": "You use the @InjectRepository decorator in the service constructor to inject a TypeORM repository for an entity. The repository provides methods like find, save, and delete.",
+              "codeExample": "constructor(\n  @InjectRepository(User)\n  private usersRepo: Repository<User>,\n) {}",
+              "simpleExample": "The repository is your librarian for a specific shelf; @InjectRepository assigns the right one to your service."
+            },
+            {
+              "question": "What is the difference between TypeORM and Prisma in NestJS?",
+              "answer": "TypeORM is an ORM with decorators and repositories tightly integrated into Nest's DI, while Prisma is a type-safe query builder using a schema file and generated client. Prisma offers stronger type safety; TypeORM offers deeper Nest integration via decorators.",
+              "simpleExample": "TypeORM feels like Angular-style decorated classes, while Prisma is a separate schema file that generates a strongly typed client you wrap in a service."
+            },
+            {
+              "question": "How do you use Prisma with NestJS?",
+              "answer": "You create a PrismaService that extends PrismaClient and connects on module init, then inject it into other services. The Prisma schema defines models and generates a typed client.",
+              "codeExample": "@Injectable()\nexport class PrismaService extends PrismaClient implements OnModuleInit {\n  async onModuleInit() {\n    await this.$connect();\n  }\n}",
+              "simpleExample": "PrismaService is a single shared, strongly-typed database client you keep on staff and hand to whoever queries the data."
+            },
+            {
+              "question": "What is a transaction and how do you run one?",
+              "answer": "A transaction groups multiple database operations so they all succeed or all roll back together, preserving data integrity. In TypeORM you use a QueryRunner or the transaction method; in Prisma you use $transaction.",
+              "codeExample": "await this.dataSource.transaction(async (manager) => {\n  await manager.save(order);\n  await manager.save(payment);\n});",
+              "simpleExample": "A transaction is an all-or-nothing deal -- if any step fails, the whole exchange is undone, like a bank transfer."
+            },
+            {
+              "question": "How do you avoid the N+1 query problem?",
+              "answer": "You avoid N+1 by eagerly joining related data in a single query using relations options, query builder joins, or Prisma's include. This replaces many small queries with one efficient query.",
+              "codeExample": "this.usersRepo.find({ relations: { posts: true } });",
+              "simpleExample": "Instead of asking the librarian one book at a time (N+1 trips), you request the whole stack in a single trip."
+            }
+          ]
+        },
+        "Microservices": {
+          "icon": "🛰️",
+          "questions": [
+            {
+              "question": "What is a microservice in NestJS?",
+              "answer": "In NestJS, a microservice is an application that uses a transport layer other than HTTP, such as TCP, Redis, NATS, or Kafka, to communicate. Nest provides a unified microservices abstraction over these transports.",
+              "codeExample": "const app = await NestFactory.createMicroservice(AppModule, {\n  transport: Transport.TCP,\n});",
+              "simpleExample": "A microservice is a small specialized shop that talks to others over a private courier line instead of the public web."
+            },
+            {
+              "question": "What is the difference between message patterns and event patterns?",
+              "answer": "Message patterns (@MessagePattern) follow a request-response model where the sender waits for a reply, while event patterns (@EventPattern) are fire-and-forget with no response. Use messages for queries and events for notifications.",
+              "codeExample": "@MessagePattern({ cmd: 'sum' })\nsum(data: number[]): number {\n  return data.reduce((a, b) => a + b, 0);\n}",
+              "simpleExample": "A message pattern is asking a question and waiting for an answer; an event pattern is shouting an announcement and walking away."
+            },
+            {
+              "question": "How does a client send messages to a microservice?",
+              "answer": "You inject a ClientProxy and use its send method (for request-response) or emit method (for events). send returns an Observable with the reply.",
+              "codeExample": "this.client.send({ cmd: 'sum' }, [1, 2, 3]).subscribe();",
+              "simpleExample": "The client is the customer using the courier: 'send' waits for a reply, 'emit' just drops off a notice."
+            },
+            {
+              "question": "How does NestJS handle Kafka or RabbitMQ?",
+              "answer": "NestJS provides built-in transporters for Kafka and RabbitMQ, letting you consume and produce messages with the same @MessagePattern and @EventPattern decorators. Configuration specifies brokers, queues, and topics.",
+              "simpleExample": "Nest plugs into these big message-bus post offices so your services can subscribe to topics and drop messages into queues."
+            },
+            {
+              "question": "How do you handle errors across microservices?",
+              "answer": "You can use RpcException to throw transport-aware errors and handle them with exception filters using @Catch(RpcException). Clients receive the error through the Observable's error channel.",
+              "codeExample": "throw new RpcException('Invalid credentials');",
+              "simpleExample": "RpcException is the courier-friendly complaint slip that travels back to the sender through the same line."
+            },
+            {
+              "question": "When should you choose microservices over a monolith?",
+              "answer": "Choose microservices when you need independent scaling, separate deployment, team autonomy, or fault isolation for distinct domains. For smaller apps, a modular monolith is simpler and faster to develop.",
+              "simpleExample": "Split into separate shops only when each one needs to grow, deploy, and fail on its own -- otherwise one well-organized store is easier."
+            }
+          ]
+        },
+        "Testing": {
+          "icon": "🧪",
+          "questions": [
+            {
+              "question": "What is the Test.createTestingModule used for?",
+              "answer": "Test.createTestingModule builds an isolated module for testing, letting you register providers, controllers, and overrides. It returns a TestingModule you compile to resolve dependencies.",
+              "codeExample": "const module = await Test.createTestingModule({\n  providers: [UsersService],\n}).compile();",
+              "simpleExample": "It's a mini test sandbox version of your app where you can wire up just the pieces you want to examine."
+            },
+            {
+              "question": "How do you mock a dependency in a NestJS test?",
+              "answer": "You provide a mock object using the useValue or useClass syntax when registering the provider in the testing module. This isolates the unit under test from real dependencies.",
+              "codeExample": "{\n  provide: UsersRepository,\n  useValue: { find: jest.fn().mockResolvedValue([]) },\n}",
+              "simpleExample": "You swap the real database worker for a stunt double that just pretends to do the job during the test."
+            },
+            {
+              "question": "How do you override a provider in tests?",
+              "answer": "You chain overrideProvider().useValue() (or useClass/useFactory) on the testing module builder before compiling. This replaces a real provider with a test double.",
+              "codeExample": "Test.createTestingModule({ imports: [AppModule] })\n  .overrideProvider(MailService)\n  .useValue({ send: jest.fn() })\n  .compile();",
+              "simpleExample": "overrideProvider is telling the sandbox 'use this fake mail worker instead of the real one that sends emails'."
+            },
+            {
+              "question": "Why is dependency injection helpful for testing?",
+              "answer": "Because dependencies are injected rather than hardcoded, you can easily substitute mocks and fakes during tests. This makes units testable in isolation without real databases or networks.",
+              "simpleExample": "Since workers are handed in rather than built inside, you can quietly swap in actors for the test -- the same testability benefit Angular DI gives you."
+            },
+            {
+              "question": "How do you test guards, pipes, and interceptors?",
+              "answer": "You can unit test them directly by instantiating the class and calling its method with a mocked ExecutionContext or argument. Alternatively, e2e tests verify their behavior in the full request flow.",
+              "codeExample": "const guard = new AuthGuard();\nexpect(guard.canActivate(mockContext)).toBe(true);",
+              "simpleExample": "You can quiz the bouncer (guard) directly with a fake visitor, or watch them work during a full dress rehearsal (e2e)."
+            },
+            {
+              "question": "How do you handle database setup and teardown in tests?",
+              "answer": "You typically use a separate test database, run migrations or seeds in beforeAll/beforeEach hooks, and clean up in afterEach/afterAll. Some teams use in-memory databases or transactions that roll back per test.",
+              "simpleExample": "It's like setting up a clean practice room before each rehearsal and tidying it afterward so tests don't pollute each other."
+            }
+          ]
+        },
+        "Architecture & Performance": {
+          "icon": "🏛️",
+          "questions": [
+            {
+              "question": "What is a modular monolith and why might you prefer it?",
+              "answer": "A modular monolith is a single deployable app organized into well-isolated feature modules with clear boundaries. It offers many benefits of microservices (organization, separation) without the operational complexity of distribution.",
+              "simpleExample": "It's one big well-organized office with clearly separated departments, instead of renting separate buildings across town."
+            },
+            {
+              "question": "How do you implement graceful shutdown in NestJS?",
+              "answer": "You enable shutdown hooks with app.enableShutdownHooks() and implement OnApplicationShutdown to release resources like database connections. This ensures clean termination on signals like SIGTERM.",
+              "codeExample": "app.enableShutdownHooks();",
+              "simpleExample": "Graceful shutdown is locking up properly when closing -- turning off equipment and finishing current customers instead of cutting the power."
+            },
+            {
+              "question": "How do you add caching to a NestJS app?",
+              "answer": "You use the @nestjs/cache-manager package with the CacheModule, optionally backed by Redis for distributed caching. You can cache automatically via CacheInterceptor or manually through the cache manager.",
+              "codeExample": "@Module({\n  imports: [CacheModule.register({ ttl: 5000 })],\n})\nexport class AppModule {}",
+              "simpleExample": "Caching is keeping the most-requested dishes pre-made so you don't cook them from scratch every time."
+            },
+            {
+              "question": "How can you improve NestJS application performance?",
+              "answer": "You can switch to the Fastify adapter, enable caching, use compression, optimize database queries, and use clustering or horizontal scaling. Profiling and avoiding request-scoped providers also help.",
+              "simpleExample": "It's like speeding up a kitchen: faster equipment (Fastify), prepped ingredients (cache), efficient recipes (optimized queries), and more cooks (scaling)."
+            },
+            {
+              "question": "What is the performance impact of request-scoped providers?",
+              "answer": "Request-scoped providers create a new instance for every request, which adds overhead and prevents some optimizations. They should be used sparingly and only when per-request state is truly needed.",
+              "simpleExample": "Hiring a brand-new worker for every single customer is slower than keeping a shared, ready staff -- so do it only when necessary."
+            },
+            {
+              "question": "How do you handle background jobs and queues in NestJS?",
+              "answer": "You use the @nestjs/bull or @nestjs/bullmq package backed by Redis to offload heavy or delayed work to background processors. Producers add jobs to a queue and consumers process them asynchronously.",
+              "codeExample": "@Processor('email')\nexport class EmailProcessor {\n  @Process()\n  async send(job: Job) {}\n}",
+              "simpleExample": "Queues are the to-do basket where you drop slow tasks (sending emails) so a back-room worker handles them without making the customer wait."
+            },
+            {
+              "question": "What architectural patterns are common in large NestJS apps?",
+              "answer": "Common patterns include layered architecture (controller-service-repository), CQRS, domain-driven design, and hexagonal architecture. NestJS provides a @nestjs/cqrs package to support command and query separation.",
+              "simpleExample": "These are organizational playbooks -- like separating order-takers, decision-makers, and record-keepers -- so a big company stays manageable."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -21,6 +21,9 @@ const TECH_META: Record<string, TechMeta> = {
   angular: { icon: '⚡', tag: 'Frontend Framework', gradient: 'linear-gradient(135deg, #c3002f 0%, #ff4857 100%)', accent: '#ff4857' },
   dotnet:  { icon: '🔷', tag: 'Backend Platform',   gradient: 'linear-gradient(135deg, #512bd4 0%, #9333ea 100%)', accent: '#9333ea' },
   sql:     { icon: '🗄️', tag: 'Database Language',  gradient: 'linear-gradient(135deg, #0050a0 0%, #0ea5e9 100%)', accent: '#0ea5e9' },
+  react:   { icon: '⚛️', tag: 'Frontend Library',    gradient: 'linear-gradient(135deg, #087ea4 0%, #61dafb 100%)', accent: '#61dafb' },
+  nextjs:  { icon: '🔼', tag: 'Fullstack Framework', gradient: 'linear-gradient(135deg, #111827 0%, #4b5563 100%)', accent: '#6b7280' },
+  nestjs:  { icon: '🐱', tag: 'Backend Framework',   gradient: 'linear-gradient(135deg, #a1132e 0%, #e0234e 100%)', accent: '#e0234e' },
 };
 
 const DEFAULT_META: TechMeta = { icon: '📚', tag: 'Technology', gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', accent: '#7c3aed' };

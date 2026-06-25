@@ -74,6 +74,33 @@ const ARENAS: Arena[] = [
     gradient: 'linear-gradient(135deg, #0050a0 0%, #0ea5e9 100%)',
     accent: '#0ea5e9',
   },
+  {
+    id: 'react',
+    name: 'React',
+    icon: '⚛️',
+    tag: 'Frontend Library',
+    blurb: 'JSX, hooks, context, performance & patterns.',
+    gradient: 'linear-gradient(135deg, #087ea4 0%, #61dafb 100%)',
+    accent: '#61dafb',
+  },
+  {
+    id: 'nextjs',
+    name: 'Next.js',
+    icon: '🔼',
+    tag: 'Fullstack Framework',
+    blurb: 'App Router, Server Components, SSR/SSG/ISR & caching.',
+    gradient: 'linear-gradient(135deg, #111827 0%, #4b5563 100%)',
+    accent: '#6b7280',
+  },
+  {
+    id: 'nestjs',
+    name: 'NestJS',
+    icon: '🐱',
+    tag: 'Backend Framework',
+    blurb: 'Modules, DI, pipes, guards, interceptors & microservices.',
+    gradient: 'linear-gradient(135deg, #a1132e 0%, #e0234e 100%)',
+    accent: '#e0234e',
+  },
 ];
 
 const LEVEL_META: Record<string, { label: string; badge: string; difficulty: number }> = {

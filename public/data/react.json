@@ -1,0 +1,658 @@
+{
+  "categories": {
+    "0-1": {
+      "modules": {
+        "JSX & Rendering": {
+          "icon": "🎨",
+          "questions": [
+            {
+              "question": "What is React?",
+              "answer": "React is a JavaScript library for building user interfaces using reusable components and a declarative, component-based approach.",
+              "simpleExample": "React is like a box of LEGO bricks. You build small pieces (components) and snap them together to make a whole page."
+            },
+            {
+              "question": "What is JSX?",
+              "answer": "JSX is a syntax extension for JavaScript that lets you write HTML-like markup inside JavaScript. It gets compiled to React.createElement calls.",
+              "codeExample": "const element = <h1>Hello, world!</h1>;",
+              "simpleExample": "JSX lets you write what looks like HTML right inside your JavaScript, so describing the UI feels natural."
+            },
+            {
+              "question": "Why must JSX expressions have a single root element?",
+              "answer": "A component must return one element because the compiled output is a single function call. You can wrap siblings in a parent div or use a Fragment.",
+              "codeExample": "return (\n  <>\n    <h1>Title</h1>\n    <p>Text</p>\n  </>\n);",
+              "simpleExample": "It is like handing someone one bag of groceries instead of loose items - everything must be packed into one container."
+            },
+            {
+              "question": "How do you embed JavaScript expressions in JSX?",
+              "answer": "You use curly braces to embed any valid JavaScript expression, such as variables, function calls, or math, inside JSX.",
+              "codeExample": "const name = 'Sam';\nreturn <h1>Hello, {name}!</h1>;",
+              "simpleExample": "The curly braces are a window into JavaScript - whatever value is inside gets shown on the page."
+            },
+            {
+              "question": "What is the Virtual DOM?",
+              "answer": "The Virtual DOM is an in-memory representation of the real DOM. React updates it first, compares it to the previous version, and applies only the minimal changes to the real DOM.",
+              "simpleExample": "It is like editing a draft on paper before writing the final copy - you only rewrite the lines that changed."
+            },
+            {
+              "question": "What is the difference between a React element and a component?",
+              "answer": "An element is a plain object describing what should appear on screen, while a component is a function that returns elements. Elements are the output; components are the blueprint.",
+              "codeExample": "const element = <App />; // an element\nfunction App() { return <h1>Hi</h1>; } // a component",
+              "simpleExample": "A component is the cookie cutter; an element is one cookie it stamps out."
+            }
+          ]
+        },
+        "Components & Props": {
+          "icon": "🧩",
+          "questions": [
+            {
+              "question": "What is a React component?",
+              "answer": "A component is a reusable, self-contained piece of UI. In modern React it is a JavaScript function that returns JSX.",
+              "codeExample": "function Welcome() {\n  return <h1>Welcome!</h1>;\n}",
+              "simpleExample": "A component is like a custom rubber stamp - define it once and stamp it wherever you need that piece of UI."
+            },
+            {
+              "question": "What are props in React?",
+              "answer": "Props are inputs passed from a parent component to a child. They are read-only and let you configure or customize a component.",
+              "codeExample": "function Greeting(props) {\n  return <h1>Hi, {props.name}</h1>;\n}\n<Greeting name='Alex' />",
+              "simpleExample": "Props are like settings you hand to a component, the way you tell a coffee machine 'large, no sugar'."
+            },
+            {
+              "question": "Why are props read-only?",
+              "answer": "A component must never modify its own props. This keeps data flow predictable and one-directional, from parent to child.",
+              "simpleExample": "Props are like a gift - you can use it but you should not change what the giver handed you."
+            },
+            {
+              "question": "What is the difference between a function component and a class component?",
+              "answer": "Function components are plain functions that use hooks for state and lifecycle. Class components use ES6 classes with lifecycle methods. Function components with hooks are the modern standard.",
+              "codeExample": "function Hi() { return <p>Hi</p>; }\n\nclass Hi extends React.Component {\n  render() { return <p>Hi</p>; }\n}",
+              "simpleExample": "Function components are the new lightweight model; class components are the older, heavier model."
+            },
+            {
+              "question": "How do you destructure props?",
+              "answer": "You can destructure props directly in the function parameter list for cleaner, shorter code.",
+              "codeExample": "function Greeting({ name, age }) {\n  return <p>{name} is {age}</p>;\n}",
+              "simpleExample": "Destructuring is like unpacking a box and laying each item out by name instead of digging into the box each time."
+            },
+            {
+              "question": "What is the children prop?",
+              "answer": "props.children holds whatever JSX is nested between a component's opening and closing tags, letting you build wrapper components.",
+              "codeExample": "function Card({ children }) {\n  return <div className='card'>{children}</div>;\n}\n<Card><p>Inside</p></Card>",
+              "simpleExample": "children is like an empty picture frame - whatever you place inside it gets shown."
+            },
+            {
+              "question": "How do you set default values for props?",
+              "answer": "You assign default values using default parameters when destructuring props.",
+              "codeExample": "function Button({ label = 'Click' }) {\n  return <button>{label}</button>;\n}",
+              "simpleExample": "It is like a form that fills in a sensible default when you leave a field blank."
+            }
+          ]
+        },
+        "State & Events": {
+          "icon": "🎛️",
+          "questions": [
+            {
+              "question": "What is state in React?",
+              "answer": "State is data that a component owns and can change over time. When state changes, React re-renders the component to reflect the new data.",
+              "codeExample": "const [count, setCount] = useState(0);",
+              "simpleExample": "State is a component's memory - like a scoreboard that updates as the game goes on."
+            },
+            {
+              "question": "How do you handle events in React?",
+              "answer": "You pass a function to an event prop like onClick or onChange. React uses camelCase event names and passes a synthetic event object.",
+              "codeExample": "<button onClick={() => alert('Hi')}>Click</button>",
+              "simpleExample": "Handling events is like wiring a doorbell - when someone presses the button, your function rings."
+            },
+            {
+              "question": "What is the difference between props and state?",
+              "answer": "Props are passed in from a parent and are read-only. State is managed inside the component and can change. Both trigger re-renders when they change.",
+              "simpleExample": "Props are instructions handed to you from outside; state is your own notebook that you can edit."
+            },
+            {
+              "question": "Why should you not modify state directly?",
+              "answer": "Directly mutating state does not tell React to re-render. You must use the setter function so React knows to schedule an update.",
+              "codeExample": "// Wrong\ncount = count + 1;\n// Right\nsetCount(count + 1);",
+              "simpleExample": "Updating state directly is like changing a scoreboard's wires by hand - the official display never notices."
+            },
+            {
+              "question": "How do you pass an argument to an event handler?",
+              "answer": "You wrap the handler in an arrow function so the argument is passed when the event fires, not immediately during render.",
+              "codeExample": "<button onClick={() => deleteItem(id)}>Delete</button>",
+              "simpleExample": "The arrow function is a wrapper that waits until the click happens before running with your value."
+            },
+            {
+              "question": "What is event.preventDefault used for?",
+              "answer": "It stops the browser's default behavior for an event, such as a form submitting and reloading the page.",
+              "codeExample": "function onSubmit(e) {\n  e.preventDefault();\n  // handle form\n}",
+              "simpleExample": "It is like catching a falling object before it hits the ground - you stop the automatic outcome."
+            }
+          ]
+        },
+        "Lists & Conditional Rendering": {
+          "icon": "📋",
+          "questions": [
+            {
+              "question": "How do you render a list in React?",
+              "answer": "You map over an array and return a JSX element for each item, giving each element a unique key prop.",
+              "codeExample": "{items.map(item => (\n  <li key={item.id}>{item.name}</li>\n))}",
+              "simpleExample": "It is like a mail-merge - you have a list of names and you stamp out one label per name."
+            },
+            {
+              "question": "Why do list items need a key?",
+              "answer": "Keys give each list item a stable identity so React can efficiently track which items changed, were added, or removed during re-renders.",
+              "simpleExample": "Keys are like name tags at a party - they let React tell people apart even when the crowd shifts."
+            },
+            {
+              "question": "How do you conditionally render with the ternary operator?",
+              "answer": "You use a ternary expression inside JSX to choose between two outputs based on a condition.",
+              "codeExample": "{isLoggedIn ? <Dashboard /> : <Login />}",
+              "simpleExample": "It is a fork in the road - if true go left, if false go right."
+            },
+            {
+              "question": "How do you render something only when a condition is true?",
+              "answer": "You use the logical AND operator. If the left side is true, the right side renders; otherwise nothing renders.",
+              "codeExample": "{hasError && <p className='error'>Something went wrong</p>}",
+              "simpleExample": "It is like a guard at a gate - the content only passes through if the condition is true."
+            },
+            {
+              "question": "Why should you avoid using the array index as a key?",
+              "answer": "Index keys can cause bugs and inefficient updates when the list is reordered, filtered, or items are inserted, because the identity shifts with position.",
+              "simpleExample": "Using the index is like labeling people by their seat number - if they swap seats, the labels become wrong."
+            },
+            {
+              "question": "Why does React not render false, null, or undefined?",
+              "answer": "React intentionally ignores booleans, null, and undefined so you can use short-circuit conditions without rendering unwanted text.",
+              "codeExample": "{count > 0 && <Badge count={count} />}",
+              "simpleExample": "These values are like blank ballots - React simply skips them instead of showing anything."
+            }
+          ]
+        }
+      }
+    },
+    "1-2": {
+      "modules": {
+        "Hooks: useState & useEffect": {
+          "icon": "🪝",
+          "questions": [
+            {
+              "question": "What is the useState hook?",
+              "answer": "useState lets a function component hold local state. It returns the current value and a setter function to update it.",
+              "codeExample": "const [name, setName] = useState('');",
+              "simpleExample": "useState gives a component a small memory slot plus a remote control to change what is stored in it."
+            },
+            {
+              "question": "What is the useEffect hook?",
+              "answer": "useEffect runs side effects after render, such as data fetching, subscriptions, or DOM updates. It accepts a function and a dependency array.",
+              "codeExample": "useEffect(() => {\n  document.title = `Count: ${count}`;\n}, [count]);",
+              "simpleExample": "useEffect is like a chore you run after the page is painted, such as turning on the lights once a room is built."
+            },
+            {
+              "question": "What does the dependency array control in useEffect?",
+              "answer": "It tells React when to re-run the effect. An empty array runs once on mount, no array runs every render, and listed values re-run when any of them change.",
+              "codeExample": "useEffect(() => { fetchData(); }, []); // runs once",
+              "simpleExample": "The dependency array is a watchlist - the effect only fires again when something on the list changes."
+            },
+            {
+              "question": "How do you clean up an effect?",
+              "answer": "You return a cleanup function from useEffect. React calls it before re-running the effect and when the component unmounts, which prevents leaks.",
+              "codeExample": "useEffect(() => {\n  const id = setInterval(tick, 1000);\n  return () => clearInterval(id);\n}, []);",
+              "simpleExample": "The cleanup is like turning off the tap before you leave - it prevents leaks and waste."
+            },
+            {
+              "question": "Why should state updates based on previous state use a function?",
+              "answer": "Passing an updater function ensures you work with the latest state, which is important when multiple updates are batched together.",
+              "codeExample": "setCount(prev => prev + 1);",
+              "simpleExample": "Asking 'whatever it is now, add one' is safer than guessing the current number from a possibly stale value."
+            },
+            {
+              "question": "What are the rules of hooks?",
+              "answer": "Only call hooks at the top level of a component or custom hook, never inside loops, conditions, or nested functions, and only call them from React functions.",
+              "simpleExample": "Hooks must be called in the same order every time, like reciting steps of a recipe without skipping around."
+            },
+            {
+              "question": "What happens if you call setState with the same value?",
+              "answer": "If you set state to a value equal to the current one (by Object.is comparison), React may bail out and skip re-rendering that component.",
+              "simpleExample": "It is like asking someone to repaint a wall the exact same color - there is no point doing the work."
+            }
+          ]
+        },
+        "Forms & Controlled Inputs": {
+          "icon": "📝",
+          "questions": [
+            {
+              "question": "What is a controlled component?",
+              "answer": "A controlled input has its value driven by React state, and updates that state on every change. React is the single source of truth.",
+              "codeExample": "<input value={name} onChange={e => setName(e.target.value)} />",
+              "simpleExample": "React holds the steering wheel - the input only shows what state says it should show."
+            },
+            {
+              "question": "What is an uncontrolled component?",
+              "answer": "An uncontrolled input keeps its own state in the DOM, and you read its value with a ref when needed instead of tracking it in state.",
+              "codeExample": "const ref = useRef();\n<input ref={ref} />\n// ref.current.value",
+              "simpleExample": "The input manages itself like a self-service kiosk; you only check what it has when you ask for it."
+            },
+            {
+              "question": "How do you handle multiple inputs with one handler?",
+              "answer": "You give each input a name attribute and use the event target's name to update the matching field in a state object.",
+              "codeExample": "function onChange(e) {\n  setForm({ ...form, [e.target.name]: e.target.value });\n}",
+              "simpleExample": "One mailroom worker sorts every letter into the right box based on the address on each one."
+            },
+            {
+              "question": "How do you handle form submission in React?",
+              "answer": "You attach an onSubmit handler to the form, call preventDefault to stop the reload, then process the collected state.",
+              "codeExample": "<form onSubmit={handleSubmit}>\n  <button type='submit'>Save</button>\n</form>",
+              "simpleExample": "Submitting is like handing in a finished worksheet - you stop the automatic page flip and collect the answers."
+            },
+            {
+              "question": "How do you handle a checkbox in a controlled form?",
+              "answer": "You bind the checked attribute to state and read e.target.checked in the change handler instead of e.target.value.",
+              "codeExample": "<input type='checkbox' checked={agree}\n  onChange={e => setAgree(e.target.checked)} />",
+              "simpleExample": "A checkbox is a yes or no switch, so you watch whether it is flipped on, not what text it holds."
+            },
+            {
+              "question": "Why might you prefer controlled inputs?",
+              "answer": "Controlled inputs make it easy to validate, format, disable, or conditionally change input values in real time because state is the source of truth.",
+              "simpleExample": "Because React watches every keystroke, you can correct or block input the instant it happens."
+            }
+          ]
+        },
+        "Lifting State & Composition": {
+          "icon": "⬆️",
+          "questions": [
+            {
+              "question": "What does 'lifting state up' mean?",
+              "answer": "When two components need the same data, you move that state to their closest common parent and pass it down via props.",
+              "codeExample": "function Parent() {\n  const [value, setValue] = useState('');\n  return (<><Input value={value} onChange={setValue} /><Display value={value} /></>);\n}",
+              "simpleExample": "If two kids need the same toy, you give it to the parent who shares it with both, instead of duplicating it."
+            },
+            {
+              "question": "What is component composition?",
+              "answer": "Composition is building complex UIs by combining smaller components, often passing components as children or props rather than using inheritance.",
+              "simpleExample": "It is like assembling a meal from prepared ingredients rather than cooking one giant inseparable dish."
+            },
+            {
+              "question": "How do you pass data from a child to a parent?",
+              "answer": "The parent passes a callback function down as a prop, and the child calls it with the data, sending information back up.",
+              "codeExample": "function Parent() {\n  const handle = data => console.log(data);\n  return <Child onSend={handle} />;\n}",
+              "simpleExample": "The parent hands the child a phone; the child calls back to report news."
+            },
+            {
+              "question": "What is one-way data flow in React?",
+              "answer": "Data flows downward from parent to child through props. Children cannot directly change parent data; they request changes via callbacks.",
+              "simpleExample": "Information flows downhill like water; to send something back up you must use a pump (a callback)."
+            },
+            {
+              "question": "What is prop drilling?",
+              "answer": "Prop drilling is passing props through many intermediate components that do not use them, just to reach a deeply nested component. Context or composition can avoid it.",
+              "simpleExample": "It is like passing a note through a long row of people just to reach the one person at the end."
+            },
+            {
+              "question": "How does the children prop help with composition?",
+              "answer": "Using children lets a component wrap arbitrary content, so you can build flexible layout or wrapper components without hardcoding what goes inside.",
+              "codeExample": "<Layout>\n  <Sidebar />\n  <Content />\n</Layout>",
+              "simpleExample": "A picture frame does not care what photo you put in it - children lets a component hold any content."
+            }
+          ]
+        },
+        "Keys & Reconciliation": {
+          "icon": "🔑",
+          "questions": [
+            {
+              "question": "What is reconciliation in React?",
+              "answer": "Reconciliation is the process where React compares the new Virtual DOM tree with the previous one (diffing) and updates only the parts of the real DOM that changed.",
+              "simpleExample": "React is like a careful editor who only rewrites the sentences that changed instead of retyping the whole page."
+            },
+            {
+              "question": "How does React decide whether to update or recreate a DOM node?",
+              "answer": "If the element type is the same it updates the existing node and its props. If the type changes, React tears down the old node and builds a new one.",
+              "simpleExample": "Same kind of furniture gets rearranged; a different kind gets thrown out and replaced."
+            },
+            {
+              "question": "How do keys affect reconciliation?",
+              "answer": "Keys let React match elements between renders. Stable, unique keys let React reuse and reorder elements correctly instead of recreating them.",
+              "codeExample": "{users.map(u => <Row key={u.id} user={u} />)}",
+              "simpleExample": "Keys are name tags that let React recognize the same item even if it moved in the list."
+            },
+            {
+              "question": "What bug can occur from using index as a key with editable lists?",
+              "answer": "When items reorder or get removed, index keys cause React to associate state with the wrong item, leading to mismatched input values or stale UI.",
+              "simpleExample": "If you label coats by hook number and people swap hooks, you hand back the wrong coats."
+            },
+            {
+              "question": "Do keys need to be globally unique?",
+              "answer": "No, keys only need to be unique among siblings in the same list, not across the entire application.",
+              "simpleExample": "Like students in a classroom, IDs only need to be unique within that room, not the whole school."
+            },
+            {
+              "question": "What happens when a component's key changes?",
+              "answer": "Changing a component's key tells React to unmount the old instance and mount a fresh one, resetting its internal state.",
+              "codeExample": "<Profile key={userId} userId={userId} />",
+              "simpleExample": "Changing the key is like swapping in a brand new component - it forgets everything and starts over."
+            }
+          ]
+        }
+      }
+    },
+    "2-3": {
+      "modules": {
+        "Advanced Hooks (useMemo/useCallback/useRef/useReducer)": {
+          "icon": "⚙️",
+          "questions": [
+            {
+              "question": "What is the useMemo hook?",
+              "answer": "useMemo caches the result of an expensive calculation and only recomputes it when one of its dependencies changes, avoiding wasted work on every render.",
+              "codeExample": "const total = useMemo(() => slowSum(items), [items]);",
+              "simpleExample": "It is like saving the answer to a hard math problem so you do not solve it again until the numbers change."
+            },
+            {
+              "question": "What is the useCallback hook?",
+              "answer": "useCallback returns a memoized version of a function that stays the same between renders unless its dependencies change. It helps avoid re-rendering memoized children.",
+              "codeExample": "const handleClick = useCallback(() => doThing(id), [id]);",
+              "simpleExample": "It hands back the same function instance each render so children do not think the prop changed."
+            },
+            {
+              "question": "What is the difference between useMemo and useCallback?",
+              "answer": "useMemo memoizes a computed value, while useCallback memoizes a function. useCallback(fn, deps) is equivalent to useMemo(() => fn, deps).",
+              "simpleExample": "useMemo remembers the answer; useCallback remembers the calculator itself."
+            },
+            {
+              "question": "What is the useRef hook?",
+              "answer": "useRef returns a mutable object whose .current property persists across renders without causing a re-render when changed. It is used for DOM access and storing mutable values.",
+              "codeExample": "const inputRef = useRef(null);\n<input ref={inputRef} />\n// inputRef.current.focus()",
+              "simpleExample": "useRef is a sticky note that survives re-renders but does not ring any alarm when you change it."
+            },
+            {
+              "question": "When would you use useReducer instead of useState?",
+              "answer": "useReducer is preferable when state logic is complex, involves multiple sub-values, or when the next state depends on the previous one through many actions.",
+              "codeExample": "const [state, dispatch] = useReducer(reducer, initial);\ndispatch({ type: 'increment' });",
+              "simpleExample": "useReducer is like a central command center where all state changes go through one set of rules."
+            },
+            {
+              "question": "Does changing a ref cause a re-render?",
+              "answer": "No. Mutating ref.current does not trigger a re-render, which is why refs are ideal for values like timers or previous values that should not affect the UI.",
+              "simpleExample": "Changing a ref is silent - it is like scribbling in a private notebook the page never reads."
+            },
+            {
+              "question": "What is a common mistake with useCallback?",
+              "answer": "Wrapping every function in useCallback adds overhead without benefit. It only helps when the function is a dependency of an effect or passed to a memoized child.",
+              "simpleExample": "Memoizing everything is like locking every drawer in your house - extra effort that rarely pays off."
+            }
+          ]
+        },
+        "Context API": {
+          "icon": "🌐",
+          "questions": [
+            {
+              "question": "What is the Context API?",
+              "answer": "Context provides a way to share values like themes or the current user across the component tree without passing props through every level.",
+              "codeExample": "const ThemeContext = createContext('light');",
+              "simpleExample": "Context is like a building's central heating - every room gets it without running a separate pipe from the top floor."
+            },
+            {
+              "question": "How do you provide and consume context?",
+              "answer": "You wrap part of the tree in a Context.Provider with a value, and consume it in descendants using the useContext hook.",
+              "codeExample": "<ThemeContext.Provider value='dark'>\n  <App />\n</ThemeContext.Provider>\n\nconst theme = useContext(ThemeContext);",
+              "simpleExample": "The Provider broadcasts a value, and any child can tune in with useContext."
+            },
+            {
+              "question": "What problem does Context solve?",
+              "answer": "It eliminates prop drilling by letting deeply nested components read shared data directly instead of passing props through every intermediate component.",
+              "simpleExample": "Instead of relaying a message down a line of people, you put it on a notice board everyone can read."
+            },
+            {
+              "question": "What is a downside of Context?",
+              "answer": "Every component consuming a context re-renders when the context value changes, so frequently changing values can cause performance issues if not split or memoized.",
+              "simpleExample": "When the notice board updates, everyone reading it has to look again - too many updates means constant interruptions."
+            },
+            {
+              "question": "How can you reduce unnecessary re-renders from Context?",
+              "answer": "Split context into multiple smaller contexts, memoize the value object with useMemo, or move state down so fewer components subscribe.",
+              "codeExample": "const value = useMemo(() => ({ user, setUser }), [user]);",
+              "simpleExample": "Split one giant noticeboard into smaller topic boards so people only check the one they care about."
+            },
+            {
+              "question": "Is Context a replacement for Redux or other state libraries?",
+              "answer": "Not entirely. Context is a transport mechanism for sharing values, but it lacks built-in tooling, middleware, and optimized updates that dedicated state libraries provide.",
+              "simpleExample": "Context is a delivery pipe; Redux is the whole warehouse with inventory tracking and rules."
+            }
+          ]
+        },
+        "Performance Optimization": {
+          "icon": "🚀",
+          "questions": [
+            {
+              "question": "What is React.memo?",
+              "answer": "React.memo is a higher-order component that memoizes a function component, skipping re-renders when its props have not changed by shallow comparison.",
+              "codeExample": "const Row = React.memo(function Row({ name }) {\n  return <li>{name}</li>;\n});",
+              "simpleExample": "It is like a bouncer that only lets a component re-render if its props actually changed."
+            },
+            {
+              "question": "Why can passing inline functions or objects as props hurt performance?",
+              "answer": "A new function or object is created on every render, so a memoized child sees a different reference and re-renders anyway. useCallback or useMemo can stabilize them.",
+              "simpleExample": "Handing someone a freshly printed identical document each time makes them think it is new and re-read it."
+            },
+            {
+              "question": "What is code splitting in React?",
+              "answer": "Code splitting breaks the bundle into smaller chunks loaded on demand, often with React.lazy and Suspense, so users download only what they need.",
+              "codeExample": "const Chart = React.lazy(() => import('./Chart'));",
+              "simpleExample": "Instead of shipping the whole warehouse at once, you deliver boxes only when they are needed."
+            },
+            {
+              "question": "What is list virtualization?",
+              "answer": "Virtualization renders only the visible portion of a long list and recycles rows as the user scrolls, drastically reducing DOM nodes and improving performance.",
+              "simpleExample": "It is like a window that shows only a few rows at a time, even if the list has thousands."
+            },
+            {
+              "question": "How do you find unnecessary re-renders?",
+              "answer": "You can use the React DevTools Profiler to record renders, see which components rendered and why, and identify wasted work.",
+              "simpleExample": "The Profiler is like a fitness tracker that shows which components are working when they did not need to."
+            },
+            {
+              "question": "When does optimizing with memo, useMemo, and useCallback actually help?",
+              "answer": "They help when re-renders are genuinely expensive or frequent. For cheap components they add complexity and overhead without measurable benefit, so measure first.",
+              "simpleExample": "Do not install a fire alarm in every closet - add safeguards only where there is real risk."
+            }
+          ]
+        },
+        "Custom Hooks": {
+          "icon": "🛠️",
+          "questions": [
+            {
+              "question": "What is a custom hook?",
+              "answer": "A custom hook is a JavaScript function whose name starts with 'use' and that calls other hooks to share reusable stateful logic between components.",
+              "codeExample": "function useToggle(initial = false) {\n  const [on, setOn] = useState(initial);\n  return [on, () => setOn(o => !o)];\n}",
+              "simpleExample": "A custom hook is a reusable recipe for behavior that many components can cook up the same way."
+            },
+            {
+              "question": "Why must custom hooks start with 'use'?",
+              "answer": "The 'use' prefix is a convention that lets React and lint tooling verify the rules of hooks are followed inside the function.",
+              "simpleExample": "The prefix is like a uniform that tells the tools 'this thing follows hook rules, watch it accordingly'."
+            },
+            {
+              "question": "Do two components using the same custom hook share state?",
+              "answer": "No. Each component that calls a custom hook gets its own isolated state. The hook shares logic, not the actual state values.",
+              "simpleExample": "Two cooks using the same recipe each make their own separate dish - the recipe is shared, the food is not."
+            },
+            {
+              "question": "What is a good example of a custom hook?",
+              "answer": "Common custom hooks include useFetch for data loading, useLocalStorage for persisting state, and useDebounce for delaying rapidly changing values.",
+              "codeExample": "function useLocalStorage(key, initial) {\n  const [val, setVal] = useState(() => JSON.parse(localStorage.getItem(key)) ?? initial);\n  useEffect(() => localStorage.setItem(key, JSON.stringify(val)), [key, val]);\n  return [val, setVal];\n}",
+              "simpleExample": "It is like bottling a useful routine so any component can pour it out and use it instantly."
+            },
+            {
+              "question": "What should a custom hook return?",
+              "answer": "It can return anything that is useful: a single value, an array (like useState), or an object of values and functions. Arrays suit positional naming; objects suit many named fields.",
+              "simpleExample": "Return whatever shape is most convenient - a pair like useState, or a labeled toolbox of many items."
+            },
+            {
+              "question": "How do custom hooks improve code over utility functions?",
+              "answer": "Unlike plain functions, custom hooks can use state and effects, letting them encapsulate reactive logic that responds to renders and lifecycle, not just compute a value.",
+              "simpleExample": "A utility function is a calculator; a custom hook is a living gadget that reacts and remembers."
+            }
+          ]
+        }
+      }
+    },
+    "4+": {
+      "modules": {
+        "Concurrent React & Suspense": {
+          "icon": "⏳",
+          "questions": [
+            {
+              "question": "What is concurrent rendering in React?",
+              "answer": "Concurrent rendering lets React prepare multiple versions of the UI at once and interrupt, pause, or abandon work so urgent updates stay responsive. It is enabled by features like transitions and the concurrent root.",
+              "simpleExample": "It is like a chef who can pause a slow dish to quickly serve an urgent order, then return to it."
+            },
+            {
+              "question": "What is the useTransition hook?",
+              "answer": "useTransition marks a state update as non-urgent (a transition), letting React keep the UI responsive to urgent updates like typing while the heavy update renders in the background.",
+              "codeExample": "const [isPending, startTransition] = useTransition();\nstartTransition(() => setResults(filter(query)));",
+              "simpleExample": "It tells React 'this update can wait' so quick interactions are not blocked by slow ones."
+            },
+            {
+              "question": "What is Suspense in React?",
+              "answer": "Suspense lets a component 'wait' for something (like lazy code or async data) and show a fallback UI until it is ready, declaratively handling loading states.",
+              "codeExample": "<Suspense fallback={<Spinner />}>\n  <Profile />\n</Suspense>",
+              "simpleExample": "Suspense is like a 'please wait' sign that shows automatically until the content behind it is ready."
+            },
+            {
+              "question": "What is the useDeferredValue hook?",
+              "answer": "useDeferredValue lets you defer updating a value so React can keep rendering the previous value while the expensive update catches up, reducing lag during fast input.",
+              "codeExample": "const deferredQuery = useDeferredValue(query);",
+              "simpleExample": "It lets the screen lag slightly behind your typing so the typing itself never stutters."
+            },
+            {
+              "question": "What is React Server Components?",
+              "answer": "Server Components render on the server and send a serialized result to the client, reducing bundle size and allowing direct backend access without exposing it to the browser.",
+              "simpleExample": "The server does the heavy cooking and sends a ready plate, so the browser does not need the whole kitchen."
+            },
+            {
+              "question": "How does automatic batching work in React 18?",
+              "answer": "React 18 batches multiple state updates into a single re-render even inside promises, timeouts, and native event handlers, not just React events, improving performance by default.",
+              "codeExample": "setTimeout(() => {\n  setA(1);\n  setB(2); // one re-render in React 18\n}, 0);",
+              "simpleExample": "Instead of repainting the wall after each brushstroke, React waits and repaints once after all strokes."
+            },
+            {
+              "question": "What is the useId hook used for?",
+              "answer": "useId generates stable unique IDs that match between server and client rendering, useful for accessibility attributes like linking labels to inputs.",
+              "codeExample": "const id = useId();\n<label htmlFor={id}>Name</label>\n<input id={id} />",
+              "simpleExample": "It hands out matching ticket numbers on both server and client so nothing gets mismatched."
+            }
+          ]
+        },
+        "Design Patterns (HOC, Render Props, Compound)": {
+          "icon": "🏛️",
+          "questions": [
+            {
+              "question": "What is a Higher-Order Component (HOC)?",
+              "answer": "An HOC is a function that takes a component and returns a new component with added behavior or props. It is a pattern for reusing component logic.",
+              "codeExample": "function withLogger(Wrapped) {\n  return props => {\n    console.log('render', props);\n    return <Wrapped {...props} />;\n  };\n}",
+              "simpleExample": "An HOC is like gift-wrapping a component to add extra features without changing the original."
+            },
+            {
+              "question": "What is the render props pattern?",
+              "answer": "Render props is a technique where a component takes a function as a prop (often children) and calls it with data, letting the consumer control rendering.",
+              "codeExample": "<Mouse>\n  {pos => <p>{pos.x}, {pos.y}</p>}\n</Mouse>",
+              "simpleExample": "The component supplies the data and asks 'how should I draw this?' by calling your function."
+            },
+            {
+              "question": "What is the compound component pattern?",
+              "answer": "Compound components are a set of components that work together and share implicit state, often via context, giving a flexible declarative API.",
+              "codeExample": "<Tabs>\n  <Tabs.List><Tabs.Tab>One</Tabs.Tab></Tabs.List>\n  <Tabs.Panel>Content</Tabs.Panel>\n</Tabs>",
+              "simpleExample": "Like a TV and remote sold together - separate pieces that quietly coordinate as one system."
+            },
+            {
+              "question": "How have hooks changed the use of HOCs and render props?",
+              "answer": "Custom hooks now handle most logic reuse more simply, reducing 'wrapper hell' from nested HOCs and render props, though those patterns still appear in libraries.",
+              "simpleExample": "Hooks are a flat, direct tool that replaced the deep nesting that older patterns produced."
+            },
+            {
+              "question": "What is the container/presentational pattern?",
+              "answer": "It separates components into containers that handle data and logic, and presentational components that only render UI from props. Hooks have blurred this distinction.",
+              "simpleExample": "One component is the brain that fetches and decides; the other is the face that just shows the result."
+            },
+            {
+              "question": "What problem does the provider pattern solve?",
+              "answer": "The provider pattern wraps part of the tree to supply shared services or state via context, decoupling consumers from how that data is created or stored.",
+              "codeExample": "<AuthProvider>\n  <App />\n</AuthProvider>",
+              "simpleExample": "It is a utility company - components plug in and get the service without knowing where it comes from."
+            }
+          ]
+        },
+        "Error Boundaries & Testing": {
+          "icon": "🛡️",
+          "questions": [
+            {
+              "question": "What is an error boundary?",
+              "answer": "An error boundary is a component that catches JavaScript errors in its child tree during rendering, lifecycle, and constructors, and displays a fallback UI instead of crashing the app.",
+              "codeExample": "class ErrorBoundary extends React.Component {\n  state = { hasError: false };\n  static getDerivedStateFromError() { return { hasError: true }; }\n  render() { return this.state.hasError ? <Fallback /> : this.props.children; }\n}",
+              "simpleExample": "It is a safety net under a tightrope - if a component falls, it catches it instead of the whole show collapsing."
+            },
+            {
+              "question": "Why are error boundaries still written as class components?",
+              "answer": "There is no hook equivalent for getDerivedStateFromError or componentDidCatch yet, so error boundaries must be class components or come from a library wrapper.",
+              "simpleExample": "It is one of the few jobs only the old class tool can still do."
+            },
+            {
+              "question": "What errors do error boundaries NOT catch?",
+              "answer": "They do not catch errors in event handlers, asynchronous code, server-side rendering, or errors thrown in the boundary itself. Use try/catch for those.",
+              "simpleExample": "The net only catches falls from the tightrope, not accidents that happen backstage or after the show."
+            },
+            {
+              "question": "What is React Testing Library's core philosophy?",
+              "answer": "It encourages testing components the way users interact with them, querying by accessible roles and text rather than implementation details, making tests more resilient.",
+              "codeExample": "render(<Button />);\nuserEvent.click(screen.getByRole('button'));\nexpect(screen.getByText('Clicked')).toBeInTheDocument();",
+              "simpleExample": "Test what the user sees and does, not the wiring behind the scenes."
+            },
+            {
+              "question": "How do you test asynchronous UI updates?",
+              "answer": "You use async utilities like findBy queries or waitFor, which retry until the element appears or a timeout, handling state updates that resolve later.",
+              "codeExample": "expect(await screen.findByText('Loaded')).toBeInTheDocument();",
+              "simpleExample": "It is like waiting at a window until the food is actually ready instead of checking once and giving up."
+            },
+            {
+              "question": "Why prefer querying by role or label over test IDs?",
+              "answer": "Role and label queries verify the UI is accessible and match how users find elements, while test IDs are an escape hatch that does not validate accessibility.",
+              "simpleExample": "Finding a button by its visible label proves a real user could find it too; a hidden tag proves nothing about usability."
+            }
+          ]
+        },
+        "Architecture & State Management": {
+          "icon": "🧱",
+          "questions": [
+            {
+              "question": "When should you reach for a global state management library?",
+              "answer": "Use one when many distant components share and frequently update complex state, when you need devtools, middleware, or predictable update patterns beyond what local state and context offer.",
+              "simpleExample": "When passing notes around the office gets chaotic, you set up a central filing system everyone trusts."
+            },
+            {
+              "question": "What is the difference between client state and server state?",
+              "answer": "Client state is UI-only data you own (like a modal toggle). Server state is data fetched from a backend that must be cached, synced, and invalidated. They benefit from different tools.",
+              "simpleExample": "Client state is your personal scratchpad; server state is a shared document that may change under you and needs syncing."
+            },
+            {
+              "question": "Why use a data-fetching library like React Query instead of useEffect?",
+              "answer": "Libraries like TanStack Query handle caching, deduplication, background refetching, retries, and invalidation out of the box, removing large amounts of brittle manual effect code.",
+              "codeExample": "const { data, isLoading } = useQuery({ queryKey: ['user', id], queryFn: fetchUser });",
+              "simpleExample": "It is like hiring a librarian who fetches, caches, and refreshes books for you instead of doing it by hand each time."
+            },
+            {
+              "question": "What is the difference between Redux and lighter stores like Zustand?",
+              "answer": "Redux offers a strict, centralized, action/reducer architecture with strong tooling and conventions. Zustand and similar libraries provide minimal, hook-based stores with far less boilerplate.",
+              "simpleExample": "Redux is a formal records department with strict procedures; Zustand is a sticky note board that just works."
+            },
+            {
+              "question": "How do you decide where state should live?",
+              "answer": "Keep state as local as possible. Lift it only as high as the lowest common ancestor that needs it, and promote to context or a store only when sharing demands it.",
+              "simpleExample": "Keep belongings in your own room; only move them to shared spaces when others genuinely need access."
+            },
+            {
+              "question": "What architectural concerns come with React Server Components and frameworks like Next.js?",
+              "answer": "You must reason about the server/client boundary, what runs where, serialization limits, data fetching strategy, and caching, since not all code (like state and effects) can run on the server.",
+              "simpleExample": "You become a city planner deciding which work happens at the factory (server) versus in each home (client)."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

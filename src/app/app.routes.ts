@@ -19,6 +19,18 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/sql/sql').then(m => m.SqlComponent)
   },
   {
+    path: 'react',
+    loadComponent: () => import('./pages/react/react').then(m => m.ReactComponent)
+  },
+  {
+    path: 'nextjs',
+    loadComponent: () => import('./pages/nextjs/nextjs').then(m => m.NextjsComponent)
+  },
+  {
+    path: 'nestjs',
+    loadComponent: () => import('./pages/nestjs/nestjs').then(m => m.NestjsComponent)
+  },
+  {
     path: 'test-me',
     loadComponent: () => import('./pages/test-me/test-me').then(m => m.TestMeComponent),
     canDeactivate: [CanDeactivateGuard]
