@@ -31,6 +31,8 @@
 //   if (p === "/api/rag-query" && method === "POST")
 //     return withCors(request, await handleRagQuery(request, env));
 
+import { chat } from "./llm.js";
+
 const EMBED_MODEL = "@cf/baai/bge-base-en-v1.5";
 
 // Embed an array of texts → array of 768-number vectors (same as Step 1).
@@ -151,30 +153,21 @@ export async function handleRagAsk(request, env) {
       "Be concise and practical.";
     const userPrompt = `Notes:\n${context}\n\nQuestion: ${question}\n\nAnswer:`;
 
-    // ── G: generate — same Groq/Llama call pattern as hint.js ──
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.GROK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.3, // low = stick to the notes, don't get creative
-        max_tokens: 300,
-      }),
+    // ── G: generate — via the shared multi-model engine (llm.js) ──
+    // Grounded note-answering is mid-complexity, so we start on gemma2 and let
+    // llm.js fall back across models/providers if that quota is hit (temp low =
+    // stick to the notes, don't get creative).
+    const { ok, content: answer } = await chat(env, {
+      system: systemPrompt,
+      user: userPrompt,
+      tier: "mid",
+      temperature: 0.3,
+      maxTokens: 300,
     });
 
-    if (!res.ok) {
+    if (!ok) {
       return Response.json({ error: "LLM call failed", sources: notes }, { status: 502 });
     }
-
-    const data = await res.json();
-    const answer = (data.choices?.[0]?.message?.content || "").trim();
 
     // Return the answer AND the sources — so you can SEE it was grounded in
     // your notes, not invented. This "show your sources" pattern is how real

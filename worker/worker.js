@@ -88,8 +88,15 @@ export default {
     }
 
     // ── /api/evaluate ──
+    // Limit is generous (120/hr per IP) so a full Test Me batch — forkJoin'd
+    // concurrent requests, one per question — clears comfortably even if the
+    // quiz grows beyond 5 questions. Per-item catchError on the client means a
+    // hit limit degrades one answer, never the whole results screen.
     if (p === "/api/evaluate") {
-      if (method === "POST") return withCors(request, await evaluateHandler(request, env));
+      if (method === "POST") {
+        if (await rateLimited(request, env, "evaluate", 120)) return withCors(request, tooMany());
+        return withCors(request, await evaluateHandler(request, env));
+      }
       return withCors(request, new Response("Method not allowed", { status: 405 }));
     }
 

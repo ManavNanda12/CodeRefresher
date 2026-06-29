@@ -8,6 +8,8 @@
 //   import { handleHint } from "./hint.js";
 //   if (p === "/api/hint" && method === "POST") return withCors(request, await handleHint(request, env));
 
+import { chat } from "./llm.js";
+
 const SYSTEM_PROMPT = `You are an interview coach giving a hint during a quiz.
 Given a question and its expert answer, output ONE short hint (max ~20 words) that nudges
 the candidate toward the answer WITHOUT revealing it — do not state the answer, key terms
@@ -22,28 +24,20 @@ export async function handleHint(request, env) {
       return Response.json({ error: "Missing question" }, { status: 400 });
     }
 
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.GROK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: `Question: ${question}\nExpert answer: ${correctAnswer || ""}\n\nHint:` },
-        ],
-        temperature: 0.5,
-        max_tokens: 60,
-      }),
+    // A one-line hint is trivial — start on the small tier (frees 70B quota);
+    // llm.js escalates to other models/providers only if it's rate-limited.
+    const { ok, content } = await chat(env, {
+      system: SYSTEM_PROMPT,
+      user: `Question: ${question}\nExpert answer: ${correctAnswer || ""}\n\nHint:`,
+      tier: "small",
+      temperature: 0.5,
+      maxTokens: 60,
     });
 
-    if (!res.ok) return Response.json({ hint: FALLBACK });
+    if (!ok) return Response.json({ hint: FALLBACK });
 
-    const data = await res.json();
-    const raw = (data.choices?.[0]?.message?.content || "").trim().replace(/^["']|["']$/g, "");
-    return Response.json({ hint: raw || FALLBACK });
+    const hint = content.replace(/^["']|["']$/g, "");
+    return Response.json({ hint: hint || FALLBACK });
   } catch {
     return Response.json({ hint: FALLBACK });
   }

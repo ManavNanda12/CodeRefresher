@@ -30,6 +30,8 @@ Output only the follow-up question OR the token NO_FOLLOWUP — no quotes, no pr
 
 const SENTINEL = "NO_FOLLOWUP";
 
+import { chat } from "./llm.js";
+
 export async function handleFollowup(request, env) {
   try {
     const { question, userAnswer, correctAnswer } = await request.json();
@@ -38,32 +40,21 @@ export async function handleFollowup(request, env) {
     // No answer reached us → nothing to probe. (The client gates this too, but be safe.)
     if (!userAnswer || !userAnswer.trim()) return Response.json({ followup: null });
 
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.GROK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `Question: ${question}\nCandidate answer: ${userAnswer}\nExpert answer (for your context only): ${correctAnswer || ""}\n\nFollow-up:`,
-          },
-        ],
-        temperature: 0.5,
-        max_tokens: 60,
-      }),
+    // A short probe is a cheap task — start small (frees 70B quota); llm.js
+    // escalates to other models/providers only on a rate-limit.
+    const { ok, content } = await chat(env, {
+      system: SYSTEM_PROMPT,
+      user: `Question: ${question}\nCandidate answer: ${userAnswer}\nExpert answer (for your context only): ${correctAnswer || ""}\n\nFollow-up:`,
+      tier: "small",
+      temperature: 0.5,
+      maxTokens: 60,
     });
 
     // On model/network failure we DECLINE rather than ask a generic probe — we can't verify
     // relevance, and a blind "why does that work?" is exactly what we want to avoid.
-    if (!res.ok) return Response.json({ followup: null });
+    if (!ok) return Response.json({ followup: null });
 
-    const data = await res.json();
-    const raw = (data.choices?.[0]?.message?.content || "").trim().replace(/^["']|["']$/g, "");
+    const raw = content.replace(/^["']|["']$/g, "");
     // Treat the sentinel (or an empty / sentinel-containing reply) as "no probe".
     const declined = !raw || raw.toUpperCase().includes(SENTINEL);
     return Response.json({ followup: declined ? null : raw });
