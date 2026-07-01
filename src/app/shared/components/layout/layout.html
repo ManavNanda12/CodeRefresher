@@ -62,7 +62,47 @@
 
   <!-- Desktop nav — hidden below 768px via CSS -->
   <nav class="header-nav" aria-label="Main navigation">
-    @for (item of navItems; track item.path) {
+    <!-- Home -->
+    <a [routerLink]="homeItem.path"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="header-link">
+      <span class="link-icon">{{ homeItem.icon }}</span>
+      <span>{{ homeItem.label }}</span>
+    </a>
+
+    <!-- Topics dropdown (collapses the tech pages) -->
+    <div class="topics-dd">
+      <button type="button"
+              class="header-link topics-trigger"
+              [class.active]="topicActive()"
+              [class.open]="topicsOpen()"
+              [attr.aria-expanded]="topicsOpen()"
+              aria-haspopup="true"
+              (click)="toggleTopics($event)">
+        <span class="link-icon">📚</span>
+        <span>Topics</span>
+        <span class="topics-caret" aria-hidden="true">▾</span>
+      </button>
+
+      @if (topicsOpen()) {
+        <div class="topics-menu" role="menu" (click)="$event.stopPropagation()">
+          @for (item of topicItems; track item.path) {
+            <a [routerLink]="item.path"
+               routerLinkActive="active"
+               class="topics-menu-item"
+               role="menuitem">
+              <span class="link-icon">{{ item.icon }}</span>
+              <span>{{ item.label }}</span>
+              @if (item.badge) { <span class="nav-badge">{{ item.badge }}</span> }
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Remaining top-level items -->
+    @for (item of mainItems; track item.path) {
       <a [routerLink]="item.path"
          routerLinkActive="active"
          [routerLinkActiveOptions]="{ exact: !!item.exact }"
