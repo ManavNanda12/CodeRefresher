@@ -36,6 +36,10 @@ export const routes: Routes = [
     canDeactivate: [CanDeactivateGuard]
   },
   {
+    path: 'interview',
+    loadComponent: () => import('./pages/interview/interview').then(m => m.InterviewComponent)
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
   },

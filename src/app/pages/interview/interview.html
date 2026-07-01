@@ -1,0 +1,271 @@
+<section class="iv" [style.--accent]="selectedStacks()[0]?.accent || '#818cf8'">
+
+  <!-- ════════ STAGE: READY (bounce-in hero) ════════ -->
+  @if (stage() === 'ready') {
+    <div class="stage stage-ready">
+      <div class="ready-card pop-in">
+        <div class="ready-emoji">🎤</div>
+        <h1 class="ready-title">Are you ready for the best<br><span class="grad">animated interview</span> you've ever had?</h1>
+        <p class="ready-sub">Combine your stacks, rate your own confidence, answer fresh AI-generated questions at your level, earn XP — and get your verdict as a meme. 😏</p>
+        <button class="cta-btn bounce" (click)="begin()">
+          <span>Let's go</span> <span class="cta-arrow">→</span>
+        </button>
+        <div class="ready-tags">
+          <span class="rtag">🧩 Multi-stack</span>
+          <span class="rtag">🧠 AI-graded</span>
+          <span class="rtag">🏆 Earn XP</span>
+          <span class="rtag">😂 Meme verdict</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: PICK STACKS ════════ -->
+  @if (stage() === 'pick') {
+    <div class="stage">
+      <header class="stage-head">
+        <span class="step-pill">Step 1 of 2</span>
+        <h2>Build your interview</h2>
+        <p>Pick a combo, or choose up to {{ MAX_STACKS }} stacks yourself — {{ PER_STACK }} questions each.</p>
+      </header>
+
+      <!-- Quick presets -->
+      <div class="preset-row">
+        @for (p of presets; track p.label) {
+          <button class="preset-chip" (click)="applyPreset(p)">
+            <span class="preset-label">{{ p.label }}</span>
+            <span class="preset-hint">{{ p.hint }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="divider"><span>or build your own</span></div>
+
+      <!-- Custom multi-select -->
+      <div class="tech-grid">
+        @for (t of techs; track t.id; let i = $index) {
+          <button class="tech-card rise"
+                  [class.picked]="isSelected(t.id)"
+                  [class.dim]="!isSelected(t.id) && atMax()"
+                  [style.--accent]="t.accent" [style.animation-delay.ms]="i * 50"
+                  (click)="toggleTech(t)">
+            <span class="pick-check">{{ isSelected(t.id) ? '✓' : '' }}</span>
+            <span class="tech-icon">{{ t.icon }}</span>
+            <span class="tech-name">{{ t.name }}</span>
+            <span class="tech-blurb">{{ t.blurb }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="pick-footer">
+        <span class="pick-summary">
+          @if (selectedCount()) {
+            {{ selectedCount() }} stack{{ selectedCount() > 1 ? 's' : '' }} · <strong>{{ totalQuestions() }} questions</strong>
+          } @else {
+            Select at least one stack
+          }
+        </span>
+        <button class="cta-btn" [disabled]="!selectedCount()" (click)="goToRate()">
+          <span>Next</span> <span class="cta-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: RATE YOURSELF (per stack) ════════ -->
+  @if (stage() === 'rate') {
+    <div class="stage">
+      <header class="stage-head">
+        <span class="step-pill">Step 2 of 2</span>
+        <h2>How good are you, really?</h2>
+        <p>Rate each stack — this tunes how hard we go on you.</p>
+      </header>
+
+      <div class="rate-list">
+        @for (t of selectedStacks(); track t.id) {
+          <div class="rate-card pop-in" [style.--accent]="t.accent">
+            <div class="rate-card-head">
+              <span class="rate-tech">{{ t.icon }} {{ t.name }}</span>
+              <span class="rate-badge" [style.color]="colorFor(ratingFor(t.id))">
+                {{ ratingFor(t.id) }}/10 · {{ labelFor(ratingFor(t.id)) }}
+              </span>
+            </div>
+            <input type="range" min="1" max="10" step="1" class="rate-slider"
+                   [style.--track]="colorFor(ratingFor(t.id))"
+                   [ngModel]="ratingFor(t.id)" (ngModelChange)="setRating(t.id, $event)"
+                   [attr.aria-label]="'Rate your ' + t.name + ' confidence'" />
+            <div class="rate-scale"><span>Just starting</span><span>I could teach this</span></div>
+          </div>
+        }
+      </div>
+
+      <div class="rate-actions">
+        <button class="ghost-btn" (click)="backToPick()">← Change stacks</button>
+        <button class="cta-btn" (click)="startInterview()">
+          <span>Start the interview</span> <span class="cta-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: LOADING ════════ -->
+  @if (stage() === 'loading') {
+    <div class="stage stage-center">
+      @if (!loadError()) {
+        <div class="loader-pulse">🎧</div>
+        <p class="loader-text">Writing you fresh questions…</p>
+        <p class="loader-sub">The interviewer is preparing — no two interviews are the same.</p>
+      } @else {
+        <div class="err-card pop-in">
+          <div class="err-emoji">😵</div>
+          <h3>Couldn't start the interview</h3>
+          <p>Something went wrong preparing your questions.</p>
+          <button class="cta-btn" (click)="startInterview()">Try again</button>
+          <button class="ghost-btn" (click)="restart()">Start over</button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ════════ STAGE: QUIZ ════════ -->
+  @if (stage() === 'quiz') {
+    <div class="stage stage-quiz">
+      <div class="quiz-top">
+        <div class="quiz-meta">
+          <span class="quiz-count">Question {{ currentIndex() + 1 }} / {{ total() }}</span>
+          <span class="quiz-answered">{{ answeredCount() }} answered</span>
+        </div>
+        <div class="quiz-bar"><span class="quiz-bar-fill" [style.width.%]="progressPct()"></span></div>
+        <div class="quiz-dots">
+          @for (q of questions(); track $index; let i = $index) {
+            <button class="qdot"
+                    [class.done]="(answers()[i] || '').trim().length"
+                    [class.here]="i === currentIndex()"
+                    (click)="goTo(i)" [attr.aria-label]="'Go to question ' + (i + 1)"></button>
+          }
+        </div>
+      </div>
+
+      @if (current(); as q) {
+        <div class="q-card slide" [attr.data-idx]="currentIndex()">
+          <div class="q-tags">
+            <span class="q-stack">{{ q.stackIcon }} {{ q.stackName }}</span>
+            <span class="q-kind">{{ KIND_LABEL[q.kind] }}</span>
+            <span class="q-module">{{ q.module }}</span>
+          </div>
+          <h3 class="q-text">{{ q.question }}</h3>
+          <textarea class="q-input"
+                    [ngModel]="currentAnswer()" (ngModelChange)="updateAnswer($event)"
+                    [placeholder]="wantsCode() ? 'Explain your approach in words…' : 'Type your answer out loud, in plain words…'"
+                    rows="6"></textarea>
+
+          <!-- Code editor (IntelliSense) — shown for code/query questions, opt-in otherwise -->
+          @if (editorVisible()) {
+            <div class="q-editor">
+              <div class="q-editor-head">
+                <span class="q-editor-lang">⌨️ {{ currentLangLabel() }}</span>
+                @if (!wantsCode()) {
+                  <button type="button" class="editor-hide" (click)="toggleEditor()">Remove code</button>
+                }
+              </div>
+              @for (lang of [currentLang()]; track lang) {
+                <app-code-editor [language]="lang" [value]="currentCode()" (valueChange)="updateCode($event)" />
+              }
+            </div>
+          } @else {
+            <button type="button" class="add-code-btn" (click)="toggleEditor()">＋ Add a code snippet</button>
+          }
+
+          <div class="q-nav">
+            <button class="ghost-btn" (click)="prev()" [disabled]="currentIndex() === 0">← Back</button>
+            @if (!isLast()) {
+              <button class="cta-btn" (click)="next()"><span>Next</span> <span class="cta-arrow">→</span></button>
+            } @else {
+              <button class="cta-btn submit" (click)="submit()">
+                <span>Submit for grading</span> <span class="cta-arrow">🎯</span>
+              </button>
+            }
+          </div>
+          <p class="q-hint">Skipped questions score zero — take a swing at every one.</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ════════ STAGE: GRADING ════════ -->
+  @if (stage() === 'grading') {
+    <div class="stage stage-center">
+      <div class="judge">
+        <div class="judge-face">🧑‍⚖️</div>
+        <div class="judge-dots"><span></span><span></span><span></span></div>
+      </div>
+      <p class="loader-text">The interviewer is judging your answers…</p>
+      <p class="loader-sub">Grading each stack in one pass — hang tight.</p>
+    </div>
+  }
+
+  <!-- ════════ STAGE: RESULTS ════════ -->
+  @if (stage() === 'results') {
+    <div class="stage stage-results">
+      <div class="verdict-stamp pop-in" [class.pass]="passed()" [class.fail]="!passed()">
+        {{ passed() ? 'PASSED' : 'NOT QUITE' }}
+      </div>
+
+      <div class="result-top">
+        <!-- Score ring -->
+        <div class="score-ring">
+          <svg viewBox="0 0 120 120" width="132" height="132">
+            <circle cx="60" cy="60" r="52" class="ring-track" />
+            <circle cx="60" cy="60" r="52" class="ring-fill"
+                    [style.stroke]="ringColor(overall())"
+                    [style.stroke-dasharray]="RING_CIRC"
+                    [style.stroke-dashoffset]="ringOffset(overall())" />
+          </svg>
+          <div class="score-center">
+            <span class="score-num" [style.color]="ringColor(overall())">{{ overall() }}</span>
+            <span class="score-of">/ 10</span>
+          </div>
+        </div>
+
+        <!-- Meme verdict -->
+        <div class="meme-wrap pop-in">
+          @if (meme() && !memeFailed()) {
+            <img class="meme-img" [src]="meme()!.url" [alt]="meme()!.alt" (error)="onMemeError()" />
+          } @else {
+            <div class="meme-fallback" [class.pass]="passed()">
+              <span class="mf-emoji">{{ passed() ? '🎉' : '💀' }}</span>
+              <span class="mf-text">{{ passed() ? 'You passed the interview!' : 'The interview did not go well.' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- XP reward -->
+      <div class="xp-banner pop-in">
+        <span class="xp-spark">✨</span>
+        <span class="xp-amt">+{{ xpEarned() }} XP</span>
+        <span class="xp-label">· Level {{ game.level() }} · saved to your dashboard</span>
+      </div>
+
+      <!-- Per-question breakdown -->
+      <div class="breakdown">
+        @for (q of questions(); track $index; let i = $index) {
+          <div class="bd-row">
+            <span class="bd-score" [style.background]="ringColor(results()[i]?.score || 0)">{{ results()[i]?.score || 0 }}</span>
+            <div class="bd-body">
+              <span class="bd-q"><span class="bd-stack">{{ q.stackIcon }}</span> {{ q.question }}</span>
+              <span class="bd-note">{{ results()[i]?.note }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="result-actions">
+        <button class="cta-btn" (click)="playAgain()"><span>Run it back</span> <span class="cta-arrow">↻</span></button>
+        <button class="ghost-btn" (click)="restart()">New interview</button>
+        <a routerLink="/dashboard" class="ghost-btn">View dashboard →</a>
+      </div>
+    </div>
+  }
+
+</section>

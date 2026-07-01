@@ -6,6 +6,8 @@
 // recovery-code token) instead.
 
 import { evaluateHandler } from "./evaluate.js";
+import { interviewGradeHandler } from "./interview-grade.js";
+import { interviewQuestionsHandler } from "./interview-questions.js";
 import { handleUserRegister } from "./register.js";
 import { handleDashboard } from "./dashboard.js";
 import { handleProgressSync } from "./progress-sync.js";
@@ -98,6 +100,19 @@ export default {
         return withCors(request, await evaluateHandler(request, env));
       }
       return withCors(request, new Response("Method not allowed", { status: 405 }));
+    }
+
+    // ── /api/interview-grade (Mock Interview — grades a whole round in ONE call) ──
+    // One request per interview, so a low bucket is plenty and keeps abuse cheap.
+    if (p === "/api/interview-grade" && method === "POST") {
+      if (await rateLimited(request, env, "interview", 60)) return withCors(request, tooMany());
+      return withCors(request, await interviewGradeHandler(request, env));
+    }
+
+    // ── /api/interview-questions (Mock Interview — fresh AI questions per stack) ──
+    if (p === "/api/interview-questions" && method === "POST") {
+      if (await rateLimited(request, env, "interview", 60)) return withCors(request, tooMany());
+      return withCors(request, await interviewQuestionsHandler(request, env));
     }
 
     // ── /api/embed-demo (RAG Step 1 — learn embeddings) ──

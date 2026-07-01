@@ -53,6 +53,7 @@ export class LayoutComponent {
   readonly homeItem: NavItem = { path: '/', label: 'Home', icon: '🏠', exact: true };
   readonly mainItems: NavItem[] = [
     { path: '/test-me',     label: 'Test Me',     icon: '🧪' },
+    { path: '/interview',   label: 'Interview',   icon: '🎤', badge: 'NEW' },
     { path: '/dashboard',   label: 'Dashboard',   icon: '📊' },
     { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
     { path: '/ask-notes',   label: 'Ask My Notes', icon: '🧠', badge: 'NEW' },

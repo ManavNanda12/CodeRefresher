@@ -17,6 +17,15 @@ Pick a tech + level, answer **5 random questions from memory**, and a large lang
 - A hint lifeline is available during Test Me: the first hint is free, and each additional hint costs **20 XP**.
 - **AI follow-up probing** — on up to 2 random questions, when you give a real answer the AI reads it and fires **one deeper follow-up** ("ok, but *why*? when would that break?") inline before you move on. If your answer is a non-answer or off-topic, the AI stays silent and you just advance — it never probes `hello world`. Your follow-up reply is folded into grading.
 
+### 🎤 AI Mock Interview — multi-stack, fresh questions, meme verdict
+A distinct, animated interview simulation. **Combine up to 3 stacks** (pick a preset like *Full-Stack = Angular + .NET* or *The Full Gauntlet = Angular + .NET + SQL*, or build your own), **rate your confidence per stack (1–10)**, and get **5 fresh AI-generated questions per stack** — so a 2-stack interview is 10 questions, 3 is 15.
+
+- **Balanced question mix** — the generator is prompted for a spread of **theory**, **code/query** (write-a-snippet), and **scenario/design** questions, tagged with a `kind` so the UI adapts — not an endless wall of "how would you…".
+- **Code editor with IntelliSense** — code & query questions get a **CodeMirror editor** (language auto-set per stack: SQL / C# / TypeScript); on theory questions you can opt in with *"＋ Add a code snippet"*. Your code is folded into the graded answer.
+- **Self-rating drives difficulty** — your rating maps to a question tier per stack (`0–1` → `4+`).
+- **Meme verdict + XP** — a pass/fail meme (rendered purely from a URL, zero extra API calls) plus XP, and **every round saves to your dashboard** (one record per stack).
+- **Token-lean** — questions are generated **once per stack** and the whole round is **graded in one batched call per stack**; skipped answers are scored locally and never sent. If generation is unavailable it **falls back to the static bank**, so it always works.
+
 ### 🧠 Ask My Notes — chat with your own notes (RAG)
 Paste your own study notes — or your résumé — and ask questions in plain English. An LLM answers **only from what you saved**, never invented facts, and **shows the exact notes it used** as cited sources. Built as a real **Retrieval-Augmented Generation** pipeline on Cloudflare's edge:
 
@@ -91,6 +100,8 @@ Browser (Angular SSR)
   ├─ localStorage: progress + game state (instant, offline-first cache)
   └─ HTTPS → Cloudflare Worker
                 ├─ /api/evaluate              → AI grades a Test Me answer
+                ├─ /api/interview-questions   → generate fresh interview questions (per stack)
+                ├─ /api/interview-grade       → grade a whole interview round in one call
                 ├─ /api/rag-ingest|query|ask  → Ask My Notes (embed → Vectorize → LLaMA)
                 ├─ /api/user/register|recover|delete
                 ├─ /api/progress/sync|dashboard   → per-module stats + history
@@ -121,7 +132,7 @@ src/app/
                          · tech-page (arena) · onboarding-modal · game-events
                          (level-up crate + toasts)
   pages/                 home · angular · dotnet · sql · react · nextjs · nestjs
-                         · test-me · dashboard · leaderboard · ask-notes
+                         · test-me · interview · dashboard · leaderboard · ask-notes
 public/data/             angular.json · dotnet.json · sql.json · react.json
                          · nextjs.json · nestjs.json   (Q&A content)
 worker/                  Worker endpoint reference files + KV/EMAIL setup docs
@@ -168,8 +179,8 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] Daily Challenge
 - [x] Ask My Notes — RAG over your own notes (Vectorize + LLaMA 3.3)
 - [x] More arenas — React, Next.js & NestJS (100 Q&A each)
+- [x] AI-generated questions — multi-stack **Mock Interview** with a code editor & meme verdict
 - [ ] Further arenas (Python, AWS, Docker) & deeper question banks
-- [ ] AI-generated questions
 - [ ] Spaced repetition for mastered questions
 
 ---

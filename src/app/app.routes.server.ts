@@ -11,6 +11,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'nextjs', renderMode: RenderMode.Prerender },
   { path: 'nestjs', renderMode: RenderMode.Prerender },
   { path: 'test-me', renderMode: RenderMode.Prerender },
+  { path: 'interview', renderMode: RenderMode.Prerender },
 
   // Personalized / dynamic pages. They're noindex and depend on browser-only
   // state, so prerender an empty shell that hydrates client-side. This also

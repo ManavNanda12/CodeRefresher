@@ -36,6 +36,7 @@
     <div class="hero-actions">
       <a routerLink="/angular" class="btn-primary">Start Refreshing →</a>
       <a routerLink="/test-me" class="btn-ghost">🧪 Try Test Me</a>
+      <a routerLink="/interview" class="btn-ghost">🎤 Mock Interview</a>
     </div>
 
     <p class="hero-hint">✨ psst — click anywhere up here</p>
@@ -195,6 +196,39 @@
             <span class="chat-avatar">🎙️</span>
             <div class="chat-bubble">Follow-up: when would a <em>ReplaySubject</em> be the better choice?</div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── AI Mock Interview (NEW) ────────────────────────── -->
+<section class="peek-section">
+  <div class="peek-card reveal">
+    <div class="peek-right">
+      <span class="ai-badge">🎤 AI Mock Interview <span class="new-tag">NEW</span></span>
+      <h3 class="ai-title">Rate yourself. Then get grilled.</h3>
+      <p class="ai-desc">
+        Combine your stacks — <strong>Angular + .NET + SQL</strong> — rate your confidence, and face
+        <strong>fresh AI-generated questions</strong> tuned to your level: a balanced mix of theory,
+        real <strong>code &amp; query</strong> challenges, and scenarios. Write code in a full editor with
+        IntelliSense, earn XP, and get your verdict as a <strong>meme</strong>. Every round saves to your dashboard.
+      </p>
+      <a routerLink="/interview" class="btn-primary">Start a Mock Interview →</a>
+    </div>
+
+    <div class="peek-left" aria-hidden="true">
+      <div class="iv-mock">
+        <div class="iv-mock-chips"><span>⚡ Angular</span><span>🔷 .NET</span><span>🗄️ SQL</span></div>
+        <div class="iv-mock-kind">🗄️ Write a query</div>
+        <div class="iv-mock-q">“Return the top-selling product this month.”</div>
+        <pre class="iv-mock-code"><code><span class="tk-kw">SELECT</span> p.name, <span class="tk-fn">SUM</span>(oi.qty) <span class="tk-kw">AS</span> sold
+<span class="tk-kw">FROM</span>   order_items oi
+<span class="tk-kw">JOIN</span>   products p <span class="tk-kw">ON</span> p.id = oi.product_id
+<span class="tk-kw">GROUP BY</span> p.name <span class="tk-kw">ORDER BY</span> sold <span class="tk-kw">DESC</span>;</code></pre>
+        <div class="iv-mock-verdict">
+          <span class="ivm-stamp">PASSED</span>
+          <span class="ivm-xp">✨ +34 XP</span>
         </div>
       </div>
     </div>
