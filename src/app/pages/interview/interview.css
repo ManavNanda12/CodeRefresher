@@ -302,10 +302,10 @@
 .slide { animation: slideIn 0.35s ease both; }
 @keyframes slideIn { 0% { opacity: 0; transform: translateX(18px); } 100% { opacity: 1; transform: translateX(0); } }
 
-@media (prefers-reduced-motion: reduce) {
+/* @media (prefers-reduced-motion: reduce) {
   .pop-in, .rise, .bounce, .slide, .ready-emoji, .loader-pulse, .judge-face, .judge-dots span, .xp-spark, .stamp-slam { animation: none; }
   .stamp-slam::after { animation: none; content: none; }
-}
+} */
 
 /* ─── Light theme ────────────────────────────────────────────────── */
 :host-context([data-theme="light"]) {
