@@ -34,9 +34,9 @@
     <p class="hero-why">Why use Code Refresher? Short, focused rounds target your weak spots and reward progress with XP, streaks, and badges — practice that scales.</p>
 
     <div class="hero-actions">
-      <a routerLink="/angular" class="btn-primary">Start Refreshing →</a>
-      <a routerLink="/test-me" class="btn-ghost">🧪 Try Test Me</a>
-      <a routerLink="/interview" class="btn-ghost">🎤 Mock Interview</a>
+      <a routerLink="/angular" class="btn-primary" (animationend)="clearAnim($event)">Start Refreshing →</a>
+      <a routerLink="/test-me" class="btn-ghost" (animationend)="clearAnim($event)">🧪 Try Test Me</a>
+      <a routerLink="/interview" class="btn-ghost" (animationend)="clearAnim($event)">🎤 Mock Interview</a>
     </div>
 
     <p class="hero-hint">✨ psst — click anywhere up here</p>
@@ -60,49 +60,51 @@
 
 <!-- ── Stats ──────────────────────────────────────────── -->
 <div class="stats-bar">
-  <div class="stat">
+  <div class="stat reveal rv-pop">
     <span class="stat-num">{{ statQuestions() }}+</span>
     <span class="stat-lbl">Questions</span>
   </div>
   <div class="stat-sep"></div>
-  <div class="stat">
+  <div class="stat reveal rv-pop" style="--rv-delay: 0.1s">
     <span class="stat-num">{{ statTech() }}</span>
     <span class="stat-lbl">Technologies</span>
   </div>
   <div class="stat-sep"></div>
-  <div class="stat">
+  <div class="stat reveal rv-pop" style="--rv-delay: 0.2s">
     <span class="stat-num">{{ statLevels() }}</span>
     <span class="stat-lbl">Experience Levels</span>
   </div>
   <div class="stat-sep"></div>
-  <div class="stat">
+  <div class="stat reveal rv-pop" style="--rv-delay: 0.3s">
     <span class="stat-num">∞</span>
     <span class="stat-lbl">Free Forever</span>
   </div>
 </div>
 
 <!-- ── Journey ribbon ─────────────────────────────────── -->
-<div class="journey reveal">
+<div class="journey">
   @for (step of journey; track step.label; let last = $last) {
-    <div class="journey-step" [style.--j-delay]="$index * 90 + 'ms'">
+    <div class="journey-step reveal rv-left" [style.--rv-delay]="$index * 110 + 'ms'">
       <span class="journey-icon">{{ step.icon }}</span>
       <span class="journey-label">{{ step.label }}</span>
     </div>
-    @if (!last) { <span class="journey-arrow">→</span> }
+    @if (!last) { <span class="journey-arrow reveal rv-pop" [style.--rv-delay]="($index * 110 + 70) + 'ms'">→</span> }
   }
 </div>
 
 <!-- ── Topics ─────────────────────────────────────────── -->
 <section class="topics-section">
-  <div class="section-header reveal">
+  <div class="section-header reveal rv-up">
     <span class="section-eyebrow">What's Inside</span>
     <h2 class="section-title">Pick Your Topic</h2>
     <p class="section-sub">Bite-sized questions with answers, code examples, and simple analogies</p>
   </div>
 
   <div class="topics-grid">
-    @for (card of techCards; track card.id) {
-      <a [routerLink]="card.path" class="topic-card" [style.--card-delay]="card.delay">
+    @for (card of techCards; track card.id; let i = $index) {
+      <a [routerLink]="card.path" class="topic-card reveal"
+         [class.rv-left]="i % 3 === 0" [class.rv-up]="i % 3 === 1" [class.rv-right]="i % 3 === 2"
+         [style.--rv-delay]="(i % 3) * 120 + 'ms'" (animationend)="clearAnim($event)">
         <div class="topic-strip" [style.background]="card.gradient"></div>
         <div class="topic-body">
           <div class="topic-top">
@@ -125,7 +127,7 @@
 
 <!-- ── Everything you get ─────────────────────────────── -->
 <section class="features-section">
-  <div class="section-header reveal">
+  <div class="section-header reveal rv-up">
     <span class="section-eyebrow">The Full Loop</span>
     <h2 class="section-title">Everything you need to get interview-ready</h2>
     <p class="section-sub">A complete prep system — not just questions, but practice, tracking, and a plan that adapts to you.</p>
@@ -133,8 +135,8 @@
 
   <div class="features-grid">
     @for (f of features; track f.title) {
-      <div class="feature-card reveal" [style.--card-delay]="$index * 70 + 'ms'"
-           (mousemove)="tilt($event)" (mouseleave)="resetTilt($event)">
+      <div class="feature-card reveal rv-up" [style.--rv-delay]="$index * 70 + 'ms'"
+           (mousemove)="tilt($event)" (mouseleave)="resetTilt($event)" (animationend)="clearAnim($event)">
         <div class="feature-icon">{{ f.icon }}</div>
         <span class="feature-tag">{{ f.tag }}</span>
         <h3 class="feature-title">{{ f.title }}</h3>
@@ -146,7 +148,7 @@
 
 <!-- ── Test Me (LIVE) ─────────────────────────────────── -->
 <section class="ai-section">
-  <div class="ai-card reveal">
+  <div class="ai-card reveal rv-up">
     <div class="ai-glow"></div>
 
     <div class="ai-left">
@@ -174,15 +176,15 @@
           <span class="chat-label">Live AI Evaluation</span>
         </div>
         <div class="chat-body">
-          <div class="chat-row chat-row--ai">
+          <div class="chat-row chat-row--ai reveal rv-left" style="--rv-delay: 0.2s">
             <span class="chat-avatar">🤖</span>
             <div class="chat-bubble">What is a BehaviorSubject in RxJS?</div>
           </div>
-          <div class="chat-row chat-row--user">
+          <div class="chat-row chat-row--user reveal rv-right" style="--rv-delay: 0.55s">
             <div class="chat-bubble">It stores the latest value and replays it to new subscribers...</div>
             <span class="chat-avatar">👨‍💻</span>
           </div>
-          <div class="chat-row chat-row--ai">
+          <div class="chat-row chat-row--ai reveal rv-up" style="--rv-delay: 0.95s">
             <span class="chat-avatar">🤖</span>
             <div class="score-bubble">
               <div class="sb-ring"><span class="sb-score">8</span></div>
@@ -192,7 +194,7 @@
               </div>
             </div>
           </div>
-          <div class="chat-row chat-row--ai">
+          <div class="chat-row chat-row--ai reveal rv-left" style="--rv-delay: 1.4s">
             <span class="chat-avatar">🎙️</span>
             <div class="chat-bubble">Follow-up: when would a <em>ReplaySubject</em> be the better choice?</div>
           </div>
@@ -204,8 +206,8 @@
 
 <!-- ── AI Mock Interview (NEW) ────────────────────────── -->
 <section class="peek-section">
-  <div class="peek-card reveal">
-    <div class="peek-right">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
       <span class="ai-badge">🎤 AI Mock Interview <span class="new-tag">NEW</span></span>
       <h3 class="ai-title">Rate yourself. Then get grilled.</h3>
       <p class="ai-desc">
@@ -217,7 +219,7 @@
       <a routerLink="/interview" class="btn-primary">Start a Mock Interview →</a>
     </div>
 
-    <div class="peek-left" aria-hidden="true">
+    <div class="peek-left reveal rv-right" aria-hidden="true">
       <div class="iv-mock">
         <div class="iv-mock-chips"><span>⚡ Angular</span><span>🔷 .NET</span><span>🗄️ SQL</span></div>
         <div class="iv-mock-kind">🗄️ Write a query</div>
@@ -227,8 +229,8 @@
 <span class="tk-kw">JOIN</span>   products p <span class="tk-kw">ON</span> p.id = oi.product_id
 <span class="tk-kw">GROUP BY</span> p.name <span class="tk-kw">ORDER BY</span> sold <span class="tk-kw">DESC</span>;</code></pre>
         <div class="iv-mock-verdict">
-          <span class="ivm-stamp">PASSED</span>
-          <span class="ivm-xp">✨ +34 XP</span>
+          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">PASSED</span>
+          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ +34 XP</span>
         </div>
       </div>
     </div>
@@ -237,8 +239,8 @@
 
 <!-- ── Dashboard peek ─────────────────────────────────── -->
 <section class="peek-section">
-  <div class="peek-card reveal">
-    <div class="peek-right">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
       <span class="ai-badge">📊 Your Dashboard</span>
       <h3 class="ai-title">See your readiness at a glance</h3>
       <p class="ai-desc">
@@ -249,14 +251,16 @@
       <a routerLink="/dashboard" class="btn-primary">Open Dashboard →</a>
     </div>
 
-    <div class="peek-left" aria-hidden="true">
+    <div class="peek-left reveal rv-right" aria-hidden="true">
       <div class="peek-rings">
         <div class="peek-ring">
-          <div class="pr-dial" style="--p:76%;--c:#34d399"><span>7.6</span></div>
+          <div class="pr-dial" data-ring="76" data-score="7.6" data-color="#34d399"
+               style="background: conic-gradient(#34d399 0%, rgba(255,255,255,0.08) 0)"><span>0.0</span></div>
           <span class="pr-name">⚡ Angular</span>
         </div>
         <div class="peek-ring">
-          <div class="pr-dial" style="--p:41%;--c:#fbbf24"><span>4.1</span></div>
+          <div class="pr-dial" data-ring="41" data-score="4.1" data-color="#fbbf24"
+               style="background: conic-gradient(#fbbf24 0%, rgba(255,255,255,0.08) 0)"><span>0.0</span></div>
           <span class="pr-name">🔷 .NET</span>
         </div>
         <div class="peek-ring">
@@ -265,10 +269,10 @@
         </div>
       </div>
       <div class="peek-heat">
-        <div class="ph-row"><span>Directives</span><div class="ph-bar"><i style="width:82%;background:#34d399"></i></div></div>
-        <div class="ph-row"><span>Services &amp; DI</span><div class="ph-bar"><i style="width:71%;background:#34d399"></i></div></div>
-        <div class="ph-row"><span>RxJS Operators</span><div class="ph-bar"><i style="width:32%;background:#f87171"></i></div></div>
-        <div class="ph-row"><span>Change Detection</span><div class="ph-bar"><i style="width:28%;background:#f87171"></i></div></div>
+        <div class="ph-row"><span>Directives</span><div class="ph-bar"><i data-bar="82" style="background:#34d399"></i></div></div>
+        <div class="ph-row"><span>Services &amp; DI</span><div class="ph-bar"><i data-bar="71" style="background:#34d399"></i></div></div>
+        <div class="ph-row"><span>RxJS Operators</span><div class="ph-bar"><i data-bar="32" style="background:#f87171"></i></div></div>
+        <div class="ph-row"><span>Change Detection</span><div class="ph-bar"><i data-bar="28" style="background:#f87171"></i></div></div>
       </div>
     </div>
   </div>
@@ -276,8 +280,8 @@
 
 <!-- ── Ask My Notes peek (NEW) ────────────────────────── -->
 <section class="peek-section">
-  <div class="peek-card reveal">
-    <div class="peek-right">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
       <span class="ai-badge">🧠 Ask My Notes <span class="new-tag">NEW</span></span>
       <h3 class="ai-title">Chat with your own notes</h3>
       <p class="ai-desc">
@@ -290,7 +294,7 @@
       <a routerLink="/ask-notes" class="btn-primary">Try Ask My Notes →</a>
     </div>
 
-    <div class="peek-left" aria-hidden="true">
+    <div class="peek-left reveal rv-right" aria-hidden="true">
       <div class="notes-mock">
         <div class="nm-note">📝 “Call unsubscribe in ngOnDestroy to clean up subscriptions.”</div>
         <div class="nm-q">❓ How do I avoid memory leaks with observables?</div>
@@ -306,12 +310,12 @@
 
 <!-- ── Final CTA ──────────────────────────────────────── -->
 <section class="cta-band" (click)="burst($event)">
-  <div class="cta-inner reveal">
-    <h2 class="cta-title">Your next interview starts here.</h2>
-    <p class="cta-sub">Free forever. No sign-up to browse. Just pick a topic and go.</p>
+  <div class="cta-inner">
+    <h2 class="cta-title reveal rv-up">Your next interview starts here.</h2>
+    <p class="cta-sub reveal rv-up" style="--rv-delay: 0.12s">Free forever. No sign-up to browse. Just pick a topic and go.</p>
     <div class="hero-actions">
-      <a routerLink="/angular" class="btn-primary">Start Refreshing →</a>
-      <a routerLink="/test-me" class="btn-ghost">🧪 Take a Test</a>
+      <a routerLink="/angular" class="btn-primary reveal rv-pop" style="--rv-delay: 0.24s" (animationend)="clearAnim($event)">Start Refreshing →</a>
+      <a routerLink="/test-me" class="btn-ghost reveal rv-pop" style="--rv-delay: 0.34s" (animationend)="clearAnim($event)">🧪 Take a Test</a>
     </div>
   </div>
 </section>

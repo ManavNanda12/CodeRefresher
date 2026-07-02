@@ -64,36 +64,70 @@ export class HomeComponent {
   // ── interactivity wiring ───────────────────────────────────
   private initInteractions(): void {
     const root = this.host.nativeElement as HTMLElement;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Scroll-reveal
+    // One observer releases paused entrance animations and kicks off the
+    // count-up stats, the readiness-ring dials and the heatmap bars as each
+    // scrolls into view.
     const io = new IntersectionObserver(
       entries => {
         for (const e of entries) {
-          if (e.isIntersecting) {
-            e.target.classList.add('in');
-            io.unobserve(e.target);
-          }
+          if (!e.isIntersecting) continue;
+          const el = e.target as HTMLElement;
+          io.unobserve(el);
+          el.classList.add('in'); // release the paused entrance animation
+          if (el.dataset['ring'] !== undefined) this.animateRing(el, reduce);
+          if (el.dataset['bar'] !== undefined) el.style.width = `${el.dataset['bar']}%`;
+          if (el.classList.contains('stats-bar')) this.startStats(reduce);
         }
       },
-      { threshold: 0.14 },
+      { threshold: 0.15 },
     );
-    root.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    root.querySelectorAll('.reveal, .stats-bar, [data-ring], [data-bar]').forEach(el => io.observe(el));
+  }
 
-    // Count-up when the stats bar appears
-    const stats = root.querySelector('.stats-bar');
-    if (stats) {
-      const so = new IntersectionObserver(
-        entries => {
-          if (entries[0].isIntersecting) {
-            this.animate(this.statQuestions, 650, 1200);
-            this.animate(this.statTech, 6, 900);
-            this.animate(this.statLevels, 4, 1000);
-            so.disconnect();
-          }
-        },
-        { threshold: 0.5 },
-      );
-      so.observe(stats);
+  private startStats(reduce: boolean): void {
+    if (reduce) {
+      this.statQuestions.set(650);
+      this.statTech.set(6);
+      this.statLevels.set(4);
+      return;
+    }
+    this.animate(this.statQuestions, 650, 1200);
+    this.animate(this.statTech, 6, 900);
+    this.animate(this.statLevels, 4, 1000);
+  }
+
+  /** Fill a readiness dial's conic-gradient and count its score up from 0. */
+  private animateRing(el: HTMLElement, reduce: boolean): void {
+    const target = parseFloat(el.dataset['ring'] ?? '0');
+    const score = parseFloat(el.dataset['score'] ?? '0');
+    const color = el.dataset['color'] ?? '#34d399';
+    const span = el.querySelector('span');
+    const paint = (p: number, s: number): void => {
+      el.style.background = `conic-gradient(${color} ${p.toFixed(1)}%, rgba(255,255,255,0.08) 0)`;
+      if (span) span.textContent = s.toFixed(1);
+    };
+    if (reduce) {
+      paint(target, score);
+      return;
+    }
+    const start = performance.now();
+    const tick = (now: number): void => {
+      const t = Math.min(1, (now - start) / 1300);
+      const eased = 1 - Math.pow(1 - t, 3);
+      paint(target * eased, score * eased);
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  /** Once an entrance animation ends, drop it so hover/tilt transforms aren't
+      pinned by the animation's fill-mode. */
+  clearAnim(ev: AnimationEvent): void {
+    const name = ev.animationName;
+    if (name.startsWith('bounceIn') || name === 'popIn' || name === 'stampIn') {
+      (ev.target as HTMLElement).style.animation = 'none';
     }
   }
 
