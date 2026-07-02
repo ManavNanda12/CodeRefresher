@@ -207,7 +207,7 @@
   <!-- ════════ STAGE: RESULTS ════════ -->
   @if (stage() === 'results') {
     <div class="stage stage-results">
-      <div class="verdict-stamp pop-in" [class.pass]="passed()" [class.fail]="!passed()">
+      <div class="verdict-stamp stamp-slam" [class.pass]="passed()" [class.fail]="!passed()">
         {{ passed() ? 'PASSED' : 'NOT QUITE' }}
       </div>
 

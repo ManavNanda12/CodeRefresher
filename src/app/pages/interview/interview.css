@@ -224,11 +224,29 @@
 /* ─── STAGE: RESULTS ─────────────────────────────────────────────── */
 .stage-results { align-items: stretch; gap: 1.25rem; }
 .verdict-stamp {
-  align-self: center; font-size: 1.3rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase;
+  position: relative; align-self: center; font-size: 1.3rem; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase;
   padding: 0.5rem 1.6rem; border-radius: 12px; transform: rotate(-4deg);
 }
 .verdict-stamp.pass { color: #34d399; border: 3px solid #34d399; box-shadow: 0 0 30px rgba(52, 211, 153, 0.35); }
 .verdict-stamp.fail { color: #f87171; border: 3px solid #f87171; box-shadow: 0 0 30px rgba(248, 113, 113, 0.3); }
+
+/* Slam the verdict in like a rubber stamp, then fire an impact ring in its color. */
+.stamp-slam { animation: stampSlam 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.stamp-slam::after {
+  content: ''; position: absolute; inset: -6px; border-radius: 16px;
+  border: 3px solid currentColor; opacity: 0; pointer-events: none;
+  animation: stampRing 0.6s ease-out 0.06s both;
+}
+@keyframes stampSlam {
+  0%   { opacity: 0; transform: scale(2.6) rotate(-16deg); filter: blur(2px); }
+  55%  { opacity: 1; transform: scale(0.9) rotate(-4deg); filter: blur(0); }
+  75%  { transform: scale(1.05) rotate(-4deg); }
+  100% { transform: scale(1) rotate(-4deg); }
+}
+@keyframes stampRing {
+  0%   { opacity: 0.85; transform: scale(0.55) rotate(-4deg); }
+  100% { opacity: 0; transform: scale(1.7) rotate(-4deg); }
+}
 
 .result-top { display: flex; gap: 1.5rem; align-items: center; justify-content: center; flex-wrap: wrap; }
 .score-ring { position: relative; width: 132px; height: 132px; flex-shrink: 0; }
@@ -239,7 +257,7 @@
 .score-num { font-size: 2.6rem; font-weight: 900; line-height: 1; }
 .score-of { font-size: 0.85rem; color: var(--iv-muted); font-weight: 700; }
 
-.meme-wrap { max-width: 340px; }
+.meme-wrap { max-width: 340px; animation-delay: 0.26s; }
 .meme-img { width: 100%; border-radius: 16px; border: 1px solid var(--iv-border); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: block; }
 .meme-fallback {
   display: flex; flex-direction: column; align-items: center; gap: 0.5rem; text-align: center;
@@ -285,7 +303,8 @@
 @keyframes slideIn { 0% { opacity: 0; transform: translateX(18px); } 100% { opacity: 1; transform: translateX(0); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .pop-in, .rise, .bounce, .slide, .ready-emoji, .loader-pulse, .judge-face, .judge-dots span, .xp-spark { animation: none; }
+  .pop-in, .rise, .bounce, .slide, .ready-emoji, .loader-pulse, .judge-face, .judge-dots span, .xp-spark, .stamp-slam { animation: none; }
+  .stamp-slam::after { animation: none; content: none; }
 }
 
 /* ─── Light theme ────────────────────────────────────────────────── */
