@@ -41,7 +41,8 @@ export const routes: Routes = [
   },
   {
     path: 'resume-interview',
-    loadComponent: () => import('./pages/resume-interview/resume-interview').then(m => m.ResumeInterviewComponent)
+    loadComponent: () => import('./pages/resume-interview/resume-interview').then(m => m.ResumeInterviewComponent),
+    canDeactivate: [CanDeactivateGuard]
   },
   {
     path: 'dashboard',

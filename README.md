@@ -15,7 +15,7 @@ Drop a PDF (parsed **in your browser** via pdf.js — the file never leaves it) 
 
 1. **Claim extraction** — an animated laser-scan while the AI pulls out your verifiable claims, typed as `quantified` / `tech` / `project` / `responsibility`. Vague fluff is flagged, not asked about. You review the claims and untick any you'd rather not defend.
 2. **Skills round** — the résumé's declared skills become **self-rating sliders** (add your own too). A high rating earns a *harder* question.
-3. **Chat interview** — a real chat room: typing indicator, claim chips ("📄 About your résumé: …"), skill checks ("🛠️ you rated it 8/10"), CodeMirror for code/query answers, skeptical interviewer reactions between questions.
+3. **Chat interview** — a real chat room: typing indicator, claim chips ("📄 About your résumé: …"), skill checks ("🛠️ you rated it 8/10"), CodeMirror for code/query answers, skeptical interviewer reactions between questions. **Answer by voice** (Web Speech API — free, in-browser, live transcript): pace and filler words are measured locally and the grader adds a one-line **delivery verdict**, because speaking an answer is a different skill from typing one.
 4. **The verdict** — every claim stamped **Backed / Shaky / Busted**, a **"You said vs you showed"** board comparing self-ratings against actual scores (HONEST ✅ → DELULU 🥲), a roast, a meme, XP, and a dashboard record.
 
 Token-lean by design: extraction is **cached in KV** (hashed, 24h TTL — résumés are PII and are never logged), questions are one call, grading is one batched call, and the between-question reactions are local theater — zero extra LLM cost.
@@ -198,7 +198,7 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] AI-generated questions — multi-stack **Mock Interview** with a code editor & meme verdict
 - [x] **Résumé Interview** — claim extraction, chat interview, substantiation grading (Backed/Shaky/Busted)
   - [x] Skills round — self-rated skills → calibrated questions + "you said vs you showed" verdict
-  - [ ] Voice answers (Web Speech) with delivery feedback
+  - [x] Voice answers (Web Speech) with delivery feedback
   - [ ] Résumé × JD gap analysis + role-specific readiness (Phase 2)
 - [ ] Further arenas (Python, AWS, Docker) & deeper question banks
 - [ ] Spaced repetition for mastered questions

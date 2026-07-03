@@ -171,10 +171,13 @@
           <div class="skill-add">
             <input class="skill-add-input" type="text" maxlength="40"
                    placeholder="Add a skill we should test (e.g. Cloudflare)…"
-                   [ngModel]="newSkill()" (ngModelChange)="newSkill.set($event)"
+                   [ngModel]="newSkill()" (ngModelChange)="newSkill.set($event); skillMsg.set('')"
                    (keydown.enter)="addSkill()" />
             <button class="mini-btn" [disabled]="!newSkill().trim()" (click)="addSkill()">+ Add</button>
           </div>
+          @if (skillMsg()) {
+            <p class="skill-msg shake">⚠️ {{ skillMsg() }}</p>
+          }
         </div>
       }
 
@@ -207,6 +210,10 @@
           </span>
         </div>
       </header>
+
+      @if (cheatMsg()) {
+        <div class="cheat-warn" role="status">{{ cheatMsg() }}</div>
+      }
 
       <div class="chat-log" #chatLog aria-live="polite">
         @for (m of messages(); track $index) {
@@ -253,6 +260,33 @@
                              (valueChange)="draftCode.set($event)" />
           </div>
         }
+        @if (currentHint()) {
+          <div class="hint-card" role="note">💡 {{ currentHint() }}</div>
+        }
+        @if (hintConfirm()) {
+          <div class="hint-confirm" role="alertdialog" aria-label="Use a hint?">
+            <span class="hc-text">
+              @if (hintIsFree()) {
+                💡 Use your <strong>free hint</strong> for this round?
+              } @else {
+                💡 Another hint costs <strong>{{ HINT_COST_XP }} XP</strong> (you have {{ game.xp() }}). Use it?
+              }
+            </span>
+            <span class="hc-btns">
+              <button class="mini-btn" (click)="confirmHint()">Yes, hint me</button>
+              <button class="mini-btn" (click)="cancelHint()">No</button>
+            </span>
+          </div>
+        }
+        @if (recording()) {
+          <div class="voice-live" aria-live="polite">
+            <span class="voice-dot"></span> Listening — speak your answer…
+            @if (interim()) { <em class="voice-interim">“{{ interim() }}”</em> }
+          </div>
+        }
+        @if (voiceError()) {
+          <p class="voice-err">🎙️ {{ voiceError() }}</p>
+        }
         <div class="composer-row">
           <textarea class="composer-input" rows="2"
                     [ngModel]="draft()" (ngModelChange)="draft.set($event)"
@@ -260,10 +294,21 @@
                     (keydown.control.enter)="send()"
                     [placeholder]="awaitingAnswer() ? 'Defend it… (Ctrl+Enter to send)' : 'The interviewer is talking…'"></textarea>
           <div class="composer-btns">
+            @if (awaitingAnswer() && !currentHint()) {
+              <button class="mini-btn hint-btn" [disabled]="!hintAvailable()" (click)="requestHint()"
+                      [title]="hintIsFree() ? 'Hint — first one is free' : 'Hint — costs ' + HINT_COST_XP + ' XP'">
+                {{ hintLoading() ? '💭…' : '💡' }}
+              </button>
+            }
             @if (!wantsCode() && awaitingAnswer()) {
               <button class="mini-btn" (click)="toggleEditor()" title="Add a code snippet">&lt;/&gt;</button>
             }
-            <button class="mini-btn" disabled title="Voice answers — coming soon">🎙️</button>
+            @if (speechSupported()) {
+              <button class="mini-btn mic" [class.rec]="recording()" [disabled]="!awaitingAnswer()"
+                      (click)="toggleVoice()"
+                      [title]="recording() ? 'Stop the mic' : 'Answer by voice'"
+                      [attr.aria-pressed]="recording()">🎙️</button>
+            }
             <button class="mini-btn skip" [disabled]="!awaitingAnswer()" (click)="skip()" title="Skip this question">Skip</button>
             <button class="send-btn" [disabled]="!canSend()" (click)="send()" aria-label="Send answer">
               <span class="send-plane">➤</span>
@@ -363,6 +408,9 @@
                 @if (results()[i].subNote) {
                   <p class="detail-note sub">⚖️ {{ results()[i].subNote }}</p>
                 }
+                @if (results()[i].deliveryNote) {
+                  <p class="detail-note voice">🎙️ {{ results()[i].deliveryNote }}</p>
+                }
               </div>
             }
           </div>
@@ -379,6 +427,31 @@
         <button class="cta-btn" (click)="grillAgain()"><span>Grill me again</span> <span class="cta-arrow">↻</span></button>
         <button class="ghost-btn" (click)="restart()">📄 New résumé</button>
         <a class="ghost-btn" routerLink="/dashboard">📊 Dashboard</a>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ LEAVE-GUARD DIALOG (in-app navigation mid-round) ════════ -->
+  @if (showLeaveDialog()) {
+    <div class="leave-overlay" (click)="stayInInterview()">
+      <div class="leave-dialog" role="alertdialog" aria-modal="true"
+           aria-labelledby="ri-leave-title" (click)="$event.stopPropagation()">
+        <div class="ld-icon" aria-hidden="true">🧑‍⚖️</div>
+        <h3 class="ld-title" id="ri-leave-title">Walk out mid-interview?</h3>
+        <p class="ld-body">
+          The interviewer isn't done with you. Leave now and your answers are
+          <strong>wiped</strong> — this round won't be scored.
+        </p>
+        @if (tabLeaves() > 0) {
+          <p class="ld-cheat">
+            👀 Also… we counted {{ tabLeaves() }} tab switch{{ tabLeaves() === 1 ? '' : 'es' }} —
+            keep it solo to make the verdict count.
+          </p>
+        }
+        <div class="ld-actions">
+          <button class="cta-btn" type="button" (click)="stayInInterview()" autofocus>⚡ Stay &amp; finish</button>
+          <button class="ghost-btn danger" type="button" (click)="confirmLeave()">Leave anyway</button>
+        </div>
       </div>
     </div>
   }

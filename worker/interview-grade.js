@@ -26,9 +26,13 @@ const SYSTEM_PROMPT =
   `Some items include a "Resume claim" — the claim from the candidate's résumé that the question was testing. For THOSE items, ` +
   `additionally judge whether the answer SUBSTANTIATES the claim: "backed" = specifics, ownership and detail that make the claim credible; ` +
   `"shaky" = plausible but thinner than the résumé implies (say so gently); "busted" = the answer contradicts the claim or shows they can't back it up. ` +
+  `Some items include a "Spoken" line — the answer was given BY VOICE, with duration, word count and filler-word count. For THOSE items, ` +
+  `also give one short sentence of DELIVERY feedback ("deliveryNote"): structure, rambling vs concise, pace, filler words. ` +
+  `Judge delivery like a friendly interview coach — speaking is a separate skill from knowing. ` +
   `Reply with ONLY valid JSON, no fences or prose: ` +
   `{"results":[{"i":<item index int>,"score":<1-10 int>,"verdict":"<nailed_it|good|partial|needs_work|missed>","note":"<one short sentence of feedback>",` +
-  `"sub":"<backed|shaky|busted — ONLY for items with a Resume claim>","subNote":"<one short sentence on the claim — ONLY for items with a Resume claim>"}]}. ` +
+  `"sub":"<backed|shaky|busted — ONLY for items with a Resume claim>","subNote":"<one short sentence on the claim — ONLY for items with a Resume claim>",` +
+  `"deliveryNote":"<one short sentence on delivery — ONLY for Spoken items>"}]}. ` +
   `Return exactly one entry per item, same order. ` +
   `Score: 9-10 all key points; 7-8 solid, minor gaps; 5-6 partial; 3-4 vague/surface; 1-2 off-topic or wrong.`;
 
@@ -68,10 +72,16 @@ export async function interviewGradeHandler(request, env) {
         const expected = String(it?.expected ?? "").slice(0, 350);
         const answer = String(it?.answer ?? "").slice(0, 700);
         const claim = String(it?.claim ?? "").slice(0, 300);
+        const v = it?.voice;
+        const spoken = v && Number(v.words) > 0
+          ? `Spoken: answered by voice — ~${Math.round(Number(v.seconds) || 0)}s, ` +
+            `${Math.round(Number(v.words))} words, ${Math.round(Number(v.fillers) || 0)} filler words`
+          : "";
         return [
           `### Item ${i}`,
           `Question: ${q}`,
           ...(claim ? [`Resume claim: ${claim}`] : []),
+          ...(spoken ? [spoken] : []),
           `Expected: ${expected}`,
           `Candidate: ${answer || "(no answer)"}`,
         ].join("\n");
@@ -91,9 +101,9 @@ export async function interviewGradeHandler(request, env) {
       user: userPrompt,
       tier,
       temperature: 0.3,
-      // ~55 tokens/item of JSON + scaffolding (more when claim verdicts are added);
-      // generous ceiling for up to 8 items.
-      maxTokens: (capped.some(it => it?.claim) ? 140 : 90) * capped.length + 120,
+      // ~55 tokens/item of JSON + scaffolding (more when claim/delivery verdicts
+      // are added); generous ceiling for up to 8 items.
+      maxTokens: (capped.some(it => it?.claim || it?.voice) ? 170 : 90) * capped.length + 120,
       json: true,
     });
 
@@ -141,6 +151,10 @@ export async function interviewGradeHandler(request, env) {
         out.subNote = (typeof r?.subNote === "string" && r.subNote.trim())
           ? r.subNote.trim().slice(0, 220)
           : "";
+      }
+      // Delivery feedback only exists for spoken answers.
+      if (it?.voice && Number(it.voice.words) > 0 && typeof r?.deliveryNote === "string" && r.deliveryNote.trim()) {
+        out.deliveryNote = r.deliveryNote.trim().slice(0, 220);
       }
       return out;
     });

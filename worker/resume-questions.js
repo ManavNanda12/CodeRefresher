@@ -60,7 +60,7 @@ export async function resumeQuestionsHandler(request, env) {
     const skills = Array.isArray(body?.skills)
       ? body.skills
           .filter(s => s && typeof s.name === "string" && s.name.trim())
-          .slice(0, 10)
+          .slice(0, 12)
           .map(s => ({
             name: s.name.trim().slice(0, 40),
             rating: Math.max(1, Math.min(10, Math.trunc(Number(s.rating)) || 5)),

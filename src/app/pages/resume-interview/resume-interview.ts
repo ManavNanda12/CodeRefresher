@@ -1,5 +1,6 @@
-import { Component, ElementRef, OnDestroy, PLATFORM_ID, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, PLATFORM_ID, computed, inject, signal, viewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { CanComponentDeactivate } from '../../core/guards/can-deactivate-guard';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
@@ -16,7 +17,11 @@ import {
   ResumeGradeInput,
   ResumeGradeItem,
   ResumeQuestion,
+  VoiceStats,
 } from '../../services/resume-interview/resume-interview.service';
+
+/** Conservative filler-word set — avoids technical uses of "like". */
+const FILLER_RE = /\b(u+m+|u+h+|hmm+|erm+|you know|i mean|kind of|sort of|basically|actually)\b/gi;
 
 type Stage = 'intro' | 'scanning' | 'review' | 'interview' | 'deliberating' | 'results';
 
@@ -44,7 +49,9 @@ interface SkillVerdict {
 
 const QUESTION_COUNT = 5;        // claims-only rounds
 const QUESTION_COUNT_SKILLS = 6; // rounds that include skill-checks
-const MAX_SKILLS = 10;
+const MAX_SKILLS = 12;      // hard cap on the rated list (worker accepts 12)
+const SEED_SKILLS = 8;      // auto-detected skills — leaves room for user adds
+const HINT_COST_XP = 20;         // first hint per round is free; each extra costs this
 const PASS_MARK = 6;
 const MAX_FILE_MB = 10;
 const MAX_CLAIMS_SENT = 8;
@@ -135,7 +142,7 @@ const ROASTS: Record<string, string[]> = {
   templateUrl: './resume-interview.html',
   styleUrl: './resume-interview.css',
 })
-export class ResumeInterviewComponent implements OnDestroy {
+export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactivate {
   private platformId = inject(PLATFORM_ID);
   private svc = inject(ResumeInterviewService);
   private memeSvc = inject(MemeService);
@@ -189,6 +196,19 @@ export class ResumeInterviewComponent implements OnDestroy {
   private startedAt = 0;
   private lastReaction = -1;
 
+  // Voice answers — Web Speech API (browser-native STT, zero server cost).
+  speechSupported = signal(false);
+  recording = signal(false);
+  interim = signal('');
+  voiceError = signal('');
+  // Web Speech types aren't in lib.dom — vendor-prefixed in Chrome.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private recog: any = null;
+  private voiceSegmentStart = 0;
+  /** Per-question spoken transcript + seconds — feeds delivery grading. */
+  private voiceText: Record<number, string> = {};
+  private voiceSeconds: Record<number, number> = {};
+
   // Deliberation + results
   deliberationLine = signal(DELIBERATION_LINES[0]);
   results = signal<ResumeGradeItem[]>([]);
@@ -199,6 +219,7 @@ export class ResumeInterviewComponent implements OnDestroy {
   detailOpen = signal<Set<number>>(new Set());
 
   constructor() {
+    this.speechSupported.set(!!this.speechCtor());
     inject(SeoService).update({
       title: 'Résumé Interview — Can You Back Up Your Own CV?',
       description:
@@ -210,6 +231,98 @@ export class ResumeInterviewComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.timers.forEach(t => clearTimeout(t));
     if (this.scanTimer) clearInterval(this.scanTimer);
+    this.stopVoice();
+  }
+
+  // ── Voice answers (Web Speech API — free, in-browser STT) ───
+  private speechCtor(): (new () => unknown) | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    const w = window as unknown as Record<string, unknown>;
+    return (w['SpeechRecognition'] ?? w['webkitSpeechRecognition']) as (new () => unknown) | null;
+  }
+
+  toggleVoice(): void {
+    if (this.recording()) this.stopVoice();
+    else this.startVoice();
+  }
+
+  private startVoice(): void {
+    const Ctor = this.speechCtor();
+    if (!Ctor || !this.awaitingAnswer()) return;
+    this.voiceError.set('');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r = new (Ctor as any)();
+    r.continuous = true;
+    r.interimResults = true;
+    r.lang = navigator.language || 'en-US';
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    r.onresult = (e: any) => {
+      let interim = '';
+      for (let k = e.resultIndex; k < e.results.length; k++) {
+        const text = e.results[k][0]?.transcript ?? '';
+        if (e.results[k].isFinal) this.acceptFinalSpeech(text);
+        else interim += text;
+      }
+      this.interim.set(interim.trim());
+    };
+    r.onend = () => {
+      // Chrome auto-stops after silence — restart while the mic is meant to be live.
+      if (this.recording() && this.recog === r) {
+        try { r.start(); } catch { this.stopVoice(); }
+      }
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    r.onerror = (e: any) => {
+      if (e?.error === 'not-allowed' || e?.error === 'service-not-allowed') {
+        this.stopVoice();
+        this.voiceError.set('Mic blocked — allow microphone access and try again. Typing still works!');
+      }
+      // 'no-speech' etc. → onend fires and we restart; nothing to do.
+    };
+
+    try {
+      r.start();
+    } catch {
+      this.voiceError.set("Couldn't start the mic — typing still works!");
+      return;
+    }
+    this.recog = r;
+    this.recording.set(true);
+    this.voiceSegmentStart = this.now();
+  }
+
+  stopVoice(): void {
+    if (!this.recording() && !this.recog) return;
+    this.recording.set(false);
+    this.interim.set('');
+    if (this.voiceSegmentStart) {
+      const i = this.qIndex();
+      this.voiceSeconds[i] = (this.voiceSeconds[i] ?? 0) + (this.now() - this.voiceSegmentStart) / 1000;
+      this.voiceSegmentStart = 0;
+    }
+    try { this.recog?.stop(); } catch { /* already stopped */ }
+    this.recog = null;
+  }
+
+  /** A finalized speech chunk: append to the draft + remember it was spoken. */
+  private acceptFinalSpeech(text: string): void {
+    const t = text.trim();
+    if (!t) return;
+    const i = this.qIndex();
+    this.voiceText[i] = ((this.voiceText[i] ?? '') + ' ' + t).trim();
+    this.draft.update(d => (d.trim() ? d.replace(/\s+$/, '') + ' ' : '') + t);
+  }
+
+  /** Delivery stats for a question — only when a real spoken transcript exists. */
+  private voiceStatsFor(i: number): VoiceStats | undefined {
+    const text = (this.voiceText[i] ?? '').trim();
+    if (!text) return undefined;
+    const words = text.split(/\s+/).length;
+    if (words < 5) return undefined; // a mumble isn't a spoken answer
+    const fillers = (text.match(FILLER_RE) ?? []).length;
+    return { seconds: Math.round(this.voiceSeconds[i] ?? 0), words, fillers };
   }
 
   private later(fn: () => void, ms: number): void {
@@ -352,7 +465,7 @@ export class ResumeInterviewComponent implements OnDestroy {
       if (!key || seen.has(key)) continue;
       seen.add(key);
       list.push(s.trim());
-      if (list.length >= MAX_SKILLS) break;
+      if (list.length >= SEED_SKILLS) break; // leave headroom for custom adds
     }
     this.skills.set(list);
     this.skillRatings.set(Object.fromEntries(list.map(s => [s, 5])));
@@ -378,19 +491,29 @@ export class ResumeInterviewComponent implements OnDestroy {
     return '#f87171';
   }
 
+  /** Feedback for the add-skill row — a silent no-op reads as a bug. */
+  skillMsg = signal('');
+
   addSkill(): void {
     const name = this.newSkill().trim().slice(0, 40);
     if (!name) return;
-    const exists = this.skills().some(s => s.toLowerCase() === name.toLowerCase());
-    if (!exists && this.skills().length < MAX_SKILLS) {
-      this.skills.update(list => [...list, name]);
-      this.skillRatings.update(r => ({ ...r, [name]: 5 }));
+    if (this.skills().some(s => s.toLowerCase() === name.toLowerCase())) {
+      this.skillMsg.set(`“${name}” is already on the list.`);
+      return;
     }
+    if (this.skills().length >= MAX_SKILLS) {
+      this.skillMsg.set(`That's the max (${MAX_SKILLS}) — remove one (✕) to add another.`);
+      return;
+    }
+    this.skills.update(list => [...list, name]);
+    this.skillRatings.update(r => ({ ...r, [name]: 5 }));
+    this.skillMsg.set('');
     this.newSkill.set('');
   }
 
   removeSkill(name: string): void {
     this.skills.update(list => list.filter(s => s !== name));
+    this.skillMsg.set('');
   }
 
   readonly ratedSkills = computed<RatedSkill[]>(() =>
@@ -445,6 +568,11 @@ export class ResumeInterviewComponent implements OnDestroy {
     this.messages.set([]);
     this.qIndex.set(0);
     this.results.set([]);
+    this.voiceText = {};
+    this.voiceSeconds = {};
+    this.voiceError.set('');
+    this.tabLeaves.set(0);
+    this.resetHints();
     this.stage.set('interview');
     this.typing.set(true);
 
@@ -506,6 +634,7 @@ export class ResumeInterviewComponent implements OnDestroy {
   }
 
   private commitAnswer(text: string, code: string, skipped = false): void {
+    this.stopVoice();
     const i = this.qIndex();
     this.awaitingAnswer.set(false);
     this.answers.update(a => { const n = [...a]; n[i] = text; return n; });
@@ -541,6 +670,51 @@ export class ResumeInterviewComponent implements OnDestroy {
   }
 
   toggleEditor(): void { this.editorOpen.update(v => !v); }
+
+  // ── Hint lifeline (1 free per round; each extra costs XP) ───
+  readonly HINT_COST_XP = HINT_COST_XP;
+  hints = signal<Record<number, string>>({});   // question index → hint text
+  hintsUsed = signal(0);
+  hintLoading = signal(false);
+  hintConfirm = signal(false);
+
+  readonly currentHint = computed(() => this.hints()[this.qIndex()] ?? null);
+  readonly hintIsFree = computed(() => this.hintsUsed() === 0);
+  readonly canAffordHint = computed(() => this.game.xp() >= HINT_COST_XP);
+  readonly hintAvailable = computed(() =>
+    this.awaitingAnswer() && !this.currentHint() && !this.hintLoading() &&
+    (this.hintIsFree() || this.canAffordHint()));
+
+  requestHint(): void {
+    if (!this.hintAvailable()) return;
+    this.hintConfirm.set(true);
+  }
+
+  confirmHint(): void {
+    this.hintConfirm.set(false);
+    this.fetchHint(this.qIndex(), !this.hintIsFree());
+  }
+
+  cancelHint(): void { this.hintConfirm.set(false); }
+
+  private fetchHint(index: number, paid: boolean): void {
+    const q = this.questions()[index];
+    if (!q) return;
+    this.hintLoading.set(true);
+    this.svc.getHint(q.question, q.expected).subscribe(hint => {
+      this.hints.update(h => ({ ...h, [index]: hint }));
+      this.hintsUsed.update(n => n + 1);
+      if (paid) this.game.spendXp(HINT_COST_XP);
+      this.hintLoading.set(false);
+    });
+  }
+
+  private resetHints(): void {
+    this.hints.set({});
+    this.hintsUsed.set(0);
+    this.hintLoading.set(false);
+    this.hintConfirm.set(false);
+  }
 
   private pushMsg(m: ChatMsg): void {
     this.typing.set(false);
@@ -581,6 +755,7 @@ export class ResumeInterviewComponent implements OnDestroy {
       claim: x.q.skill
         ? `Self-rated ${x.q.skill} at ${this.skillRating(x.q.skill)}/10 on their résumé`
         : this.claimFor(x.q.claimId)?.text ?? '',
+      voice: this.voiceStatsFor(x.idx),
     }));
 
     this.svc.gradeBatch(payload).subscribe(graded => {
@@ -726,6 +901,84 @@ export class ResumeInterviewComponent implements OnDestroy {
     return '#f87171';
   }
 
+  // ── Leave-guard + anti-cheat (same rules as Test Me) ────────
+  /** The round is "live" while answering or being graded — leaving loses work. */
+  readonly roundLive = computed(() =>
+    this.stage() === 'interview' || this.stage() === 'deliberating');
+
+  /** Controls the animated "Walk out?" dialog (in-app navigation only). */
+  showLeaveDialog = signal(false);
+  private leaveResolver: ((proceed: boolean) => void) | null = null;
+
+  /** How many times the user switched away from this tab mid-interview. */
+  tabLeaves = signal(0);
+
+  /**
+   * Router CanDeactivate hook. While the interview is live we suspend the
+   * navigation and show our own dialog, resolving the promise with the choice.
+   * (Refresh / tab-close can't use a custom dialog — see beforeUnloadHandler.)
+   */
+  canDeactivate(): boolean | Promise<boolean> {
+    if (!this.roundLive() || !isPlatformBrowser(this.platformId)) return true;
+    this.showLeaveDialog.set(true);
+    return new Promise<boolean>(resolve => (this.leaveResolver = resolve));
+  }
+
+  /** "Leave anyway" — abandon the round and let the navigation through. */
+  confirmLeave(): void {
+    this.showLeaveDialog.set(false);
+    this.leaveResolver?.(true);
+    this.leaveResolver = null;
+  }
+
+  /** "Stay & finish" — cancel the navigation, keep the round intact. */
+  stayInInterview(): void {
+    this.showLeaveDialog.set(false);
+    this.leaveResolver?.(false);
+    this.leaveResolver = null;
+  }
+
+  /** Native browser warning for refresh / tab-close — cannot be styled. */
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnloadHandler(event: BeforeUnloadEvent): void {
+    if (this.roundLive() && isPlatformBrowser(this.platformId)) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
+
+  /**
+   * Anti-cheat: count tab switches mid-round. The call-out renders as a banner
+   * pinned above the chat (not a bubble — it would drown the conversation).
+   */
+  @HostListener('document:visibilitychange')
+  onVisibilityChange(): void {
+    if (!this.roundLive() || !isPlatformBrowser(this.platformId) || !document.hidden) return;
+    this.tabLeaves.update(n => n + 1);
+  }
+
+  /** Current escalating call-out for the banner ('' when clean). */
+  readonly cheatMsg = computed(() =>
+    this.tabLeaves() > 0 ? this.tabLeaveMessage(this.tabLeaves()) : '');
+
+  /** Escalating call-outs — mirrors Test Me's getTabLeaveMessage. */
+  private tabLeaveMessage(count: number): string {
+    const messages = [
+      '👀 First tab switch already? The interview just started...',
+      '🤨 Came back quick... checking notes already?',
+      '📚 3 times? That textbook must be getting attention.',
+      '😏 We’re starting to feel ignored here.',
+      '🚨 5 tab switches... confidence level dropping.',
+      '🕵️ Interesting strategy... very interesting.',
+      '💀 At this point, Google knows the answers better than you.',
+      '📸 We’ve noticed a pattern developing here...',
+      '🤖 The tab counter is working harder than you right now.',
+      '☠️ Double digits soon? This is becoming a side quest.',
+    ];
+    if (count <= messages.length) return messages[count - 1];
+    return `🚔 You left ${count} times... honestly, just trust yourself at this point.`;
+  }
+
   // ── Replay ──────────────────────────────────────────────────
   /** Same claims, fresh questions. */
   grillAgain(): void {
@@ -753,6 +1006,12 @@ export class ResumeInterviewComponent implements OnDestroy {
     this.meme.set(null);
     this.detailOpen.set(new Set());
     this.resumeText = '';
+    this.stopVoice();
+    this.voiceText = {};
+    this.voiceSeconds = {};
+    this.tabLeaves.set(0);
+    this.showLeaveDialog.set(false);
+    this.resetHints();
   }
 
   private now(): number {

@@ -48,6 +48,15 @@ export type Substantiation = 'backed' | 'shaky' | 'busted';
 export interface ResumeGradeItem extends GradeItem {
   sub: Substantiation;
   subNote: string;
+  /** One-line delivery feedback — only for answers given by voice. */
+  deliveryNote?: string;
+}
+
+/** Locally-computed stats for a spoken answer (Web Speech transcript). */
+export interface VoiceStats {
+  seconds: number;
+  words: number;
+  fillers: number;
 }
 
 /** One answer sent for grading, carrying the claim it defends. */
@@ -56,6 +65,7 @@ export interface ResumeGradeInput {
   expected: string;
   answer: string;
   claim: string;
+  voice?: VoiceStats;
 }
 
 /**
@@ -120,6 +130,17 @@ export class ResumeInterviewService {
       );
   }
 
+  /** One nudge toward the answer without revealing it — same lifeline endpoint as Test Me. */
+  getHint(question: string, expected: string): Observable<string> {
+    const fallback = 'Think about the core concept this question is really testing.';
+    return this.http
+      .post<{ hint: string }>(`${this.base}/api/hint`, { question, correctAnswer: expected })
+      .pipe(
+        map(r => (r?.hint ?? '').trim() || fallback),
+        catchError(() => of(fallback)),
+      );
+  }
+
   /** Grade the whole round in ONE call — with the claim-substantiation dimension. */
   gradeBatch(items: ResumeGradeInput[]): Observable<ResumeGradeItem[]> {
     if (!items.length) return of([]);
@@ -143,6 +164,7 @@ export class ResumeInterviewService {
         ? x.sub
         : score >= 7 ? 'backed' : score >= 5 ? 'shaky' : 'busted',
       subNote: (x?.subNote ?? '').trim(),
+      deliveryNote: (x?.deliveryNote ?? '').trim() || undefined,
     };
   }
 
