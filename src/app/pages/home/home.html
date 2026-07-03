@@ -19,26 +19,32 @@
   <div class="hero-content">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      🏟️ The interview-prep arena · Free forever
+      ⚔️ Developer Interview Arena · Free forever
     </div>
 
     <h1 class="hero-headline">
-      Get interviewed on your <em>own</em> résumé.<br>
-      <span class="headline-accent">The AI reads it. Then it grills you.</span>
+      Enter the arena.<br>
+      <span class="headline-accent">Defend your skills. Beat real interviews.</span>
     </h1>
 
     <p class="hero-sub">
-      Upload your résumé for a claim-by-claim grilling — or step into the Angular, React,
-      Next.js, NestJS, .NET &amp; SQL arenas for AI-graded rounds. Earn XP, level up, keep
-      your streak alive, and climb the leaderboard.
+      Upload your résumé and face an AI interviewer that challenges every project, claim,
+      and achievement you’ve written. Or train across Angular, React, Next.js, NestJS,
+      .NET &amp; SQL battle zones. Earn XP, build streaks, level up, and become impossible
+      to reject.
     </p>
 
     <div class="hero-actions">
-      <a routerLink="/resume-interview" class="btn-primary" (animationend)="clearAnim($event)">📄 Interview my résumé →</a>
-      <a routerLink="/test-me" class="btn-ghost" (animationend)="clearAnim($event)">🧪 Practice by topic</a>
+      <a routerLink="/resume-interview" class="btn-primary" (animationend)="clearAnim($event)">
+        🛡️ Defend My Résumé →
+      </a>
+
+      <a routerLink="/test-me" class="btn-ghost" (animationend)="clearAnim($event)">
+        🎯 Enter Practice Arena
+      </a>
     </div>
 
-    <p class="hero-hint">✨ psst — click anywhere up here</p>
+    <p class="hero-hint">✨ click anywhere above and unleash chaos</p>
 
     <!-- Floating Code Preview -->
     <div class="code-preview">
@@ -46,13 +52,15 @@
         <span class="mac-dot mac-red"></span>
         <span class="mac-dot mac-yellow"></span>
         <span class="mac-dot mac-green"></span>
-        <span class="code-filename">resume-trial.ts</span>
+        <span class="code-filename">battle-engine.ts</span>
       </div>
-      <pre class="code-body"><code><span class="tk-kw">const</span> claims = <span class="tk-kw">await</span> ai.<span class="tk-fn">read</span>(<span class="tk-str">'my_resume.pdf'</span>);
 
-<span class="tk-kw">await</span> <span class="tk-fn">interview</span>(claims);  <span class="tk-cmt">// "32% faster"? prove it.</span>
-<span class="tk-fn">verdict</span>();             <span class="tk-cmt">// backed / shaky / busted</span>
-<span class="tk-cmt">// ✓ interview-ready</span></code></pre>
+      <pre class="code-body"><code><span class="tk-kw">const</span> claims = <span class="tk-kw">await</span> ai.<span class="tk-fn">scan</span>(<span class="tk-str">'resume.pdf'</span>);
+
+<span class="tk-kw">await</span> <span class="tk-fn">battle</span>(claims);      <span class="tk-cmt">// "Built scalable APIs?" prove it.</span>
+<span class="tk-fn">rewardXP</span>();          <span class="tk-cmt">// +42 XP earned</span>
+<span class="tk-fn">rankUp</span>();            <span class="tk-cmt">// Level 2 unlocked</span>
+<span class="tk-cmt">// ✓ interview survival rate increased</span></code></pre>
     </div>
   </div>
 </section>
