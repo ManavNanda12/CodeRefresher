@@ -40,6 +40,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/interview/interview').then(m => m.InterviewComponent)
   },
   {
+    path: 'resume-interview',
+    loadComponent: () => import('./pages/resume-interview/resume-interview').then(m => m.ResumeInterviewComponent)
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
   },

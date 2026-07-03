@@ -62,46 +62,59 @@
 
   <!-- Desktop nav — hidden below 768px via CSS -->
   <nav class="header-nav" aria-label="Main navigation">
-    <!-- Home -->
-    <a [routerLink]="homeItem.path"
-       routerLinkActive="active"
-       [routerLinkActiveOptions]="{ exact: true }"
-       class="header-link">
-      <span class="link-icon">{{ homeItem.icon }}</span>
-      <span>{{ homeItem.label }}</span>
-    </a>
+    <!-- Grouped dropdowns: AI Interview (flagship) + Practice -->
+    @for (g of navGroups; track g.id) {
+      <div class="topics-dd">
+        <button type="button"
+                class="header-link topics-trigger"
+                [class.flagship]="g.flagship"
+                [class.active]="groupActive(g)"
+                [class.open]="openMenu() === g.id"
+                [attr.aria-expanded]="openMenu() === g.id"
+                aria-haspopup="true"
+                (click)="toggleMenu(g.id, $event)">
+          <span class="link-icon">{{ g.icon }}</span>
+          <span>{{ g.label }}</span>
+          @if (g.badge) { <span class="nav-badge">{{ g.badge }}</span> }
+          <span class="topics-caret" aria-hidden="true">▾</span>
+        </button>
 
-    <!-- Topics dropdown (collapses the tech pages) -->
-    <div class="topics-dd">
-      <button type="button"
-              class="header-link topics-trigger"
-              [class.active]="topicActive()"
-              [class.open]="topicsOpen()"
-              [attr.aria-expanded]="topicsOpen()"
-              aria-haspopup="true"
-              (click)="toggleTopics($event)">
-        <span class="link-icon">📚</span>
-        <span>Topics</span>
-        <span class="topics-caret" aria-hidden="true">▾</span>
-      </button>
+        @if (openMenu() === g.id) {
+          <div class="topics-menu dd-rich" role="menu" (click)="$event.stopPropagation()">
+            @for (item of g.items; track item.path) {
+              <a [routerLink]="item.path"
+                 routerLinkActive="active"
+                 class="topics-menu-item mi-rich"
+                 role="menuitem">
+                <span class="mi-icon">{{ item.icon }}</span>
+                <span class="mi-text">
+                  <span class="mi-label">{{ item.label }}
+                    @if (item.badge) { <span class="nav-badge">{{ item.badge }}</span> }
+                  </span>
+                  @if (item.desc) { <span class="mi-desc">{{ item.desc }}</span> }
+                </span>
+              </a>
+            }
+            @if (g.topics?.length) {
+              <div class="menu-divider"><span>Topics</span></div>
+              <div class="menu-topics-grid">
+                @for (item of g.topics; track item.path) {
+                  <a [routerLink]="item.path"
+                     routerLinkActive="active"
+                     class="topics-menu-item"
+                     role="menuitem">
+                    <span class="link-icon">{{ item.icon }}</span>
+                    <span>{{ item.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
 
-      @if (topicsOpen()) {
-        <div class="topics-menu" role="menu" (click)="$event.stopPropagation()">
-          @for (item of topicItems; track item.path) {
-            <a [routerLink]="item.path"
-               routerLinkActive="active"
-               class="topics-menu-item"
-               role="menuitem">
-              <span class="link-icon">{{ item.icon }}</span>
-              <span>{{ item.label }}</span>
-              @if (item.badge) { <span class="nav-badge">{{ item.badge }}</span> }
-            </a>
-          }
-        </div>
-      }
-    </div>
-
-    <!-- Remaining top-level items -->
+    <!-- Top-level items -->
     @for (item of mainItems; track item.path) {
       <a [routerLink]="item.path"
          routerLinkActive="active"
@@ -150,26 +163,24 @@
             <span class="brand-icon">&#60;/&#62;</span>
             <span class="footer-brand-name">Dev Refresher</span>
           </a>
-          <p class="footer-tagline">Your personal interview prep arena. Learn, test, track, compete — and share your wins. Free forever.</p>
-          <a routerLink="/test-me" class="footer-ai-badge live">🧪 Test Me — AI grading is live!</a>
+          <p class="footer-tagline">The AI that reads your résumé and grills you on it. Practice by topic, track progress, level up — free forever.</p>
+          <a routerLink="/resume-interview" class="footer-ai-badge live">📄 New — get interviewed on your own résumé!</a>
         </div>
 
         <div class="footer-col">
-          <span class="footer-col-title">Topics</span>
-          <a routerLink="/angular" class="footer-nav-link">⚡ Angular</a>
-          <a routerLink="/dotnet"  class="footer-nav-link">🔷 .NET / ASP.NET Core</a>
-          <a routerLink="/sql"     class="footer-nav-link">🗄️ SQL</a>
-          <a routerLink="/react"   class="footer-nav-link">⚛️ React</a>
-          <a routerLink="/nextjs"  class="footer-nav-link">🔼 Next.js</a>
-          <a routerLink="/nestjs"  class="footer-nav-link">🐱 NestJS</a>
+          <span class="footer-col-title">AI Interview</span>
+          <a routerLink="/resume-interview" class="footer-nav-link">📄 Résumé Interview</a>
+          <a routerLink="/interview" class="footer-nav-link">🎤 Mock Interview</a>
+          <span class="footer-roadmap-item">🧳 Résumé × JD match — soon</span>
+          <span class="footer-roadmap-item">🎙️ Voice answers — soon</span>
         </div>
 
         <div class="footer-col">
-          <span class="footer-col-title">On the Roadmap</span>
-          <span class="footer-roadmap-item">☁️ AWS / Cloud</span>
-          <span class="footer-roadmap-item">⚛️ React</span>
-          <span class="footer-roadmap-item">🐍 Python</span>
-          <span class="footer-roadmap-item">🐳 Docker / Kubernetes</span>
+          <span class="footer-col-title">Practice &amp; Progress</span>
+          <a routerLink="/test-me" class="footer-nav-link">🧪 Test Me</a>
+          <a routerLink="/ask-notes" class="footer-nav-link">🧠 Ask My Notes</a>
+          <a routerLink="/dashboard" class="footer-nav-link">📊 Dashboard</a>
+          <a routerLink="/leaderboard" class="footer-nav-link">🏆 Leaderboard</a>
         </div>
 
         <div class="footer-col footer-creator-col">
@@ -206,6 +217,16 @@
           </a>
         </div>
 
+      </div>
+
+      <div class="footer-topics">
+        <span class="footer-topics-label">Topics</span>
+        <a routerLink="/angular" class="footer-nav-link">⚡ Angular</a>
+        <a routerLink="/dotnet"  class="footer-nav-link">🔷 .NET</a>
+        <a routerLink="/sql"     class="footer-nav-link">🗄️ SQL</a>
+        <a routerLink="/react"   class="footer-nav-link">⚛️ React</a>
+        <a routerLink="/nextjs"  class="footer-nav-link">🔼 Next.js</a>
+        <a routerLink="/nestjs"  class="footer-nav-link">🐱 NestJS</a>
       </div>
 
       <div class="footer-bottom">

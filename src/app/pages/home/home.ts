@@ -51,10 +51,10 @@ export class HomeComponent {
 
   constructor() {
     inject(SeoService).update({
-      title: 'CodeRefresher — Gamified Interview Practice',
+      title: 'CodeRefresher — AI Interviews You On Your Own Résumé',
       description:
-        'CodeRefresher is a gamified, AI-powered interview prep app for Angular, React, Next.js, NestJS, .NET and SQL — AI-graded quizzes with interviewer-style follow-ups, a daily challenge, hint lifelines, animated XP level-ups, and a progress dashboard to improve readiness.',
-      keywords: 'CodeRefresher, gamified interview practice, angular interview questions, react interview questions, next.js interview questions, nestjs interview questions, ai mock interview, daily coding challenge, coding interview prep',
+        'Upload your résumé and get grilled on it, claim by claim — plus AI-graded practice rounds for Angular, React, Next.js, NestJS, .NET and SQL with XP, streaks, and a progress dashboard.',
+      keywords: 'resume interview, ai mock interview, CodeRefresher, angular interview questions, react interview questions, next.js interview questions, nestjs interview questions, coding interview prep, daily coding challenge',
     });
 
     // Runs only in the browser, after the first render — SSR-safe.
@@ -196,18 +196,18 @@ export class HomeComponent {
   ];
 
   readonly features: Feature[] = [
-    { icon: '📚', title: 'Structured Q&A', desc: 'Curated questions for Angular, .NET & SQL, split by experience level — each with a code example and a plain-English analogy.', tag: 'Learn' },
-    { icon: '🧪', title: 'AI Test Me', desc: 'Answer from memory and our AI grades every answer 0–10 against an expert response, with your strengths, gaps and a tip.', tag: 'Practice' },
-    { icon: '🎤', title: 'AI Mock Interview', desc: 'Combine your stacks, rate your confidence, and get grilled with fresh AI-generated questions — a balanced mix of theory, code/query and scenarios, with a real code editor (IntelliSense), XP, and a meme verdict.', tag: 'Practice' },
-    { icon: '💬', title: 'AI Follow-up Probing', desc: 'Give a strong answer and the AI digs deeper with a real interviewer-style follow-up — “ok, but why?” — just like the real room.', tag: 'Practice' },
-    { icon: '🧠', title: 'Ask My Notes (RAG)', desc: 'Paste your own notes and chat with them — an AI that answers ONLY from what you saved, with cited sources. Powered by vector search (Cloudflare Vectorize) + LLaMA 3.3.', tag: 'AI' },
-    { icon: '🗓️', title: 'Daily Challenge', desc: 'One fresh question a day — the same for everyone. Answer once for instant AI feedback, bonus XP, and to keep your streak alive.', tag: 'Daily' },
-    { icon: '📊', title: 'Smart Dashboard', desc: 'Readiness rings per technology, a module heatmap, your weak spots and recent rounds — progress at a glance.', tag: 'Track' },
-    { icon: '🎯', title: 'Adaptive Focus Rounds', desc: 'One tap builds a quiz weighted toward your weakest and untested modules. Drill exactly what needs work.', tag: 'Improve' },
-    { icon: '🏆', title: 'Leaderboard', desc: 'Earn XP, climb the arena and see how you rank against everyone else — by XP, tests taken and best score.', tag: 'Compete' },
-    { icon: '📣', title: 'Share Scorecard', desc: 'Turn any result into a shareable card — rich social link previews, a downloadable image, and a head-to-head challenge daring friends to beat your score.', tag: 'Show off' },
-    { icon: '📬', title: 'Weekly Recap Emails', desc: 'A Monday email with your progress, your softest spot and a nudge to keep the momentum going.', tag: 'Stay sharp' },
-    { icon: '🔁', title: 'Cross-Device Sync', desc: 'Progress is saved to the cloud and restored on any device with a recovery code — no password required.', tag: 'Anywhere' },
+    { icon: '📄', title: 'Résumé Interview', desc: 'The AI reads your résumé, attacks your claims, and grades your defense.', tag: 'Flagship' },
+    { icon: '🎤', title: 'AI Mock Interview', desc: 'Pick stacks, rate yourself, get grilled — code editor, XP, meme verdict.', tag: 'Practice' },
+    { icon: '🧪', title: 'AI Test Me', desc: 'Answer from memory; every answer scored 0–10 with what you missed.', tag: 'Practice' },
+    { icon: '💬', title: 'Follow-up Probing', desc: 'Strong answers earn a deeper “ok, but why?” — like the real room.', tag: 'Practice' },
+    { icon: '📚', title: 'Structured Q&A', desc: 'Curated questions by level, with code examples and plain-English analogies.', tag: 'Learn' },
+    { icon: '🧠', title: 'Ask My Notes', desc: 'Chat with your own notes — answers only from what you saved, sources cited.', tag: 'AI' },
+    { icon: '🗓️', title: 'Daily Challenge', desc: 'One question a day. Instant feedback, bonus XP, streak.', tag: 'Daily' },
+    { icon: '📊', title: 'Smart Dashboard', desc: 'Readiness rings, module heatmap, weak spots, round history.', tag: 'Track' },
+    { icon: '🎯', title: 'Focus Rounds', desc: 'One tap drills your weakest and untested modules.', tag: 'Improve' },
+    { icon: '🏆', title: 'Leaderboard', desc: 'Climb the arena by XP, tests taken and best score.', tag: 'Compete' },
+    { icon: '📣', title: 'Share Scorecard', desc: 'Turn any result into a shareable card and challenge your friends.', tag: 'Show off' },
+    { icon: '🔁', title: 'Cross-Device Sync', desc: 'Cloud-saved progress, restored on any device with a recovery code.', tag: 'Anywhere' },
   ];
 
   readonly techCards: TechCard[] = [
@@ -217,7 +217,7 @@ export class HomeComponent {
       name: 'Angular',
       description: 'Components, signals, DI, routing, RxJS, lifecycle hooks, lazy loading — everything you need to ace Angular interviews.',
       tag: 'Frontend Framework',
-      count: '25+ Questions',
+      count: '100+ Questions',
       gradient: 'linear-gradient(135deg, #c3002f 0%, #ff4857 100%)',
       path: '/angular',
       delay: '60ms',
@@ -228,7 +228,7 @@ export class HomeComponent {
       name: '.NET / ASP.NET Core',
       description: 'Async patterns, LINQ, EF Core, DI lifetimes, middleware pipelines, SOLID — master backend fundamentals.',
       tag: 'Backend Platform',
-      count: '10+ Questions',
+      count: '100+ Questions',
       gradient: 'linear-gradient(135deg, #512bd4 0%, #9333ea 100%)',
       path: '/dotnet',
       delay: '150ms',
@@ -239,7 +239,7 @@ export class HomeComponent {
       name: 'SQL',
       description: 'JOINs, window functions, CTEs, indexing strategies, ACID transactions — from basics to advanced query optimization.',
       tag: 'Database Language',
-      count: '10+ Questions',
+      count: '100+ Questions',
       gradient: 'linear-gradient(135deg, #0050a0 0%, #0ea5e9 100%)',
       path: '/sql',
       delay: '240ms',

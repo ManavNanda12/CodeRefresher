@@ -1,0 +1,385 @@
+<section class="ri">
+
+  <!-- ════════ STAGE: INTRO — hero slides in from the left with a bounce ════════ -->
+  @if (stage() === 'intro') {
+    <div class="stage ri-intro-stage">
+    <div class="ri-intro">
+      <div class="ri-hero slide-bounce">
+        <span class="ri-badge">📄 New arena</span>
+        <h1 class="ri-title">Your résumé talks big.<br><span class="grad">Can you back it up?</span></h1>
+        <p class="ri-sub">
+          Upload your résumé and face the interviewer who actually read it.
+          The AI extracts your claims — that “32% faster”, that “led the migration” —
+          and grills you on the specifics. Then it grades whether your answers
+          <strong>substantiate what you wrote</strong>.
+        </p>
+        <div class="ri-tags">
+          <span class="ri-tag" style="animation-delay:.45s">🔍 Claims extracted</span>
+          <span class="ri-tag" style="animation-delay:.55s">🎯 Targeted questions</span>
+          <span class="ri-tag" style="animation-delay:.65s">⚖️ Backed / Shaky / Busted</span>
+          <span class="ri-tag" style="animation-delay:.75s">😂 Meme verdict + XP</span>
+        </div>
+      </div>
+
+      <div class="ri-upload-col slide-bounce delay">
+        <div class="dropzone" [class.over]="dragOver()" [class.busy]="fileBusy()"
+             (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)"
+             (click)="fileInput.click()" role="button" tabindex="0" aria-label="Upload your résumé"
+             (keydown.enter)="fileInput.click()">
+          <input #fileInput type="file" accept=".pdf,.txt,.md,application/pdf,text/plain" hidden
+                 (change)="onFilePicked($event)" />
+          @if (fileBusy()) {
+            <div class="dz-icon spin-slow">⏳</div>
+            <p class="dz-main">Reading your file…</p>
+          } @else {
+            <div class="dz-icon float">📄</div>
+            <p class="dz-main">Drop your résumé here</p>
+            <p class="dz-hint">PDF or text · read <strong>in your browser</strong>, the file never leaves it</p>
+          }
+        </div>
+
+        <button class="paste-toggle" (click)="pasteMode.set(!pasteMode())">
+          {{ pasteMode() ? '▲ hide paste box' : '…or paste the text instead' }}
+        </button>
+        @if (pasteMode()) {
+          <div class="paste-box pop-in">
+            <textarea class="paste-area" rows="7" [ngModel]="pasteText()" (ngModelChange)="pasteText.set($event)"
+                      placeholder="Paste your résumé text here — bullets, numbers, buzzwords and all."></textarea>
+            <button class="cta-btn" [disabled]="pasteText().trim().length < 150" (click)="usePaste()">
+              <span>Extract my claims</span> <span class="cta-arrow">→</span>
+            </button>
+          </div>
+        }
+
+        @if (introError()) {
+          <p class="intro-err shake">😵 {{ introError() }}</p>
+        }
+        <p class="privacy-note">
+          🔒 Your résumé text is analyzed once, cached briefly for speed, never logged and never used for anything else.
+        </p>
+      </div>
+    </div>
+
+    <!-- How the trial works — fills the lower fold with the flow -->
+    <div class="ri-steps">
+      <div class="ri-step rise-in" style="animation-delay:.55s">
+        <span class="ri-step-num">1</span>
+        <span class="ri-step-icon">📤</span>
+        <span class="ri-step-title">Submit the evidence</span>
+        <span class="ri-step-blurb">Drop a PDF or paste the text — parsed right in your browser.</span>
+      </div>
+      <span class="ri-step-arrow rise-in" style="animation-delay:.65s">→</span>
+      <div class="ri-step rise-in" style="animation-delay:.7s">
+        <span class="ri-step-num">2</span>
+        <span class="ri-step-icon">🔍</span>
+        <span class="ri-step-title">Claims get extracted</span>
+        <span class="ri-step-blurb">Every bold bullet becomes an exhibit. You choose which go on trial.</span>
+      </div>
+      <span class="ri-step-arrow rise-in" style="animation-delay:.8s">→</span>
+      <div class="ri-step rise-in" style="animation-delay:.85s">
+        <span class="ri-step-num">3</span>
+        <span class="ri-step-icon">⚖️</span>
+        <span class="ri-step-title">Cross-examination</span>
+        <span class="ri-step-blurb">5 targeted questions attack the specifics — numbers, tech, decisions.</span>
+      </div>
+      <span class="ri-step-arrow rise-in" style="animation-delay:.95s">→</span>
+      <div class="ri-step rise-in" style="animation-delay:1s">
+        <span class="ri-step-num">4</span>
+        <span class="ri-step-icon">😂</span>
+        <span class="ri-step-title">The verdict</span>
+        <span class="ri-step-blurb">Backed / Shaky / Busted per claim, plus a meme and XP.</span>
+      </div>
+    </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: SCANNING — laser sweep over the "paper" ════════ -->
+  @if (stage() === 'scanning') {
+    <div class="stage stage-center">
+      <div class="scan-wrap pop-in">
+        <div class="scan-paper">
+          <div class="scan-laser" aria-hidden="true"></div>
+          @for (line of scanLines(); track $index) {
+            <div class="scan-line-txt">{{ line }}</div>
+          }
+        </div>
+        <div class="scan-side">
+          <div class="scan-emoji">🕵️</div>
+          <p class="scan-status">{{ scanStatus() }}</p>
+          <div class="scan-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: REVIEW — the claims about to go on trial ════════ -->
+  @if (stage() === 'review') {
+    <div class="stage">
+      <header class="stage-head pop-in">
+        <span class="step-pill">Claims detected</span>
+        <h2>Here's what your résumé is claiming{{ candidate()?.name ? ', ' + firstName() : '' }} 👀</h2>
+        <p>These go on trial. Untick anything you'd rather not defend — we'll pretend we didn't see it.</p>
+      </header>
+
+      <div class="claims-grid">
+        @for (c of probeClaims(); track c.id; let i = $index) {
+          <button class="claim-chip chip-in" [class.off]="isDeselected(c.id)"
+                  [style.animation-delay.ms]="i * 90" (click)="toggleClaim(c.id)">
+            <span class="claim-check">{{ isDeselected(c.id) ? '' : '✓' }}</span>
+            <span class="claim-type">{{ TYPE_META[c.type].icon }} {{ TYPE_META[c.type].label }}</span>
+            <span class="claim-text">“{{ c.text }}”</span>
+            @if (c.tech.length) {
+              <span class="claim-tech">{{ c.tech.join(' · ') }}</span>
+            }
+          </button>
+        }
+      </div>
+
+      @if (fluffClaims().length) {
+        <div class="fluff-note pop-in">
+          💤 <strong>{{ fluffClaims().length }}</strong> bullet{{ fluffClaims().length > 1 ? 's are' : ' is' }} too vague to grill
+          (“{{ fluffClaims()[0].text }}”…) — a real interviewer skips those too. Consider sharpening them.
+        </div>
+      }
+
+      <!-- Skills round — rate what the résumé declares. High ratings = harder questions. -->
+      @if (skills().length) {
+        <div class="skills-sec pop-in">
+          <h3 class="skills-title">🛠️ Now rate yourself on what it declares</h3>
+          <p class="skills-sub">
+            Be honest — a high rating earns a <strong>harder</strong> question,
+            and the verdict compares what you <em>said</em> with what you <em>showed</em>. 😏
+          </p>
+          <div class="skills-list">
+            @for (s of skills(); track s; let i = $index) {
+              <div class="skill-row chip-in" [style.animation-delay.ms]="i * 60">
+                <div class="skill-row-head">
+                  <span class="skill-name">{{ s }}
+                    <button class="skill-remove" (click)="removeSkill(s)" [attr.aria-label]="'Remove ' + s">✕</button>
+                  </span>
+                  <span class="skill-badge" [style.color]="skillColor(skillRating(s))">
+                    {{ skillRating(s) }}/10 · {{ skillLabel(skillRating(s)) }}
+                  </span>
+                </div>
+                <input type="range" min="1" max="10" step="1" class="skill-slider"
+                       [style.--track]="skillColor(skillRating(s))"
+                       [ngModel]="skillRating(s)" (ngModelChange)="setSkillRating(s, $event)"
+                       [attr.aria-label]="'Rate your ' + s + ' skill'" />
+              </div>
+            }
+          </div>
+          <div class="skill-add">
+            <input class="skill-add-input" type="text" maxlength="40"
+                   placeholder="Add a skill we should test (e.g. Cloudflare)…"
+                   [ngModel]="newSkill()" (ngModelChange)="newSkill.set($event)"
+                   (keydown.enter)="addSkill()" />
+            <button class="mini-btn" [disabled]="!newSkill().trim()" (click)="addSkill()">+ Add</button>
+          </div>
+        </div>
+      }
+
+      <div class="review-actions">
+        <button class="ghost-btn" (click)="restart()">← Different résumé</button>
+        <button class="cta-btn bounce" [disabled]="!selectedClaims().length" (click)="beginInterview()">
+          <span>Face the interviewer</span> <span class="cta-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: INTERVIEW — the chat room ════════ -->
+  @if (stage() === 'interview') {
+    <div class="stage chat-stage">
+      <header class="chat-top pop-in">
+        <div class="plate">
+          <span class="plate-hex">{{ initial() }}</span>
+          <span class="plate-info">
+            <span class="plate-name">{{ candidate()?.name || 'Candidate' }}</span>
+            <span class="plate-sub">{{ candidate()?.headline || 'On the record' }} · {{ selectedClaims().length }} claims on trial</span>
+          </span>
+        </div>
+        <div class="chat-brand">
+          <span class="brand-mark">⚖️ Résumé Trial</span>
+          <span class="pips" aria-label="progress">
+            @for (filled of pips(); track $index) {
+              <span class="pip" [class.on]="filled"></span>
+            }
+          </span>
+        </div>
+      </header>
+
+      <div class="chat-log" #chatLog aria-live="polite">
+        @for (m of messages(); track $index) {
+          <div class="msg" [class.msg-ai]="m.from === 'ai'" [class.msg-user]="m.from === 'user'">
+            @if (m.from === 'ai') { <span class="msg-avatar">🧑‍⚖️</span> }
+            <div class="msg-body">
+              @if (m.claim) {
+                <div class="claim-quote">📄 About your résumé: <em>“{{ m.claim }}”</em></div>
+              }
+              @if (m.skill) {
+                <div class="claim-quote skill-quote">🛠️ Skill check: <strong>{{ m.skill }}</strong> — you rated it {{ m.skillRating }}/10</div>
+              }
+              @if (m.kindLabel) {
+                <span class="msg-kind">{{ m.kindLabel }}</span>
+              }
+              <div class="bubble">{{ m.text }}@if (m.code) {<pre class="bubble-code">{{ m.code }}</pre>}</div>
+            </div>
+          </div>
+        }
+        @if (typing()) {
+          <div class="msg msg-ai">
+            <span class="msg-avatar">🧑‍⚖️</span>
+            <div class="bubble bubble-typing" aria-label="interviewer is typing">
+              <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+            </div>
+          </div>
+        }
+        @if (chatError()) {
+          <div class="chat-err pop-in">
+            <p>😵 The interviewer lost their notes — questions didn't load.</p>
+            <button class="cta-btn" (click)="retryQuestions()">Try again</button>
+          </div>
+        }
+      </div>
+
+      <div class="composer" [class.locked]="!awaitingAnswer()">
+        @if (editorVisible()) {
+          <div class="composer-editor slide-up">
+            <div class="editor-head">
+              <span>⌨️ {{ currentLangLabel() }}</span>
+              @if (!wantsCode()) { <button class="editor-close" (click)="toggleEditor()">✕</button> }
+            </div>
+            <app-code-editor [language]="currentLang()" [value]="draftCode()"
+                             (valueChange)="draftCode.set($event)" />
+          </div>
+        }
+        <div class="composer-row">
+          <textarea class="composer-input" rows="2"
+                    [ngModel]="draft()" (ngModelChange)="draft.set($event)"
+                    [disabled]="!awaitingAnswer()"
+                    (keydown.control.enter)="send()"
+                    [placeholder]="awaitingAnswer() ? 'Defend it… (Ctrl+Enter to send)' : 'The interviewer is talking…'"></textarea>
+          <div class="composer-btns">
+            @if (!wantsCode() && awaitingAnswer()) {
+              <button class="mini-btn" (click)="toggleEditor()" title="Add a code snippet">&lt;/&gt;</button>
+            }
+            <button class="mini-btn" disabled title="Voice answers — coming soon">🎙️</button>
+            <button class="mini-btn skip" [disabled]="!awaitingAnswer()" (click)="skip()" title="Skip this question">Skip</button>
+            <button class="send-btn" [disabled]="!canSend()" (click)="send()" aria-label="Send answer">
+              <span class="send-plane">➤</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: DELIBERATING ════════ -->
+  @if (stage() === 'deliberating') {
+    <div class="stage stage-center">
+      <div class="judge-shake">🧑‍⚖️</div>
+      <p class="loader-text">{{ deliberationLine() }}</p>
+      <p class="loader-sub">Every answer is checked against the claim it was defending.</p>
+    </div>
+  }
+
+  <!-- ════════ STAGE: RESULTS — the trial verdict ════════ -->
+  @if (stage() === 'results') {
+    <div class="stage results">
+
+      <div class="verdict-hero pop-in">
+        <div class="stamp" [class.stamp-pass]="passed()" [class.stamp-fail]="!passed()">
+          {{ passed() ? 'BACKED IT UP' : 'RÉSUMÉ EXPOSED' }}
+        </div>
+        <div class="verdict-score">
+          <span class="score-big" [style.color]="scoreColor(overall())">{{ overall() }}</span>
+          <span class="score-of">/10</span>
+        </div>
+        <p class="verdict-line">{{ backedCount() }} of {{ total() }} claims survived cross-examination.</p>
+        @if (xpEarned() > 0) {
+          <span class="xp-chip">⚡ +{{ xpEarned() }} XP</span>
+        }
+      </div>
+
+      <p class="roast rise-in">{{ roast() }}</p>
+
+      <!-- Claim trial board — each card flips to its verdict -->
+      <div class="board">
+        @for (row of claimBoard(); track $index; let i = $index) {
+          <div class="board-card flip-in" [style.animation-delay.ms]="200 + i * 160" [attr.data-sub]="row.sub">
+            <div class="board-claim">
+              <span class="board-type">{{ TYPE_META[row.type].icon }}</span>
+              “{{ row.claim }}”
+            </div>
+            <div class="board-verdict">
+              <span class="board-stamp">{{ subMeta(row.sub).icon }} {{ subMeta(row.sub).label }}</span>
+              @if (row.subNote) { <span class="board-note">{{ row.subNote }}</span> }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- You said vs you showed — self-rating against performance per skill -->
+      @if (skillBoard().length) {
+        <div class="delusion">
+          <h3 class="delusion-title">🪞 You said vs you showed</h3>
+          @for (row of skillBoard(); track row.name; let i = $index) {
+            <div class="delusion-row rise-in" [style.animation-delay.ms]="350 + i * 140">
+              <div class="delusion-head">
+                <span class="delusion-name">{{ row.name }}</span>
+                <span class="delusion-tag" [attr.data-tag]="row.label">{{ row.icon }} {{ row.label }}</span>
+              </div>
+              <div class="delusion-bars">
+                <div class="dbar-line">
+                  <span class="dbar-label">You said</span>
+                  <div class="dbar-track"><div class="dbar said" [style.width.%]="row.said * 10"></div></div>
+                  <span class="dbar-val">{{ row.said }}</span>
+                </div>
+                <div class="dbar-line">
+                  <span class="dbar-label">You showed</span>
+                  <div class="dbar-track"><div class="dbar showed" [style.width.%]="row.showed * 10"></div></div>
+                  <span class="dbar-val">{{ row.showed }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Per-question breakdown -->
+      <div class="detail-list">
+        @for (q of questions(); track $index; let i = $index) {
+          <div class="detail-card rise-in" [style.animation-delay.ms]="300 + i * 80">
+            <button class="detail-head" (click)="toggleDetail(i)">
+              <span class="detail-score" [style.background]="scoreColor(results()[i].score)">{{ results()[i].score }}</span>
+              <span class="detail-q">{{ q.question }}</span>
+              <span class="detail-caret">{{ detailOpen().has(i) ? '▾' : '▸' }}</span>
+            </button>
+            @if (detailOpen().has(i)) {
+              <div class="detail-body">
+                <p class="detail-label">Your answer</p>
+                <pre class="detail-answer">{{ answerShown(i) }}</pre>
+                <p class="detail-note">🧑‍⚖️ {{ results()[i].note }}</p>
+                @if (results()[i].subNote) {
+                  <p class="detail-note sub">⚖️ {{ results()[i].subNote }}</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (meme() && !memeFailed()) {
+        <div class="meme-wrap pop-in">
+          <img class="meme-img" [src]="meme()!.url" [alt]="meme()!.alt" (error)="onMemeError()" />
+        </div>
+      }
+
+      <div class="results-actions">
+        <button class="cta-btn" (click)="grillAgain()"><span>Grill me again</span> <span class="cta-arrow">↻</span></button>
+        <button class="ghost-btn" (click)="restart()">📄 New résumé</button>
+        <a class="ghost-btn" routerLink="/dashboard">📊 Dashboard</a>
+      </div>
+    </div>
+  }
+</section>

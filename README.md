@@ -1,15 +1,27 @@
 # CodeRefresher 🏟️
 
-An interview-prep **arena** built with **Angular 22**. Don't just *read* about Angular, .NET, SQL, React, Next.js & NestJS — **refresh** structured Q&A, **test** yourself against an AI examiner, **track** your readiness on a live dashboard, and **level up** as you clear the gaps.
+**Get interviewed on your own résumé.** Upload it and the AI reads it, extracts your claims — that *"32% faster"*, that *"led the migration"* — and grills you on the specifics, then grades whether your answers actually **back up what you wrote**.
 
-> Learn → Test → Track → Improve. A complete, gamified prep loop — free forever, no sign-up to browse.
+Around the flagship sits a full prep arena built with **Angular 22**: structured Q&A for Angular, .NET, SQL, React, Next.js & NestJS, AI-graded tests, a mock interviewer, a live readiness dashboard, and XP/streak gamification.
+
+> Interview → Practice → Track → Improve. Free forever, no sign-up to browse.
 
 ---
 
 ## ✨ Features
 
+### 📄 Résumé Interview — the flagship
+Drop a PDF (parsed **in your browser** via pdf.js — the file never leaves it) or paste the text. Then:
+
+1. **Claim extraction** — an animated laser-scan while the AI pulls out your verifiable claims, typed as `quantified` / `tech` / `project` / `responsibility`. Vague fluff is flagged, not asked about. You review the claims and untick any you'd rather not defend.
+2. **Skills round** — the résumé's declared skills become **self-rating sliders** (add your own too). A high rating earns a *harder* question.
+3. **Chat interview** — a real chat room: typing indicator, claim chips ("📄 About your résumé: …"), skill checks ("🛠️ you rated it 8/10"), CodeMirror for code/query answers, skeptical interviewer reactions between questions.
+4. **The verdict** — every claim stamped **Backed / Shaky / Busted**, a **"You said vs you showed"** board comparing self-ratings against actual scores (HONEST ✅ → DELULU 🥲), a roast, a meme, XP, and a dashboard record.
+
+Token-lean by design: extraction is **cached in KV** (hashed, 24h TTL — résumés are PII and are never logged), questions are one call, grading is one batched call, and the between-question reactions are local theater — zero extra LLM cost.
+
 ### 📚 Structured Q&A ("Arenas")
-Curated interview questions for **Angular**, **.NET / ASP.NET Core**, **SQL**, **React**, **Next.js**, and **NestJS** (100 Q&A each for the latter three), split by experience tier (0–1 / 1–2 / 2–3 / 4+ years). Every question ships with a detailed answer, a syntax-highlighted **code example**, and a plain-English **analogy** so concepts actually stick. Each card is a **challenge card** — difficulty tier, XP value, and a **"Master ✓"** toggle.
+Curated interview questions for **Angular**, **.NET / ASP.NET Core**, **SQL**, **React**, **Next.js**, and **NestJS** (100+ Q&A each), split by experience tier (0–1 / 1–2 / 2–3 / 4+ years). Every question ships with a detailed answer, a syntax-highlighted **code example**, and a plain-English **analogy** so concepts actually stick. Each card is a **challenge card** — difficulty tier, XP value, and a **"Master ✓"** toggle.
 
 ### 🧪 Test Me — AI-graded mock interview
 Pick a tech + level, answer **5 random questions from memory**, and a large language model grades each answer **0–10 against an expert response** — returning a verdict, your **strengths**, **what you missed**, and a **tip**. Answers can include prose and optional code, and the quiz validates each question independently so empty or failed evaluations are handled gracefully. A playful anti-cheat guard watches for tab switches during a live round and shows funny warning messages when you look away.
@@ -85,7 +97,8 @@ A signature dark **arena** theme with an opt-in **daylight** mode (browse surfac
 | Routing | Lazy routes + `withViewTransitions()` |
 | Styling | Plain CSS — custom-property design tokens, `color-mix()`, keyframe animations |
 | Backend | **Cloudflare Worker** + **Workers KV** (progress, game state, users, shared scorecards) |
-| AI grading & generation | **Groq · LLaMA 3.3 70B** via the Worker (grading, hints, follow-ups, Ask My Notes) |
+| AI grading & generation | **Groq · LLaMA 3.3 70B** via the Worker (claim extraction, grading, hints, follow-ups, Ask My Notes) |
+| Résumé parsing | **pdf.js** — client-side text extraction; the PDF never leaves the browser |
 | RAG / vector search | **Cloudflare Vectorize** (vector DB) + **Workers AI** embeddings (`bge-base-en-v1.5`) |
 | Email | **GitHub Actions** cron + `nodemailer` (SMTP), transport-swappable to Resend |
 | Persistence | Cookie (identity) + localStorage (fast cache) + KV (source of truth) |
@@ -100,8 +113,10 @@ Browser (Angular SSR)
   ├─ localStorage: progress + game state (instant, offline-first cache)
   └─ HTTPS → Cloudflare Worker
                 ├─ /api/evaluate              → AI grades a Test Me answer
+                ├─ /api/resume-extract        → résumé text → typed claims + skills (KV-cached, 24h TTL)
+                ├─ /api/resume-interview-questions → claims + self-rated skills → targeted questions
                 ├─ /api/interview-questions   → generate fresh interview questions (per stack)
-                ├─ /api/interview-grade       → grade a whole interview round in one call
+                ├─ /api/interview-grade       → grade a whole round in one call (+ claim substantiation)
                 ├─ /api/rag-ingest|query|ask  → Ask My Notes (embed → Vectorize → LLaMA)
                 ├─ /api/user/register|recover|delete
                 ├─ /api/progress/sync|dashboard   → per-module stats + history
@@ -132,7 +147,8 @@ src/app/
                          · tech-page (arena) · onboarding-modal · game-events
                          (level-up crate + toasts)
   pages/                 home · angular · dotnet · sql · react · nextjs · nestjs
-                         · test-me · interview · dashboard · leaderboard · ask-notes
+                         · test-me · interview · resume-interview · dashboard
+                         · leaderboard · ask-notes
 public/data/             angular.json · dotnet.json · sql.json · react.json
                          · nextjs.json · nestjs.json   (Q&A content)
 worker/                  Worker endpoint reference files + KV/EMAIL setup docs
@@ -178,8 +194,12 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] AI follow-up probing in Test Me
 - [x] Daily Challenge
 - [x] Ask My Notes — RAG over your own notes (Vectorize + LLaMA 3.3)
-- [x] More arenas — React, Next.js & NestJS (100 Q&A each)
+- [x] More arenas — React, Next.js & NestJS (100+ Q&A each)
 - [x] AI-generated questions — multi-stack **Mock Interview** with a code editor & meme verdict
+- [x] **Résumé Interview** — claim extraction, chat interview, substantiation grading (Backed/Shaky/Busted)
+  - [x] Skills round — self-rated skills → calibrated questions + "you said vs you showed" verdict
+  - [ ] Voice answers (Web Speech) with delivery feedback
+  - [ ] Résumé × JD gap analysis + role-specific readiness (Phase 2)
 - [ ] Further arenas (Python, AWS, Docker) & deeper question banks
 - [ ] Spaced repetition for mastered questions
 

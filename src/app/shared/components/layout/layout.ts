@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { Component, HostListener, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -14,6 +14,20 @@ interface NavItem {
   icon: string;
   exact?: boolean;
   badge?: string;
+  /** One-line description shown in rich dropdown menus. */
+  desc?: string;
+}
+
+/** A header dropdown: rich items on top, optional compact topic links below. */
+interface NavGroup {
+  id: string;
+  label: string;
+  icon: string;
+  badge?: string;
+  /** Flagship groups get the accent-pill trigger (the business lives here). */
+  flagship?: boolean;
+  items: NavItem[];
+  topics?: NavItem[];
 }
 
 @Component({
@@ -29,7 +43,8 @@ export class LayoutComponent {
   readonly theme = inject(ThemeService);
 
   sidebarOpen = signal(false);
-  topicsOpen = signal(false);
+  /** Which header dropdown is open (group id), or null. */
+  openMenu = signal<string | null>(null);
 
   /** Current URL, kept in sync so the "Topics" button can light up on a topic page */
   private currentUrl = signal(isPlatformBrowser(this.platformId) ? this.router.url : '');
@@ -39,39 +54,76 @@ export class LayoutComponent {
   readonly flipX = signal('92%');
   readonly flipY = signal('4%');
 
-  /** Tech pages — collapsed into a single "Topics" dropdown on the desktop header */
+  /** Tech pages — nested under Practice ▾ on desktop, flat in the mobile drawer */
   readonly topicItems: NavItem[] = [
     { path: '/angular', label: 'Angular', icon: '⚡' },
     { path: '/dotnet',  label: '.NET',    icon: '🔷' },
     { path: '/sql',     label: 'SQL',     icon: '🗄️' },
-    { path: '/react',   label: 'React',   icon: '⚛️', badge: 'NEW' },
-    { path: '/nextjs',  label: 'Next.js', icon: '🔼', badge: 'NEW' },
-    { path: '/nestjs',  label: 'NestJS',  icon: '🐱', badge: 'NEW' },
+    { path: '/react',   label: 'React',   icon: '⚛️' },
+    { path: '/nextjs',  label: 'Next.js', icon: '🔼' },
+    { path: '/nestjs',  label: 'NestJS',  icon: '🐱' },
   ];
 
-  /** Top-level items shown directly on the desktop header, around the Topics dropdown */
-  readonly homeItem: NavItem = { path: '/', label: 'Home', icon: '🏠', exact: true };
+  /**
+   * Grouped header nav — the business leads. Interview (flagship, résumé-first),
+   * then Practice; Dashboard/Leaderboard stay top-level; Home is the brand.
+   */
+  readonly navGroups: NavGroup[] = [
+    {
+      id: 'interview',
+      label: 'AI Interview',
+      icon: '🎤',
+      badge: 'NEW',
+      flagship: true,
+      items: [
+        { path: '/resume-interview', label: 'Résumé Interview', icon: '📄', badge: 'NEW',
+          desc: 'Upload your résumé — defend what it claims' },
+        { path: '/interview', label: 'Mock Interview', icon: '🎙️',
+          desc: 'Pick your stacks, get grilled at your level' },
+      ],
+    },
+    {
+      id: 'practice',
+      label: 'Practice',
+      icon: '📚',
+      items: [
+        { path: '/test-me', label: 'Test Me', icon: '🧪',
+          desc: '5 AI-graded questions by tech & level' },
+        { path: '/ask-notes', label: 'Ask My Notes', icon: '🧠',
+          desc: 'Chat with your own study notes' },
+      ],
+      topics: this.topicItems,
+    },
+  ];
+
+  /** Top-level links after the dropdowns */
   readonly mainItems: NavItem[] = [
-    { path: '/test-me',     label: 'Test Me',     icon: '🧪' },
-    { path: '/interview',   label: 'Interview',   icon: '🎤', badge: 'NEW' },
     { path: '/dashboard',   label: 'Dashboard',   icon: '📊' },
     { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
-    { path: '/ask-notes',   label: 'Ask My Notes', icon: '🧠', badge: 'NEW' },
   ];
 
-  /** Full, flat list — used by the mobile sidebar drawer */
-  readonly navItems: NavItem[] = [this.homeItem, ...this.topicItems, ...this.mainItems];
+  readonly homeItem: NavItem = { path: '/', label: 'Home', icon: '🏠', exact: true };
 
-  /** True when the active route is one of the tech pages (highlights the Topics button) */
-  readonly topicActive = computed(() =>
-    this.topicItems.some(t => this.currentUrl().startsWith(t.path)));
+  /** Full, flat list — used by the mobile sidebar drawer (business-first order) */
+  readonly navItems: NavItem[] = [
+    this.homeItem,
+    ...this.navGroups.flatMap(g => g.items),
+    ...this.topicItems,
+    ...this.mainItems,
+  ];
+
+  /** True when the active route lives inside the given dropdown group. */
+  groupActive(g: NavGroup): boolean {
+    const url = this.currentUrl();
+    return [...g.items, ...(g.topics ?? [])].some(t => url.startsWith(t.path));
+  }
 
   constructor() {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(e => {
         this.currentUrl.set(e.urlAfterRedirects);
-        this.topicsOpen.set(false);
+        this.openMenu.set(null);
       });
   }
 
@@ -97,20 +149,20 @@ export class LayoutComponent {
     this.sidebarOpen.set(false);
   }
 
-  toggleTopics(e: MouseEvent): void {
+  toggleMenu(id: string, e: MouseEvent): void {
     e.stopPropagation();
-    this.topicsOpen.update(v => !v);
+    this.openMenu.update(open => (open === id ? null : id));
   }
 
-  /** Close the Topics dropdown on any click outside of it */
+  /** Close any open dropdown on a click outside of it */
   @HostListener('document:click')
   onDocumentClick(): void {
-    if (this.topicsOpen()) this.topicsOpen.set(false);
+    if (this.openMenu()) this.openMenu.set(null);
   }
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    this.topicsOpen.set(false);
+    this.openMenu.set(null);
   }
 
   @HostListener('window:resize')

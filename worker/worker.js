@@ -22,6 +22,8 @@ import { handleFollowup } from "./followup.js";
 import { handleEmbedDemo } from "./embed-demo.js";
 import { handleRagIngest, handleRagQuery, handleRagAsk } from "./rag-demo.js";
 import { handleShareCreate, handleSharePage, handleShareImage, handleShareImageGet } from "./share.js";
+import { resumeExtractHandler } from "./resume-extract.js";
+import { resumeQuestionsHandler } from "./resume-questions.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
 // ── Allowed browser origins ────────────────────────────────
@@ -113,6 +115,18 @@ export default {
     if (p === "/api/interview-questions" && method === "POST") {
       if (await rateLimited(request, env, "interview", 60)) return withCors(request, tooMany());
       return withCors(request, await interviewQuestionsHandler(request, env));
+    }
+
+    // ── Résumé Interview (extract claims → targeted questions; grading reuses
+    //    /api/interview-grade). Low buckets: extraction is cached in KV, and a
+    //    round needs exactly one call to each — 30/hr is generous for humans.
+    if (p === "/api/resume-extract" && method === "POST") {
+      if (await rateLimited(request, env, "resume", 30)) return withCors(request, tooMany());
+      return withCors(request, await resumeExtractHandler(request, env));
+    }
+    if (p === "/api/resume-interview-questions" && method === "POST") {
+      if (await rateLimited(request, env, "resume", 30)) return withCors(request, tooMany());
+      return withCors(request, await resumeQuestionsHandler(request, env));
     }
 
     // ── /api/embed-demo (RAG Step 1 — learn embeddings) ──

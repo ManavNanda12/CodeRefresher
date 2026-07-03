@@ -33,6 +33,12 @@ const LEVEL_NAME: Record<string, string> = {
   '0-1': 'Rookie', '1-2': 'Builder', '2-3': 'Senior', '4+': 'Architect',
 };
 
+/** Rounds from arenas without a card of their own (e.g. Résumé Interview) still
+ *  land in history — this meta keeps them from masquerading as Angular. */
+const EXTRA_META: ArenaMeta[] = [
+  { id: 'resume', name: 'Résumé', icon: '📄', accent: '#f59e0b', gradient: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)' },
+];
+
 interface OverviewCard {
   meta: ArenaMeta;
   rounds: number;
@@ -354,7 +360,9 @@ export class DashboardComponent {
   }
 
   arenaMeta(id: string): ArenaMeta {
-    return ARENA_META.find(m => m.id === id) ?? ARENA_META[0];
+    return ARENA_META.find(m => m.id === id)
+      ?? EXTRA_META.find(m => m.id === id)
+      ?? ARENA_META[0];
   }
 
   formatTime(sec: number): string {

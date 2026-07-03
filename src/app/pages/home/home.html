@@ -19,24 +19,23 @@
   <div class="hero-content">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      Learn · Test · Track · Improve
+      🏟️ The interview-prep arena · Free forever
     </div>
 
     <h1 class="hero-headline">
-      Code Refresher — Gamified Interview Practice.<br>
-      <span class="headline-accent">Ace Angular, React, Next.js, NestJS, .NET & SQL Interviews.</span>
+      Get interviewed on your <em>own</em> résumé.<br>
+      <span class="headline-accent">The AI reads it. Then it grills you.</span>
     </h1>
 
     <p class="hero-sub">
-      Gamified, AI-powered interview prep: structured Q&amp;A, AI-graded quizzes with interviewer-style follow-ups, a daily challenge, hint lifelines, and animated XP level-ups to make learning stick.
+      Upload your résumé for a claim-by-claim grilling — or step into the Angular, React,
+      Next.js, NestJS, .NET &amp; SQL arenas for AI-graded rounds. Earn XP, level up, keep
+      your streak alive, and climb the leaderboard.
     </p>
 
-    <p class="hero-why">Why use Code Refresher? Short, focused rounds target your weak spots and reward progress with XP, streaks, and badges — practice that scales.</p>
-
     <div class="hero-actions">
-      <a routerLink="/angular" class="btn-primary" (animationend)="clearAnim($event)">Start Refreshing →</a>
-      <a routerLink="/test-me" class="btn-ghost" (animationend)="clearAnim($event)">🧪 Try Test Me</a>
-      <a routerLink="/interview" class="btn-ghost" (animationend)="clearAnim($event)">🎤 Mock Interview</a>
+      <a routerLink="/resume-interview" class="btn-primary" (animationend)="clearAnim($event)">📄 Interview my résumé →</a>
+      <a routerLink="/test-me" class="btn-ghost" (animationend)="clearAnim($event)">🧪 Practice by topic</a>
     </div>
 
     <p class="hero-hint">✨ psst — click anywhere up here</p>
@@ -47,12 +46,12 @@
         <span class="mac-dot mac-red"></span>
         <span class="mac-dot mac-yellow"></span>
         <span class="mac-dot mac-green"></span>
-        <span class="code-filename">interview-prep.ts</span>
+        <span class="code-filename">resume-trial.ts</span>
       </div>
-      <pre class="code-body"><code><span class="tk-kw">const</span> topics = [<span class="tk-str">'Angular'</span>, <span class="tk-str">'React'</span>, <span class="tk-str">'Next.js'</span>, <span class="tk-str">'NestJS'</span>, <span class="tk-str">'.NET'</span>, <span class="tk-str">'SQL'</span>];
+      <pre class="code-body"><code><span class="tk-kw">const</span> claims = <span class="tk-kw">await</span> ai.<span class="tk-fn">read</span>(<span class="tk-str">'my_resume.pdf'</span>);
 
-<span class="tk-kw">await</span> <span class="tk-fn">testMe</span>(topics);   <span class="tk-cmt">// AI grades you 0–10</span>
-<span class="tk-fn">trackProgress</span>();     <span class="tk-cmt">// dashboard + weak spots</span>
+<span class="tk-kw">await</span> <span class="tk-fn">interview</span>(claims);  <span class="tk-cmt">// "32% faster"? prove it.</span>
+<span class="tk-fn">verdict</span>();             <span class="tk-cmt">// backed / shaky / busted</span>
 <span class="tk-cmt">// ✓ interview-ready</span></code></pre>
     </div>
   </div>
@@ -95,9 +94,9 @@
 <!-- ── Topics ─────────────────────────────────────────── -->
 <section class="topics-section">
   <div class="section-header reveal rv-up">
-    <span class="section-eyebrow">What's Inside</span>
-    <h2 class="section-title">Pick Your Topic</h2>
-    <p class="section-sub">Bite-sized questions with answers, code examples, and simple analogies</p>
+    <span class="section-eyebrow">The Arenas</span>
+    <h2 class="section-title">Pick Your Arena</h2>
+    <p class="section-sub">Structured Q&amp;A with detailed answers, code examples, and plain-English analogies — every card a challenge card you can Master ✓ for XP</p>
   </div>
 
   <div class="topics-grid">
@@ -117,7 +116,7 @@
           <p class="topic-desc">{{ card.description }}</p>
           <div class="topic-footer">
             <span class="topic-count">📋 {{ card.count }}</span>
-            <span class="topic-arrow">Explore →</span>
+            <span class="topic-arrow">Enter →</span>
           </div>
         </div>
       </a>
@@ -130,7 +129,7 @@
   <div class="section-header reveal rv-up">
     <span class="section-eyebrow">The Full Loop</span>
     <h2 class="section-title">Everything you need to get interview-ready</h2>
-    <p class="section-sub">A complete prep system — not just questions, but practice, tracking, and a plan that adapts to you.</p>
+    <p class="section-sub">Learn → Test → Track → Improve. A gamified loop that adapts to you and levels you up as you clear the gaps.</p>
   </div>
 
   <div class="features-grid">
@@ -146,6 +145,33 @@
   </div>
 </section>
 
+<!-- ── Résumé Interview (FLAGSHIP) ────────────────────── -->
+<section class="peek-section">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
+      <span class="ai-badge live"><span class="live-dot"></span> 📄 Résumé Interview <span class="new-tag">NEW</span></span>
+      <h3 class="ai-title">Your résumé talks big. Defend it.</h3>
+      <p class="ai-desc">
+        Upload your résumé — the AI extracts your claims and grills you on the specifics.
+        Every claim ends up <strong>Backed, Shaky, or Busted</strong>.
+      </p>
+      <a routerLink="/resume-interview" class="btn-primary">Put my résumé on trial →</a>
+    </div>
+
+    <div class="peek-left reveal rv-right" aria-hidden="true">
+      <div class="iv-mock">
+        <div class="iv-mock-chips"><span>📈 “32% faster”</span><span>🛠️ Angular</span><span>🏗️ “led migration”</span></div>
+        <div class="iv-mock-kind">📄 About your résumé</div>
+        <div class="iv-mock-q">“You wrote you improved API response time by 32% — measured how, against what baseline?”</div>
+        <div class="iv-mock-verdict">
+          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">BACKED ✅</span>
+          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ +38 XP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── Test Me (LIVE) ─────────────────────────────────── -->
 <section class="ai-section">
   <div class="ai-card reveal rv-up">
@@ -155,10 +181,9 @@
       <span class="ai-badge live"><span class="live-dot"></span> Live · AI-Powered</span>
       <h3 class="ai-title">🧪 Test Me</h3>
       <p class="ai-desc">
-        Done reading? Now <strong>prove it</strong>. Pick a tech and level, answer 5 random
-        interview questions from memory, and our AI grades every answer against an
-        expert response — with a score, your strengths, and exactly what you missed.
-        Nail one and it asks a <strong>follow-up</strong>, just like a real interviewer.
+        Pick a tech and level, answer 5 questions from memory, and the AI scores each
+        one 0–10 — with what you missed and <strong>interviewer-style follow-ups</strong>.
+        Burn a hint if you're stuck, then chase a new personal best.
       </p>
       <div class="ai-features">
         <div class="ai-feature"><span>🎯</span> Scored 0–10 per answer</div>
@@ -211,10 +236,8 @@
       <span class="ai-badge">🎤 AI Mock Interview <span class="new-tag">NEW</span></span>
       <h3 class="ai-title">Rate yourself. Then get grilled.</h3>
       <p class="ai-desc">
-        Combine your stacks — <strong>Angular + .NET + SQL</strong> — rate your confidence, and face
-        <strong>fresh AI-generated questions</strong> tuned to your level: a balanced mix of theory,
-        real <strong>code &amp; query</strong> challenges, and scenarios. Write code in a full editor with
-        IntelliSense, earn XP, and get your verdict as a <strong>meme</strong>. Every round saves to your dashboard.
+        Combine stacks — <strong>Angular + .NET + SQL</strong> — rate your confidence, and face
+        fresh AI questions at your level. Code editor included, verdict as a <strong>meme</strong>.
       </p>
       <a routerLink="/interview" class="btn-primary">Start a Mock Interview →</a>
     </div>
@@ -244,9 +267,8 @@
       <span class="ai-badge">📊 Your Dashboard</span>
       <h3 class="ai-title">See your readiness at a glance</h3>
       <p class="ai-desc">
-        Every round feeds a live dashboard — readiness rings per technology, a
-        colour-coded module heatmap, and your top weak spots. Then hit
-        <strong>“Focus My Weak Spots”</strong> for a round that targets exactly what needs work.
+        Readiness rings per tech, a module heatmap, and one-tap
+        <strong>Focus Rounds</strong> that drill exactly what needs work.
       </p>
       <a routerLink="/dashboard" class="btn-primary">Open Dashboard →</a>
     </div>
@@ -278,6 +300,62 @@
   </div>
 </section>
 
+<!-- ── Arena Mode: XP / levels / streak / crate (gamification) ── -->
+<section class="peek-section">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
+      <span class="ai-badge">🕹️ Arena Mode</span>
+      <h3 class="ai-title">Prep that plays like a game</h3>
+      <p class="ai-desc">
+        Every round earns <strong>XP</strong>. Master questions to <strong>level up</strong>,
+        keep your <strong>daily streak 🔥</strong> alive, and pop a BGMI-style
+        <strong>level-up crate</strong> with achievement toasts when you break through a module.
+      </p>
+      <a routerLink="/dashboard" class="btn-primary">Check my progress →</a>
+    </div>
+
+    <div class="peek-left reveal rv-right" aria-hidden="true">
+      <div class="iv-mock">
+        <div class="iv-mock-chips"><span>⭐ Level 7</span><span>🔥 12-day streak</span><span>🏅 3 badges</span></div>
+        <div class="iv-mock-kind">🎉 Crate unlocked</div>
+        <div class="iv-mock-q">“Directives” module cleared — <strong>Directives Master</strong> achievement earned.</div>
+        <div class="iv-mock-verdict">
+          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">LEVEL UP ▲</span>
+          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ +120 XP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Leaderboard + Daily Challenge (gamification) ────── -->
+<section class="peek-section">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
+      <span class="ai-badge">🏆 Leaderboard</span>
+      <h3 class="ai-title">Climb the arena rankings</h3>
+      <p class="ai-desc">
+        Three boards — <strong>Top Rank</strong> (XP), <strong>Most Tests</strong>, and
+        <strong>Best Score</strong> — with an animated top-3 podium. Grab the
+        <strong>Daily Challenge</strong> to keep your streak and edge up the board.
+      </p>
+      <a routerLink="/leaderboard" class="btn-primary">See the rankings →</a>
+    </div>
+
+    <div class="peek-left reveal rv-right" aria-hidden="true">
+      <div class="iv-mock">
+        <div class="iv-mock-chips"><span>🥇 Top Rank</span><span>🧪 Most Tests</span><span>🎯 Best Score</span></div>
+        <div class="iv-mock-kind">🏆 Top Rank · this week</div>
+        <div class="iv-mock-q">🥇 Manav — 4,820 XP · 🥈 Sam — 4,110 XP · 🥉 You — 3,980 XP</div>
+        <div class="iv-mock-verdict">
+          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">RANK ▲ #3</span>
+          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ 140 XP to #2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── Ask My Notes peek (NEW) ────────────────────────── -->
 <section class="peek-section">
   <div class="peek-card">
@@ -285,11 +363,8 @@
       <span class="ai-badge">🧠 Ask My Notes <span class="new-tag">NEW</span></span>
       <h3 class="ai-title">Chat with your own notes</h3>
       <p class="ai-desc">
-        Paste your study notes — or your résumé — and ask questions in plain English.
-        An AI answers <strong>only from what you saved</strong>, never made-up facts, and
-        <strong>shows the exact notes it used</strong>. Built with real
-        <strong>Retrieval-Augmented Generation</strong>: vector search on Cloudflare Vectorize
-        + LLaMA 3.3.
+        Paste your study notes and ask questions in plain English. The AI answers
+        <strong>only from what you saved</strong> — and shows the exact notes it used.
       </p>
       <a routerLink="/ask-notes" class="btn-primary">Try Ask My Notes →</a>
     </div>
@@ -312,10 +387,10 @@
 <section class="cta-band" (click)="burst($event)">
   <div class="cta-inner">
     <h2 class="cta-title reveal rv-up">Your next interview starts here.</h2>
-    <p class="cta-sub reveal rv-up" style="--rv-delay: 0.12s">Free forever. No sign-up to browse. Just pick a topic and go.</p>
+    <p class="cta-sub reveal rv-up" style="--rv-delay: 0.12s">Free forever. No sign-up to browse — just enter the arena.</p>
     <div class="hero-actions">
-      <a routerLink="/angular" class="btn-primary reveal rv-pop" style="--rv-delay: 0.24s" (animationend)="clearAnim($event)">Start Refreshing →</a>
-      <a routerLink="/test-me" class="btn-ghost reveal rv-pop" style="--rv-delay: 0.34s" (animationend)="clearAnim($event)">🧪 Take a Test</a>
+      <a routerLink="/resume-interview" class="btn-primary reveal rv-pop" style="--rv-delay: 0.24s" (animationend)="clearAnim($event)">📄 Put my résumé on trial →</a>
+      <a routerLink="/test-me" class="btn-ghost reveal rv-pop" style="--rv-delay: 0.34s" (animationend)="clearAnim($event)">🧪 Practice by topic</a>
     </div>
   </div>
 </section>
