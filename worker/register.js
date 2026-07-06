@@ -11,6 +11,7 @@
 //   - Legacy accounts (no token / derived recovery code) are upgraded on first call.
 
 import { updateLeaderboard } from "./leaderboard.js";
+import { dispatchWelcomeEmail } from "./welcome-dispatch.js";
 import {
   isUserId,
   safeEqual,
@@ -48,6 +49,10 @@ export async function handleUserRegister(request, env) {
     ? JSON.parse(existing) // keep arenas/recentRounds/game
     : { userId, email, arenas: {}, recentRounds: [] };
 
+  // First login = this account binds an email for the first time (a record synced
+  // before onboarding has no email). Re-registers / profile updates don't qualify.
+  const firstWelcome = !existing || !userData.email;
+
   // ── Ownership check on an already-secured account ──
   // If this account already carries a token, the caller must present a matching one —
   // stops anyone who merely knows userId+email from overwriting the profile or rebinding it.
@@ -84,6 +89,10 @@ export async function handleUserRegister(request, env) {
 
   // Refresh the leaderboard so a name change shows up for already-ranked users.
   await updateLeaderboard(env, userId, { user: userData });
+
+  // Kick off the welcome email (GitHub Action → SMTP) — after the KV writes so the
+  // Action can find the user. Fail-soft: never blocks or breaks registration.
+  if (firstWelcome) await dispatchWelcomeEmail(env, userId);
 
   return Response.json({
     success: true,

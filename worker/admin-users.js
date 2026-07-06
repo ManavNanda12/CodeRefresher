@@ -28,6 +28,7 @@ export async function handleAdminUsers(request, env) {
       users.push({
         userId: rec.userId || key.name.slice("user:".length),
         email: rec.email || "",
+        name: rec.name || "",
         unsubscribed: !!rec.unsubscribed,
         lastActive: rec.lastActive || null,
         arenas: rec.arenas || {},

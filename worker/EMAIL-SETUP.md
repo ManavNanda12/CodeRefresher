@@ -108,3 +108,63 @@ That's it — the script uses Resend's HTTP API instead of SMTP. Either way:
 - Only users with **≥1 recorded round** and **not unsubscribed**.
 - Content: rounds this week, per-arena readiness, weakest module, Focus Round CTA.
 - Unsubscribing sets `unsubscribed:true` on the KV record; progress is untouched.
+
+---
+
+# Welcome Email — Setup
+
+Sends the dark arena welcome template (`scripts/templates/welcome-email.html`,
+personalized with the user's name) right after a user registers their email for
+the first time.
+
+**How it sends:** same runtime split as the digest — Workers can't do SMTP, so the
+worker fires a GitHub `repository_dispatch` on first registration and the
+**Welcome Email** Action sends via your existing SMTP secrets. Lands ~30–60 s
+after signup. Only the `userId` travels through GitHub; email + name are pulled
+from `/api/admin/users`, so no PII touches GitHub payloads or logs.
+
+```
+Worker /api/user/register (first email bind)
+   └─ POST github.com/repos/{repo}/dispatches  {event_type: "welcome-email", {userId}}
+        └─ GitHub Action → node scripts/send-welcome-email.mjs
+             ├─ GET {WORKER}/api/admin/users (Bearer ADMIN_SECRET) → find user
+             └─ SMTP (nodemailer) → welcome email (retries while KV propagates)
+```
+
+## 1. Create a GitHub token for the worker
+
+GitHub → **Settings → Developer settings → Fine-grained personal access tokens →
+Generate new token**:
+
+- Repository access: **Only select repositories** → `CodeRefresher`
+- Permissions: **Contents → Read and write** (this is what authorizes `repository_dispatch`)
+- Expiration: your call (set a calendar reminder if it expires)
+
+## 2. Give the token to the worker
+
+```bash
+npx wrangler secret put GITHUB_DISPATCH_TOKEN   # paste the PAT
+```
+
+The repo defaults to `ManavNanda12/CodeRefresher` (see `worker/welcome-dispatch.js`);
+set a `GITHUB_REPO` var only if that ever changes. **No token → the worker silently
+skips the dispatch** — registration is never affected.
+
+## 3. Redeploy the worker & test
+
+```bash
+npx wrangler deploy
+```
+
+Test the pipeline without a real signup: GitHub → **Actions → Welcome Email →
+Run workflow** → paste any existing `userId`, leave "Dry run" checked → the log
+should show `[dry-run] → user@example.com · "Welcome to the arena, Name 🏟️"`.
+Then register a fresh account in the app and watch the Action fire on its own.
+
+## Notes
+
+- "First login" = the account binds an email for the first time (`register.js`
+  guards on this) — device recovery and profile updates never re-send it.
+- Uses the same unsubscribe link + `List-Unsubscribe` header as the digest, and
+  respects `unsubscribed:true`.
+- All GitHub secrets are shared with the digest — no new Actions secrets needed.
