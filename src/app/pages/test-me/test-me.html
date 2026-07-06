@@ -17,8 +17,8 @@
           <span class="kicker">🧪 Test Me</span>
           <h1 class="stage-title">Enter the <span class="grad">Arena</span></h1>
           <p class="stage-sub">
-            Pick a battleground. Answer 5 random interview questions from memory —
-            our AI grades each one against an expert answer. No peeking.
+            Pick a battleground and your battle length — 5, 10 or 15 random interview
+            questions from memory. Our AI grades each one against an expert answer. No peeking.
           </p>
           @if (bestScore() > 0) {
             <div class="best-chip">🏅 Personal best · <strong>{{ bestScore() }}/10</strong></div>
@@ -92,9 +92,45 @@
                     }
                   </span>
                 }
-                <span class="lc-go">Start 5-question test →</span>
+                <span class="lc-go">Start {{ selectedSize().count }}-question {{ selectedSize().name }} →</span>
               </button>
             }
+          </div>
+
+          <!-- ── Battle length picker (Skirmish / Gauntlet / Beast Mode) ── -->
+          <div class="size-zone">
+            <div class="sz-head">
+              <span class="sz-kicker">⚔️ Choose your battle</span>
+              <p class="sz-sub">
+                How long can you last? Locked in:
+                <strong class="sz-current" [attr.data-tier]="selectedSize().tier">
+                  {{ selectedSize().icon }} {{ selectedSize().name }} · {{ selectedSize().count }} questions
+                </strong>
+              </p>
+            </div>
+            <div class="size-grid">
+              @for (s of quizSizes; track s.count; let i = $index) {
+                <button class="size-card" type="button"
+                        [class.selected]="selectedSize().count === s.count"
+                        [attr.data-tier]="s.tier"
+                        [style.--delay]="(340 + i * 100) + 'ms'"
+                        (click)="pickSize(s)">
+                  <span class="sc-pulse" aria-hidden="true"></span>
+                  <span class="sc-check" aria-hidden="true">✓</span>
+                  <span class="sc-icon">{{ s.icon }}</span>
+                  <span class="sc-name">{{ s.name }}</span>
+                  <span class="sc-tag">{{ s.tag }}</span>
+                  <div class="sc-meter" aria-hidden="true">
+                    @for (seg of [1,2,3]; track seg) {
+                      <span class="seg" [class.on]="seg <= s.tier"></span>
+                    }
+                  </div>
+                  <span class="sc-count">{{ s.count }} questions</span>
+                  <span class="sc-xp">⚡ up to {{ s.count * 10 }} XP</span>
+                  <span class="sc-blurb">{{ s.blurb }}</span>
+                </button>
+              }
+            </div>
           </div>
         }
       }
@@ -131,6 +167,7 @@
                 <span class="qm-chip focus">🎯 Focus Round</span>
               } @else {
                 <span class="qm-chip ghost">{{ selectedLevel()?.label }} · {{ selectedLevel()?.badge }}</span>
+                <span class="qm-chip ghost">{{ selectedSize().icon }} {{ selectedSize().name }}</span>
               }
             </div>
             <span class="qm-counter">{{ currentIndex() + 1 }} / {{ total() }}</span>
@@ -511,7 +548,7 @@
 
           <!-- Actions -->
           <div class="result-actions">
-            <button class="btn-submit" type="button" (click)="retrySameLevel()">{{ opponent() ? '🔄 Rematch' : '🔄 New 5 questions' }}</button>
+            <button class="btn-submit" type="button" (click)="retrySameLevel()">{{ opponent() ? '🔄 Rematch' : '🔄 New ' + total() + ' questions' }}</button>
             <a class="btn-soft" routerLink="/dashboard">📊 View Dashboard</a>
             <button class="btn-soft" type="button" (click)="changeLevel()">🎚 Change level</button>
             <button class="btn-soft" type="button" (click)="restart()">🧪 Pick another arena</button>

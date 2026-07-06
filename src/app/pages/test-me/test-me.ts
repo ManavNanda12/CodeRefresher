@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, PLATFORM_ID, HostListener, ViewChild, ViewContainerRef, ComponentRef, Injector } from '@angular/core';
+import { Component, computed, effect, inject, signal, PLATFORM_ID, HostListener, ViewChild, ViewContainerRef, ComponentRef, Injector } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { DataService } from '../../core/services/data.service';
@@ -45,6 +45,21 @@ interface QuizQuestion extends RefresherItem {
   module: string;
   icon: string;
 }
+
+interface SizeOption {
+  count: number;
+  name: string;
+  icon: string;
+  tag: string;
+  blurb: string;
+  tier: number; // 1..3 — drives the flame meter + accent color
+}
+
+const QUIZ_SIZES: SizeOption[] = [
+  { count: 5,  name: 'Skirmish',   icon: '⚡', tag: 'Quick fire',  blurb: 'A fast warm-up round. In and out.',        tier: 1 },
+  { count: 10, name: 'Gauntlet',   icon: '🔥', tag: 'Real deal',   blurb: 'Feels like an actual interview round.',    tier: 2 },
+  { count: 15, name: 'Beast Mode', icon: '💀', tag: 'Endurance',   blurb: 'The full trial. No mercy, maximum XP.',    tier: 3 },
+];
 
 const ARENAS: Arena[] = [
   {
@@ -110,11 +125,12 @@ const LEVEL_META: Record<string, { label: string; badge: string; difficulty: num
   '4+': { label: 'Architect', badge: '4+ yrs', difficulty: 4 },
 };
 
-const QUIZ_SIZE = 5;
+const QUIZ_SIZE = 5; // Focus Rounds stay short & sharp; regular rounds use the chosen SizeOption
 const HINT_COST_XP = 20; // first hint per round is free; each extra costs this
 const MASTER_ABOVE = 7;    // score strictly above this on a question → auto-master it
 const UNMASTER_BELOW = 5;  // score strictly below this → drop mastery (with a kind nudge)
 const BEST_KEY = 'testme_best_score';
+const SIZE_KEY = 'testme_size';
 const TAKEN_KEY = 'testme_total_taken';
 const HISTORY_KEY = 'testme_history';
 const HISTORY_MAX = 6;
@@ -144,6 +160,7 @@ export class TestMeComponent {
   masteryLost = signal(0);
 
   readonly arenas = ARENAS;
+  readonly quizSizes = QUIZ_SIZES;
   readonly verdictMap = VERDICT_DISPLAY;
 
   // ── State machine ──────────────────────────────────────────
@@ -153,6 +170,8 @@ export class TestMeComponent {
 
   selectedArena = signal<Arena | null>(null);
   selectedLevel = signal<LevelOption | null>(null);
+  /** Round length tier (Skirmish / Gauntlet / Beast Mode) — sticky across visits. */
+  selectedSize = signal<SizeOption>(QUIZ_SIZES[0]);
 
   // Adaptive "Focus Round" state
   focusMode = signal(false);
@@ -295,11 +314,20 @@ export class TestMeComponent {
     inject(SeoService).update({
       title: 'Test Me — AI Interview Practice',
       description:
-        'Put your skills to the test. Pick a technology and level, answer 5 random interview questions, and get instant AI feedback scored against expert answers.',
+        'Put your skills to the test. Pick a technology, level and battle length — 5, 10 or 15 random interview questions — and get instant AI feedback scored against expert answers.',
       keywords: 'angular quiz, dotnet quiz, sql quiz, ai interview practice, mock interview, developer test',
     });
     this.loadBest();
     this.loadHistory();
+    this.loadSize();
+
+    // If the editor stays mounted across question navigation (both questions have it
+    // open), push the new question's code into it. The editor no-ops when equal.
+    effect(() => {
+      const code = this.currentCode();
+      const ref = this.editorCompRef;
+      if (ref && !ref.hostView.destroyed) ref.setInput('value', code);
+    });
 
     // Launched from a "Focus My Weak Spots" / "Test Yourself" challenge?
     const focus = this.focusRound.consume();
@@ -338,8 +366,20 @@ export class TestMeComponent {
     return you > opp.score ? 'win' : you < opp.score ? 'lose' : 'tie';
   });
 
-  // Dynamic editor host (we create/destroy the heavy editor on demand)
-  @ViewChild('editorHost', { read: ViewContainerRef }) private editorHost!: ViewContainerRef;
+  // Dynamic editor host (we create/destroy the heavy editor on demand).
+  // Setter form is essential: the #editorHost div lives inside an @if, so it doesn't
+  // exist yet at click time — we create the editor when the container actually renders,
+  // and drop the (now destroyed) ComponentRef when the @if removes it.
+  private editorHost: ViewContainerRef | null = null;
+  @ViewChild('editorHost', { read: ViewContainerRef })
+  set editorHostRef(host: ViewContainerRef | undefined) {
+    this.editorHost = host ?? null;
+    if (host) {
+      this.ensureEditorCreated().catch(e => console.error('Failed to lazy-load editor', e));
+    } else {
+      this.editorCompRef = null; // destroyed together with its @if container
+    }
+  }
   private injector = inject(Injector);
   private editorCompRef: ComponentRef<any> | null = null;
 
@@ -366,6 +406,19 @@ export class TestMeComponent {
         this.loadingLevels.set(false);
       },
     });
+  }
+
+  /** Pick a round length tier — remembered on this device for next time. */
+  pickSize(size: SizeOption): void {
+    this.selectedSize.set(size);
+    if (isPlatformBrowser(this.platformId)) localStorage.setItem(SIZE_KEY, String(size.count));
+  }
+
+  private loadSize(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const stored = Number(localStorage.getItem(SIZE_KEY));
+    const match = QUIZ_SIZES.find(s => s.count === stored);
+    if (match) this.selectedSize.set(match);
   }
 
   // ── Stage 2: pick a level → build the quiz ─────────────────
@@ -396,12 +449,12 @@ export class TestMeComponent {
         pool.push({ ...q, module: name, icon: mod.icon });
       }
     }
-    // Fisher–Yates shuffle, then take the first N.
+    // Fisher–Yates shuffle, then take the first N (N = chosen battle length).
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [pool[i], pool[j]] = [pool[j], pool[i]];
     }
-    return pool.slice(0, Math.min(QUIZ_SIZE, pool.length));
+    return pool.slice(0, Math.min(this.selectedSize().count, pool.length));
   }
 
   // ── Adaptive "Focus Round" ─────────────────────────────────
@@ -527,64 +580,30 @@ export class TestMeComponent {
     });
   }
 
-  /** Reveal/hide the code editor for the current question (kept per-index). */
+  /** Reveal/hide the code editor for the current question (kept per-index).
+   *  The @if in the template renders/destroys the host; the ViewChild setter
+   *  above does the actual component creation/teardown. */
   toggleEditor(): void {
     const idx = this.currentIndex();
-    const isOpen = this.editorOpen().has(idx) || this.currentCode().trim().length > 0;
-    const willOpen = !isOpen;
-
-    // update signal synchronously
+    const isOpen = this.currentCodeOpen();
     this.editorOpen.update(set => {
       const next = new Set(set);
-      if (willOpen) next.add(idx);
-      else if (next.has(idx) && this.currentCode().trim().length === 0) next.delete(idx);
+      if (!isOpen) next.add(idx);
+      else if (this.currentCode().trim().length === 0) next.delete(idx);
       return next;
     });
-
-    // perform dynamic creation/destruction outside the signal update
-    if (willOpen && !this.editorCompRef && this.editorHost) {
-      this.ensureEditorCreated().catch(e => console.error('Failed to lazy-load editor', e));
-    }
-
-    if (!willOpen && this.editorCompRef && this.currentCode().trim().length === 0) {
-      try { this.editorCompRef.destroy(); } catch {}
-      this.editorCompRef = null;
-    }
   }
 
   private async ensureEditorCreated(): Promise<void> {
     if (this.editorCompRef || !this.editorHost) return;
-    try {
-      const mod = await import('../../shared/components/code-editor/code-editor');
-      const Editor = mod.CodeEditorComponent;
-      const compRef = this.editorHost.createComponent(Editor, { injector: this.injector });
-      // set inputs via setInput to satisfy typed inputs
-      if (typeof compRef.setInput === 'function') {
-        compRef.setInput('language', this.editorLanguage());
-        compRef.setInput('value', this.currentCode());
-      } else {
-        // fallback — assign directly (less type-safe)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        compRef.instance.language = this.editorLanguage();
-        // @ts-ignore
-        compRef.instance.value = this.currentCode();
-      }
-
-      // wire output if present
-      // some output shapes may not be an Observable; guard accordingly
-      const out = (compRef.instance as any).valueChange;
-      if (out && typeof out.subscribe === 'function') {
-        out.subscribe((v: string) => this.updateCode(v));
-      } else if (out && typeof out === 'function') {
-        // older-style callback — try assigning
-        try { out((v: string) => this.updateCode(v)); } catch {}
-      }
-
-      this.editorCompRef = compRef;
-    } catch (e) {
-      console.error('ensureEditorCreated error', e);
-    }
+    const mod = await import('../../shared/components/code-editor/code-editor');
+    // The user may have closed the panel (or navigated) while the chunk loaded.
+    if (this.editorCompRef || !this.editorHost) return;
+    const compRef = this.editorHost.createComponent(mod.CodeEditorComponent, { injector: this.injector });
+    compRef.setInput('language', this.editorLanguage());
+    compRef.setInput('value', this.currentCode());
+    compRef.instance.valueChange.subscribe((v: string) => this.updateCode(v));
+    this.editorCompRef = compRef;
   }
 
   goTo(index: number): void {
@@ -676,15 +695,16 @@ export class TestMeComponent {
   }
 
   // ── Follow-up lifecycle ────────────────────────────────────
-  /** Choose up to 2 random question indices as probe-eligible for this round. */
+  /** Choose random probe-eligible indices — longer rounds earn more interviewer probes. */
   private pickFollowupIndices(): void {
     const n = this.total();
+    const probes = n >= 15 ? 4 : n >= 10 ? 3 : 2;
     const idx = Array.from({ length: n }, (_, i) => i);
     for (let i = idx.length - 1; i > 0; i--) {       // Fisher–Yates shuffle
       const j = Math.floor(Math.random() * (i + 1));
       [idx[i], idx[j]] = [idx[j], idx[i]];
     }
-    this.followupIndices.set(new Set(idx.slice(0, Math.min(2, n))));
+    this.followupIndices.set(new Set(idx.slice(0, Math.min(probes, n))));
   }
 
   private resetFollowups(): void {
