@@ -7,11 +7,25 @@
   <meta name="supported-color-schemes" content="dark">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Welcome to CodeRefresher</title>
+  <style>
+    :root { color-scheme: dark; supported-color-schemes: dark; }
+    html, body { background-color: #070d1c !important; }
+    /* Gmail wraps the message in u + .body — re-assert the dark canvas there. */
+    u + .body, u + .body .gmail-bg { background-color: #070d1c !important; }
+    /* Outlook dark/light transforms rewrite colors onto data-ogsc/data-ogsb
+       attributes — override them back to the arena palette. */
+    [data-ogsb], [data-ogsb] body { background-color: #070d1c !important; }
+    [data-ogsc] { color: #cbd5e1 !important; }
+    [data-ogsc] h1, [data-ogsc] strong { color: #f1f5f9 !important; }
+  </style>
 </head>
-<body style="margin:0;padding:0;background-color:#070d1c;" bgcolor="#070d1c">
+<body class="body" style="margin:0;padding:0;background-color:#070d1c;background-image:linear-gradient(#070d1c,#070d1c);" bgcolor="#070d1c">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Your prep arena is open — get interviewed on your own r&eacute;sum&eacute;.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
 
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#070d1c" style="background-color:#070d1c;">
+  <!-- background-image:linear-gradient(...) on every dark surface = Gmail dark-mode
+       inversion shield: Gmail recolors background-color/bgcolor but never touches
+       gradient backgrounds, so the arena stays dark. -->
+  <table role="presentation" class="gmail-bg" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#070d1c" style="background-color:#070d1c;background-image:linear-gradient(#070d1c,#070d1c);">
     <tr>
       <td align="center" style="padding:36px 16px 48px;">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;">
@@ -26,7 +40,7 @@
           <!-- Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0c1326" style="background-color:#0c1326;border:1px solid #26314a;border-radius:16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0c1326" style="background-color:#0c1326;background-image:linear-gradient(#0c1326,#0c1326);border:1px solid #26314a;border-radius:16px;">
 
                 <!-- Tri-color arena bar -->
                 <tr>
@@ -57,7 +71,7 @@
                   <td align="center" style="padding:28px 40px 8px;">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td align="center" bgcolor="#6366f1" style="background-color:#6366f1;border-radius:10px;">
+                        <td align="center" bgcolor="#6366f1" style="background-color:#6366f1;background-image:linear-gradient(#6366f1,#6366f1);border-radius:10px;">
                           <a href="{{APP_URL}}" target="_blank" style="display:inline-block;padding:15px 40px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;">Enter the Arena &rarr;</a>
                         </td>
                       </tr>
@@ -68,7 +82,7 @@
                 <!-- Flagship panel -->
                 <tr>
                   <td style="padding:32px 40px 0;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111b36" style="background-color:#111b36;border:1px solid #2b3654;border-radius:12px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111b36" style="background-color:#111b36;background-image:linear-gradient(#111b36,#111b36);border:1px solid #2b3654;border-radius:12px;">
                       <tr>
                         <td style="padding:22px 24px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;">
                           <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#c084fc;padding-bottom:8px;">&#128196; THE FLAGSHIP</div>
@@ -126,7 +140,7 @@
                 <!-- Arenas strip -->
                 <tr>
                   <td style="padding:24px 40px 36px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;">
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0a1122" style="background-color:#0a1122;border:1px dashed #2b3654;border-radius:10px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0a1122" style="background-color:#0a1122;background-image:linear-gradient(#0a1122,#0a1122);border:1px dashed #2b3654;border-radius:10px;">
                       <tr>
                         <td align="center" style="padding:16px 20px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;font-size:13px;line-height:21px;color:#cbd5e1;">
                           <span style="color:#818cf8;font-weight:700;">6 arenas, 100+ Q&amp;A each</span><br>
