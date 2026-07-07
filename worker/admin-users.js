@@ -30,6 +30,10 @@ export async function handleAdminUsers(request, env) {
         email: rec.email || "",
         name: rec.name || "",
         unsubscribed: !!rec.unsubscribed,
+        // Newsletter opt-in. Accounts created before the checkbox existed have no
+        // flag — treat them as opted in (same consent basis as the weekly digest).
+        allowUpdates: rec.allowUpdates !== false,
+        createdAt: rec.createdAt || null,
         lastActive: rec.lastActive || null,
         arenas: rec.arenas || {},
         recentRounds: rec.recentRounds || [],

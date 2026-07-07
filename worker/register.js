@@ -25,7 +25,7 @@ const legacyRecoveryCodeFor = (id) => `cr_${id.replace(/-/g, "").slice(0, 8)}`;
 const normEmail = (e) => String(e || "").trim().toLowerCase();
 
 export async function handleUserRegister(request, env) {
-  const { userId, email, name } = await request.json();
+  const { userId, email, name, allowUpdates } = await request.json();
 
   if (!isUserId(userId) || !email || typeof email !== "string") {
     return Response.json({ success: false, error: "Missing fields" }, { status: 400 });
@@ -47,7 +47,7 @@ export async function handleUserRegister(request, env) {
   const existing = await env.PROGRESS_KV.get(`user:${userId}`);
   const userData = existing
     ? JSON.parse(existing) // keep arenas/recentRounds/game
-    : { userId, email, arenas: {}, recentRounds: [] };
+    : { userId, email, arenas: {}, recentRounds: [], createdAt: new Date().toISOString() };
 
   // First login = this account binds an email for the first time (a record synced
   // before onboarding has no email). Re-registers / profile updates don't qualify.
@@ -66,6 +66,9 @@ export async function handleUserRegister(request, env) {
 
   userData.email = email;
   if (typeof name === "string" && name.trim()) userData.name = name.trim().slice(0, 24);
+  // Monthly-newsletter opt-in. Only an explicit boolean writes the flag, so profile
+  // updates / token migrations (which don't send it) can't clobber a stored choice.
+  if (typeof allowUpdates === "boolean") userData.allowUpdates = allowUpdates;
 
   // ── Mint a session token on first secure registration ──
   let newToken = null;

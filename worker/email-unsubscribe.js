@@ -1,8 +1,11 @@
-// email-unsubscribe.js → GET /api/email/unsubscribe?u={userId}&c={recoveryCode}
+// email-unsubscribe.js → GET /api/email/unsubscribe?u={userId}&c={recoveryCode}[&t=newsletter]
 //
 // One-click opt-out linked from the footer of every digest email. The recovery
 // code (cr_ + first 8 hex of the UUID) doubles as the unsubscribe token, so no
 // extra storage is needed and links can't be trivially forged for other users.
+//
+// &t=newsletter drops ONLY the monthly newsletter (allowUpdates=false); without
+// it the user is unsubscribed from all outreach email (unsubscribed=true).
 //
 // Add to worker.js:
 //   import { handleUnsubscribe } from "./email-unsubscribe.js";
@@ -25,11 +28,18 @@ export async function handleUnsubscribe(request, env) {
   const rec = await env.PROGRESS_KV.get(`user:${userId}`, "json");
   if (!rec) return htmlResponse("We couldn't find that account.", 404);
 
-  rec.unsubscribed = true;
+  const newsletterOnly = url.searchParams.get("t") === "newsletter";
+  if (newsletterOnly) {
+    rec.allowUpdates = false;
+  } else {
+    rec.unsubscribed = true;
+  }
   await env.PROGRESS_KV.put(`user:${userId}`, JSON.stringify(rec));
 
   return htmlResponse(
-    "✅ Unsubscribed — you won't get weekly progress emails anymore. Your saved progress is untouched.",
+    newsletterOnly
+      ? "✅ Done — no more monthly newsletters. You'll still get your weekly progress recap. Your saved progress is untouched."
+      : "✅ Unsubscribed — you won't get any more emails from us. Your saved progress is untouched.",
     200,
   );
 }

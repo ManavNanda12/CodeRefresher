@@ -1,0 +1,47 @@
+{
+  "subject": "CodeRefresher July 🏟️ — voice answers & this month's champion",
+  "preheader": "Your résumé can now hear you talk. Plus: July's top performer and how much the arena grew.",
+  "heroTitle": "What went down in **July**",
+  "intro": "The arena got louder this month — literally. Here's everything that shipped and who's on top.",
+  "blocks": [
+    {
+      "type": "feature",
+      "emoji": "🎙️",
+      "title": "Voice answers in the Résumé Interview",
+      "body": "Stop typing, start talking. Answer the AI's grilling out loud like a real interview — you'll get **delivery feedback** on top of substance, and yes, we notice if you alt-tab to Google.",
+      "link": "/resume-interview",
+      "linkLabel": "Try a voice round"
+    },
+    {
+      "type": "meme",
+      "url": "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmF4bHhodm9wam4zcDF2YjF5eHF3N2NiODRpcXlwamZqZ2tyYTZ0ZiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/vtFD7SOw5XdzDR0PB0/giphy.webp",
+      "alt": "Me explaining my résumé claims to the AI interviewer",
+      "caption": "\"led the migration\" — the AI: prove it."
+    },
+    { "type": "topPerformer" },
+    {
+      "type": "feature",
+      "emoji": "⚔️",
+      "kicker": "ALSO NEW",
+      "title": "Pick your battle length",
+      "body": "Mock interviews now come in 5, 10 or 15-question rounds. Quick warm-up before standup or a full gauntlet — your call.",
+      "link": "/interview",
+      "linkLabel": "Start a round"
+    },
+    {
+      "type": "meme",
+      "url": "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2x0b3VydHdvbGQwdTl1ajhsaHp3eXJhNWgwcmhxOHB2M2VjeWJmMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mB9taBltLZIXMaZjUZ/giphy.gif",
+      "alt": "Choosing the 5-question round at 11:58pm to keep the streak",
+      "caption": "streak preservation is a legitimate strategy 🔥"
+    },
+    { "type": "signupCount" },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "text",
+      "title": "One more thing",
+      "body": "New members now get a proper **welcome to the arena** the moment they join — dark mode friendly, obviously. Know someone grinding for interviews? Send them in."
+    }
+  ]
+}

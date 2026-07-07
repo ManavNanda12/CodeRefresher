@@ -99,7 +99,7 @@ export class UserService {
    * the profile in KV. Resolves to the recovery code even if the network call fails
    * (identity is still usable locally and will sync on the next round).
    */
-  register(email: string, name?: string): Observable<RegisterResponse> {
+  register(email: string, name?: string, allowUpdates?: boolean): Observable<RegisterResponse> {
     const hadIdentity = !!this.userId();
     const id = this.userId() ?? generateUuid();
     const clean = email.trim();
@@ -111,8 +111,10 @@ export class UserService {
     this.onboarded.set(true);
     this.writeCookies(id, clean, this.name());
 
-    const body: Record<string, string> = { userId: id, email: clean };
+    const body: Record<string, string | boolean> = { userId: id, email: clean };
     if (this.name()) body['name'] = this.name() as string;
+    // Only send when explicitly chosen — profile updates must not clobber the stored choice.
+    if (typeof allowUpdates === 'boolean') body['allowUpdates'] = allowUpdates;
     return this.http
       .post<RegisterResponse>(`${WORKER_BASE}/api/user/register`, body, { headers: this.authHeader() })
       .pipe(

@@ -35,6 +35,14 @@
               (keyup.enter)="submitEmail()" />
           </div>
 
+          <label class="ob-check">
+            <input
+              type="checkbox"
+              [checked]="updatesOptIn()"
+              (change)="updatesOptIn.set($any($event.target).checked)" />
+            <span>📬 Send me the monthly newsletter — new features, top performers &amp; arena news</span>
+          </label>
+
           @if (error()) { <p class="ob-error">{{ error() }}</p> }
 
           <button class="ob-go" type="button" [disabled]="submitting()" (click)="submitEmail()">

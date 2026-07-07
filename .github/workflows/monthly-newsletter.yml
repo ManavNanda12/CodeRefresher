@@ -1,0 +1,54 @@
+name: Monthly Newsletter
+
+on:
+  schedule:
+    # 1st of every month, 09:00 UTC. Sends scripts/newsletters/{YYYY-MM}.json —
+    # if no issue file exists for the month, the script exits without sending.
+    - cron: "0 9 1 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — log recipients, send nothing"
+        type: boolean
+        default: true
+      issue:
+        description: "Issue to send, e.g. 2026-07 (default: current month)"
+        type: string
+        required: false
+      preview_to:
+        description: "Send ONE proof copy to this address instead of subscribers"
+        type: string
+        required: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      # CI-only dependency — not added to the app's package.json.
+      - run: npm install --no-save nodemailer@^6
+
+      - name: Send monthly newsletter
+        run: node scripts/send-monthly-newsletter.mjs
+        env:
+          WORKER_BASE: ${{ secrets.WORKER_BASE }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          # Optional — set EMAIL_PROVIDER=resend + RESEND_API_KEY to switch transport later.
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ISSUE: ${{ inputs.issue }}
+          PREVIEW_TO: ${{ inputs.preview_to }}
+          # Scheduled runs send for real; manual runs default to dry-run unless you flip it.
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}

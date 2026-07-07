@@ -33,6 +33,7 @@ export class OnboardingModalComponent {
   mode = signal<Mode>('email');
   nameInput = signal('');
   emailInput = signal('');
+  updatesOptIn = signal(true);
   codeInput = signal('');
   error = signal('');
   submitting = signal(false);
@@ -76,7 +77,7 @@ export class OnboardingModalComponent {
       return;
     }
     this.submitting.set(true);
-    this.user.register(email, this.nameInput().trim()).subscribe(res => {
+    this.user.register(email, this.nameInput().trim(), this.updatesOptIn()).subscribe(res => {
       this.submitting.set(false);
       // Email already belongs to an account → can't adopt it from an email alone.
       // Send the user to the recovery-code flow to restore it securely.
