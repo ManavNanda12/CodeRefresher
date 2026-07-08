@@ -31,6 +31,13 @@ const SYSTEM_BASE =
   `TECH claims get a concrete technical question on that named technology at the depth the résumé implies — these may be ` +
   `"code" questions asking for a short snippet, or "query" for SQL. ` +
   `PROJECT claims get scenario/design probes — trade-offs, what broke, what they'd do differently. ` +
+  `SCOPE — the whole interview must fit in ~10 minutes, so every question must be answerable in about 2 minutes in a plain ` +
+  `text box. A "code" question asks for ONE small thing: a single function, method, or query, under ~15 lines — and should ` +
+  `invite the candidate to either write it OR describe their approach in words. NEVER ask the candidate to build an ` +
+  `application, set up or connect projects, create a database and tables, or wire multiple technologies together — that is ` +
+  `homework, not an interview question. ` +
+  `If the résumé shows a non-coding background (no hands-on code claims), ask NO code questions at all — use theory and ` +
+  `scenario questions about processes, decisions and outcomes from their actual work instead. ` +
   `You may also be given self-rated SKILLS (1-10). Write SKILL-CHECK questions for those, calibrated to the rating: ` +
   `1-3 fundamentals and definitions; 4-6 practical usage and common gotchas; 7-8 senior trade-offs, debugging and design; ` +
   `9-10 expert depth — internals, performance, edge cases. A HIGH self-rating earns a HARDER question; be fair to low ratings. ` +
