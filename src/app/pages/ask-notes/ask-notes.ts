@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RagService } from '../../core/services/rag.service';
 import { UserService } from '../../core/services/user.service';
+import { SeoService } from '../../core/services/seo.service';
 
 type View = 'empty-initial' | 'empty-ready' | 'thinking' | 'answer';
 
@@ -24,6 +25,15 @@ export class AskNotesComponent implements OnDestroy {
   private platformId = inject(PLATFORM_ID);
 
   constructor() {
+    // Personalized tool with no static, indexable content (answers come from the
+    // user's own saved notes) — give it a real title/description but keep it out
+    // of the index, like the dashboard and leaderboard.
+    inject(SeoService).update({
+      title: 'Ask My Notes',
+      description: 'Chat with your own study notes — CodeRefresher\'s AI answers questions using only the notes you save, so revision stays grounded in your material.',
+      noindex: true,
+    });
+
     // Notes persist server-side (Vectorize) across refreshes. Restore the saved
     // count from localStorage so the UI remembers the user already has notes —
     // otherwise it wrongly blocks "Ask" after a refresh.
