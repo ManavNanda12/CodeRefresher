@@ -65,7 +65,82 @@ export class MemeService {
   ];
 
   /**
-   * Caption banks by score band → [top, bottom]. Deliberately mixes flavors:
+   * CONTEXTUAL caption banks — `{x}` is replaced with a tag from the user's own
+   * round (the skill they nailed, the claim that got busted, the JD gap). These
+   * are weighted over the generic bank because a meme that names YOUR tech is
+   * the one you actually relate to.
+   */
+  private readonly CTX_CAPTIONS: Record<string, [top: string, bottom: string][]> = {
+    legend: [
+      ['resume said {x}', 'and you PROVED it'],
+      ['{x} expert', 'certified not a lie'],
+      ['{x} questions', 'speedran like a boss'],
+      ['ekdum jhakaas', '{x} performance'],            // Bollywood — Anil Kapoor
+      ['{x} claim', 'backed with receipts'],
+    ],
+    strong: [
+      ['ok you actually', 'know {x}'],
+      ['{x} on the resume', '{x} in the answers too'],
+      ['{x} claim', 'survived the grilling'],
+      ['{x} skills', 'ekdum premium'],                 // desi
+    ],
+    pass: [
+      ['{x} knowledge', 'buffering but it loaded'],
+      ['{x}', 'chalega bhai chalega'],                 // desi
+      ['{x} answers', 'honest work'],
+      ['{x} round', 'cleared in extra time'],
+    ],
+    close: [
+      ['resume said {x}', 'answers said maybe'],
+      ['{x} claim', 'needs a patch update'],
+      ['thoda {x} padh lete', 'toh nikal jaate'],      // desi
+      ['{x}', 'so close yet so far'],
+    ],
+    fail: [
+      ['resume said {x}', 'the answers said nahi'],
+      ['{x} expert', 'allegedly'],
+      ['{x} claim', 'left the chat'],
+      ['git blame', 'the {x} bullet point'],           // dev
+      ['{x} skills', '404 not found'],                 // dev
+    ],
+  };
+
+  /** JD-screening flavored contextual captions — recruiter / ATS / shortlist humor. */
+  private readonly CTX_CAPTIONS_JD: Record<string, [top: string, bottom: string][]> = {
+    legend: [
+      ['recruiter saw {x}', 'instant shortlist'],
+      ['JD wanted {x}', 'resume said say less'],
+      ['{x} required', '{x} delivered'],
+      ['ATS scanned {x}', 'and swiped right'],
+    ],
+    strong: [
+      ['JD wants {x}', 'you brought receipts'],
+      ['{x} box', 'ticked with evidence'],
+      ['recruiter read {x}', 'and kept scrolling happily'],
+      ['{x} matched', 'shortlist loading'],
+    ],
+    pass: [
+      ['{x} kind of matches', 'recruiter kind of nods'],
+      ['JD wants {x}', 'resume whispers same-ish'],
+      ['{x}', 'close enough for round one'],
+      ['half the JD matched', 'the {x} half'],
+    ],
+    close: [
+      ['JD wants {x}', 'resume changes the subject'],
+      ['{x}', 'the gap between you and the offer'],
+      ['almost qualified for {x}', 'is still not qualified'],
+      ['{x} required', 'vibes provided'],
+    ],
+    fail: [
+      ['JD asked for {x}', 'resume left it on read'],
+      ['ATS looked for {x}', 'found a hobbies section'],
+      ['{x} must-have', 'must-not-have apparently'],
+      ['dear candidate', 'the {x} role has moved on'],
+    ],
+  };
+
+  /**
+   * Generic caption banks by score band → [top, bottom]. Deliberately mixes flavors:
    * classic memes, Bollywood/filmy one-liners (romanized), Netflix/binge, and dev humor.
    * ASCII only — memegen slugs romanized Hindi fine.
    */
@@ -130,12 +205,31 @@ export class MemeService {
   private readonly MAX_RECENT = 18;
   private recent: string[] = this.loadRecent();
 
-  /** Build a meme for the given overall score (0-10). */
-  forScore(score: number): MemeResult {
-    const band = this.band(score);
-    const passed = score >= 6;
+  /**
+   * Build a meme for the given overall score (0-10). Pass a `tag` — the skill,
+   * tech, or claim keyword the round actually hinged on — and the caption will
+   * usually name it, so the joke lands on THIS user's round, not a generic one.
+   */
+  forScore(score: number, tag?: string): MemeResult {
+    return this.build(this.band(score), score >= 6, this.CTX_CAPTIONS, tag);
+  }
+
+  /** Build a JD-screening meme for a 0-100 match score (recruiter/ATS humor). */
+  forMatch(score: number, tag?: string): MemeResult {
+    return this.build(this.band(score / 10), score >= 60, this.CTX_CAPTIONS_JD, tag);
+  }
+
+  private build(
+    band: string,
+    passed: boolean,
+    ctxBank: Record<string, [string, string][]>,
+    tag?: string,
+  ): MemeResult {
     const templates = passed ? this.PASS : this.FAIL;
-    const captions = this.CAPTIONS[band];
+    // A clean tag → weight contextual captions 2:1 over generic; no tag → generic only.
+    const cleanTag = (tag ?? '').trim().slice(0, 24);
+    const ctx = cleanTag ? ctxBank[band].map(c => this.fill(c, cleanTag)) : [];
+    const captions = ctx.length ? [...ctx, ...ctx, ...this.CAPTIONS[band]] : this.CAPTIONS[band];
 
     // Try a handful of times to find a template+caption combo we haven't shown lately.
     let tmpl = this.pick(templates);
@@ -148,6 +242,10 @@ export class MemeService {
     this.remember(this.key(tmpl, top, bottom));
 
     return { url: this.buildUrl(tmpl, top, bottom), alt: `${top} — ${bottom}` };
+  }
+
+  private fill([top, bottom]: [string, string], tag: string): [string, string] {
+    return [top.replace(/\{x\}/g, tag), bottom.replace(/\{x\}/g, tag)];
   }
 
   // ── URL building ────────────────────────────────────────────────

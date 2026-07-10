@@ -1,0 +1,269 @@
+<section class="jm">
+
+  <!-- ════════ STAGE: INTRO — résumé on the left, JD on the right ════════ -->
+  @if (stage() === 'intro') {
+    <div class="stage jm-intro-stage">
+      <header class="jm-hero slide-bounce">
+        <span class="jm-badge">🧳 New arena</span>
+        <h1 class="jm-title">That job posting.<br><span class="grad">Does your résumé actually fit it?</span></h1>
+        <p class="jm-sub">
+          Paste the JD next to your résumé and get the recruiter's read <strong>before</strong> a recruiter gets it:
+          a match score, the skills you've proven, the gaps that block the screen —
+          and the exact edits to make for <em>this</em> application.
+        </p>
+        <div class="jm-tags">
+          <span class="jm-tag" style="animation-delay:.45s">🎯 Match score</span>
+          <span class="jm-tag" style="animation-delay:.55s">✅ Proven vs missing</span>
+          <span class="jm-tag" style="animation-delay:.65s">🤖 ATS keyword pass</span>
+          <span class="jm-tag" style="animation-delay:.75s">✂️ Tailoring plan</span>
+          <span class="jm-tag" style="animation-delay:.85s">😂 Meme verdict</span>
+        </div>
+      </header>
+
+      <div class="jm-inputs">
+        <!-- Résumé side -->
+        <div class="jm-col rise-in" style="animation-delay:.15s">
+          <span class="jm-col-tag">1 · Your résumé</span>
+          @if (resumeReady()) {
+            <div class="resume-loaded pop-in">
+              <span class="rl-icon">📄</span>
+              <div class="rl-meta">
+                <span class="rl-name">Résumé loaded</span>
+                <span class="rl-detail">{{ resumeSource() }} · {{ resumeText().length | number }} characters</span>
+              </div>
+              <button class="rl-change" (click)="clearResume()">change</button>
+            </div>
+          } @else {
+            <div class="dropzone" [class.over]="dragOver()" [class.busy]="fileBusy()"
+                 (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)"
+                 (click)="fileInput.click()" role="button" tabindex="0" aria-label="Upload your résumé"
+                 (keydown.enter)="fileInput.click()">
+              <input #fileInput type="file" accept=".pdf,.txt,.md,application/pdf,text/plain" hidden
+                     (change)="onFilePicked($event)" />
+              @if (fileBusy()) {
+                <div class="dz-icon spin-slow">⏳</div>
+                <p class="dz-main">Reading your file…</p>
+              } @else {
+                <div class="dz-icon float">📄</div>
+                <p class="dz-main">Drop your résumé here</p>
+                <p class="dz-hint">PDF or text · read <strong>in your browser</strong>, the file never leaves it</p>
+              }
+            </div>
+
+            <button class="paste-toggle" (click)="pasteMode.set(!pasteMode())">
+              {{ pasteMode() ? '▲ hide paste box' : '…or paste the text instead' }}
+            </button>
+            @if (pasteMode()) {
+              <div class="paste-box pop-in">
+                <textarea class="paste-area" rows="6" [ngModel]="pasteText()" (ngModelChange)="pasteText.set($event)"
+                          placeholder="Paste your résumé text here — bullets, numbers, buzzwords and all."></textarea>
+                <button class="mini-btn" [disabled]="pasteText().trim().length < 150" (click)="usePaste()">
+                  Use this résumé →
+                </button>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- JD side -->
+        <div class="jm-col rise-in" style="animation-delay:.3s">
+          <span class="jm-col-tag">2 · The job description</span>
+          <textarea class="jd-area" rows="11" [ngModel]="jdText()" (ngModelChange)="jdText.set($event)"
+                    placeholder="Paste the full posting — responsibilities, requirements, nice-to-haves. The boilerplate is fine, we skip it."></textarea>
+          <span class="jd-count" [class.ok]="jdReady()">
+            {{ jdReady() ? '✓ looks like a real posting' : jdText().trim().length + ' / ' + MIN_JD_CHARS + ' characters minimum' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="jm-go rise-in" style="animation-delay:.4s">
+        <button class="cta-btn bounce" [disabled]="!canMatch()" (click)="runMatch()">
+          <span>Run the match</span> <span class="cta-arrow">→</span>
+        </button>
+        @if (introError()) {
+          <p class="intro-err shake">😵 {{ introError() }}</p>
+        }
+        <p class="privacy-note">
+          🔒 Both texts are analyzed once, cached briefly for speed, never logged and never used for anything else.
+        </p>
+      </div>
+
+      <!-- How the screen works — fills the lower fold with the flow -->
+      <div class="jm-steps">
+        <div class="jm-step rise-in" style="animation-delay:.55s">
+          <span class="jm-step-num">1</span>
+          <span class="jm-step-icon">📄</span>
+          <span class="jm-step-title">Two documents in</span>
+          <span class="jm-step-blurb">Your résumé + the posting — parsed right in your browser.</span>
+        </div>
+        <span class="jm-step-arrow rise-in" style="animation-delay:.65s">→</span>
+        <div class="jm-step rise-in" style="animation-delay:.7s">
+          <span class="jm-step-num">2</span>
+          <span class="jm-step-icon">🕵️</span>
+          <span class="jm-step-title">The recruiter read</span>
+          <span class="jm-step-blurb">Every JD requirement hunted down in your résumé, ATS-style.</span>
+        </div>
+        <span class="jm-step-arrow rise-in" style="animation-delay:.8s">→</span>
+        <div class="jm-step rise-in" style="animation-delay:.85s">
+          <span class="jm-step-num">3</span>
+          <span class="jm-step-icon">🎯</span>
+          <span class="jm-step-title">Proven / close / missing</span>
+          <span class="jm-step-blurb">Score + every skill bucketed, with the evidence quoted back.</span>
+        </div>
+        <span class="jm-step-arrow rise-in" style="animation-delay:.95s">→</span>
+        <div class="jm-step rise-in" style="animation-delay:1s">
+          <span class="jm-step-num">4</span>
+          <span class="jm-step-icon">✂️</span>
+          <span class="jm-step-title">Tailor & apply</span>
+          <span class="jm-step-blurb">Concrete edits for this exact application — then defend it live.</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: MATCHING — the two documents face off ════════ -->
+  @if (stage() === 'matching') {
+    <div class="stage stage-center">
+      <div class="vs-wrap pop-in">
+        <div class="vs-doc float">📄</div>
+        <div class="vs-badge">⚡</div>
+        <div class="vs-doc float delay">🧳</div>
+      </div>
+      <p class="match-status">{{ matchStatus() }}</p>
+      <div class="scan-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: RESULTS — the recruiter's read ════════ -->
+  @if (stage() === 'results' && report(); as r) {
+    <div class="stage">
+      <header class="stage-head pop-in">
+        <span class="step-pill">Match report</span>
+        <h2>{{ r.role || 'This role' }}{{ r.company ? ' @ ' + r.company : '' }}</h2>
+      </header>
+
+      <!-- Score ring + verdict -->
+      <div class="score-row pop-in">
+        <div class="score-ring" [style.--ring-color]="verdictMeta().color">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-track" cx="60" cy="60" r="52" />
+            <circle class="ring-fill" cx="60" cy="60" r="52"
+                    [style.stroke-dashoffset]="ringOffset()" />
+          </svg>
+          <div class="ring-label">
+            <span class="ring-num">{{ displayScore() }}</span>
+            <span class="ring-pct">/ 100</span>
+          </div>
+        </div>
+        <div class="score-verdict">
+          <span class="verdict-chip stamp" [style.color]="verdictMeta().color" [style.border-color]="verdictMeta().color">
+            {{ verdictMeta().icon }} {{ verdictMeta().label }}
+          </span>
+          <p class="verdict-blurb">{{ verdictMeta().blurb }}</p>
+          @if (r.summary) {
+            <p class="verdict-summary">“{{ r.summary }}”</p>
+          }
+        </div>
+      </div>
+
+      <!-- The three buckets -->
+      <div class="buckets">
+        <div class="bucket rise-in" style="animation-delay:.1s">
+          <h3 class="bucket-title ok">✅ You've proven it <span class="bucket-count">{{ r.matched.length }}</span></h3>
+          @for (m of r.matched; track m.skill; let i = $index) {
+            <button class="bucket-row chip-in" [style.animation-delay.ms]="200 + i * 70"
+                    (click)="toggleTip('m:' + m.skill)" [class.open]="isTipOpen('m:' + m.skill)">
+              <span class="row-skill">{{ m.skill }}</span>
+              @if (m.evidence) { <span class="row-caret">{{ isTipOpen('m:' + m.skill) ? '▴' : '▾' }}</span> }
+              @if (m.evidence && isTipOpen('m:' + m.skill)) {
+                <span class="row-detail">📄 “{{ m.evidence }}”</span>
+              }
+            </button>
+          } @empty {
+            <p class="bucket-empty">Nothing matched — that's the whole story here. 😬</p>
+          }
+        </div>
+
+        <div class="bucket rise-in" style="animation-delay:.2s">
+          <h3 class="bucket-title warn">😬 Close, but not it <span class="bucket-count">{{ r.partial.length }}</span></h3>
+          @for (p of r.partial; track p.skill; let i = $index) {
+            <button class="bucket-row chip-in" [style.animation-delay.ms]="300 + i * 70"
+                    (click)="toggleTip('p:' + p.skill)" [class.open]="isTipOpen('p:' + p.skill)">
+              <span class="row-skill">{{ p.skill }}</span>
+              @if (p.note) { <span class="row-caret">{{ isTipOpen('p:' + p.skill) ? '▴' : '▾' }}</span> }
+              @if (p.note && isTipOpen('p:' + p.skill)) {
+                <span class="row-detail">↔️ {{ p.note }}</span>
+              }
+            </button>
+          } @empty {
+            <p class="bucket-empty">No near-misses — it's either there or it isn't.</p>
+          }
+        </div>
+
+        <div class="bucket rise-in" style="animation-delay:.3s">
+          <h3 class="bucket-title bad">❌ The JD wants it, you don't show it <span class="bucket-count">{{ r.missing.length }}</span></h3>
+          @for (g of mustGaps(); track g.skill; let i = $index) {
+            <button class="bucket-row chip-in" [style.animation-delay.ms]="400 + i * 70"
+                    (click)="toggleTip('g:' + g.skill)" [class.open]="isTipOpen('g:' + g.skill)">
+              <span class="row-skill">{{ g.skill }} <span class="gap-tag must">must-have</span></span>
+              @if (g.tip) { <span class="row-caret">{{ isTipOpen('g:' + g.skill) ? '▴' : '▾' }}</span> }
+              @if (g.tip && isTipOpen('g:' + g.skill)) {
+                <span class="row-detail">💡 {{ g.tip }}</span>
+              }
+            </button>
+          }
+          @for (g of niceGaps(); track g.skill; let i = $index) {
+            <button class="bucket-row chip-in" [style.animation-delay.ms]="450 + (mustGaps().length + i) * 70"
+                    (click)="toggleTip('g:' + g.skill)" [class.open]="isTipOpen('g:' + g.skill)">
+              <span class="row-skill">{{ g.skill }} <span class="gap-tag nice">nice-to-have</span></span>
+              @if (g.tip) { <span class="row-caret">{{ isTipOpen('g:' + g.skill) ? '▴' : '▾' }}</span> }
+              @if (g.tip && isTipOpen('g:' + g.skill)) {
+                <span class="row-detail">💡 {{ g.tip }}</span>
+              }
+            </button>
+          }
+          @if (!r.missing.length) {
+            <p class="bucket-empty">Zero gaps. Recruiters dream about this. ✨</p>
+          }
+        </div>
+      </div>
+
+      <!-- Extras + tailoring plan -->
+      @if (r.extras.length) {
+        <div class="extras rise-in" style="animation-delay:.35s">
+          <span class="extras-label">🃏 Not asked for, still impressive:</span>
+          @for (x of r.extras; track x; let i = $index) {
+            <span class="extra-chip chip-in" [style.animation-delay.ms]="500 + i * 80">{{ x }}</span>
+          }
+        </div>
+      }
+
+      @if (r.suggestions.length) {
+        <div class="plan rise-in" style="animation-delay:.4s">
+          <h3 class="plan-title">✂️ Tailor it before you hit apply</h3>
+          <ol class="plan-list">
+            @for (s of r.suggestions; track s; let i = $index) {
+              <li class="rise-in" [style.animation-delay.ms]="550 + i * 110">{{ s }}</li>
+            }
+          </ol>
+        </div>
+      }
+
+      <!-- Meme verdict — the recruiter's real face -->
+      @if (meme() && !memeFailed()) {
+        <div class="meme-wrap pop-in" style="animation-delay:.45s">
+          <img class="meme-img" [src]="meme()!.url" [alt]="meme()!.alt" (error)="onMemeError()" />
+        </div>
+      }
+
+      <!-- Next moves -->
+      <div class="next-row rise-in" style="animation-delay:.5s">
+        <a routerLink="/resume-interview" class="cta-btn">
+          <span>🎤 Now defend this résumé live</span> <span class="cta-arrow">→</span>
+        </a>
+        <button class="ghost-btn" (click)="tryAnotherJd()">🧳 Same résumé, another JD</button>
+        <button class="ghost-btn" (click)="restart()">↺ Start over</button>
+      </div>
+    </div>
+  }
+</section>

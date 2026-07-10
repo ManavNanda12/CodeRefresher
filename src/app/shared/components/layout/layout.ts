@@ -78,6 +78,8 @@ export class LayoutComponent {
       items: [
         { path: '/resume-interview', label: 'Résumé Interview', icon: '📄', badge: 'NEW',
           desc: 'Upload your résumé — defend what it claims' },
+        { path: '/jd-match', label: 'Résumé × JD Match', icon: '🧳', badge: 'NEW',
+          desc: 'Score your résumé against a job posting' },
         { path: '/interview', label: 'Mock Interview', icon: '🎙️',
           desc: 'Pick your stacks, get grilled at your level' },
       ],

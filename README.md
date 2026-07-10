@@ -20,6 +20,16 @@ Drop a PDF (parsed **in your browser** via pdf.js — the file never leaves it) 
 
 Token-lean by design: extraction is **cached in KV** (hashed, 24h TTL — résumés are PII and are never logged), questions are one call, grading is one batched call, and the between-question reactions are local theater — zero extra LLM cost.
 
+### 🧳 Résumé × JD Match — pass the screen before a recruiter runs it
+Paste a **job description** next to your résumé (same in-browser PDF parsing) and one call returns the recruiter's read:
+
+- **Match score (0–100)** on an animated ring + a stamped verdict (**Strong / Good / Partial / Long shot**) and a 2–3 sentence honest summary — would this résumé pass the screen, and what decides it.
+- **Every JD requirement bucketed**: ✅ **proven** (with the résumé line quoted as evidence), 😬 **close** (adjacent/transferable, with what you have instead), ❌ **missing** (split **must-have vs nice-to-have** — because only one of those blocks a screen — each with a tip to close or reframe the gap).
+- **🃏 Extras** the JD never asked for (your differentiators) and a **✂️ tailoring checklist** of concrete edits for *this* application — "mirror the JD's exact term", "quantify that bullet" — never generic advice.
+- **😂 Meme verdict** that names the exact skill that carried you (or blocked you), then a one-tap **"same résumé, another JD"** replay and a handoff into the Résumé Interview to defend it live.
+
+Scoring is must-have-weighted, results are **KV-cached on a hash of both texts** (24h TTL, retries are free), and both documents are fenced as untrusted data against prompt injection.
+
 ### 📚 Structured Q&A ("Arenas")
 Curated interview questions for **Angular**, **.NET / ASP.NET Core**, **SQL**, **React**, **Next.js**, and **NestJS** (100+ Q&A each), split by experience tier (0–1 / 1–2 / 2–3 / 4+ years). Every question ships with a detailed answer, a syntax-highlighted **code example**, and a plain-English **analogy** so concepts actually stick. Each card is a **challenge card** — difficulty tier, XP value, and a **"Master ✓"** toggle.
 
@@ -115,6 +125,7 @@ Browser (Angular SSR)
                 ├─ /api/evaluate              → AI grades a Test Me answer
                 ├─ /api/resume-extract        → résumé text → typed claims + skills (KV-cached, 24h TTL)
                 ├─ /api/resume-interview-questions → claims + self-rated skills → targeted questions
+                ├─ /api/resume-jd-match       → résumé + JD → match score, buckets, tailoring plan (KV-cached)
                 ├─ /api/interview-questions   → generate fresh interview questions (per stack)
                 ├─ /api/interview-grade       → grade a whole round in one call (+ claim substantiation)
                 ├─ /api/rag-ingest|query|ask  → Ask My Notes (embed → Vectorize → LLaMA)
@@ -147,8 +158,8 @@ src/app/
                          · tech-page (arena) · onboarding-modal · game-events
                          (level-up crate + toasts)
   pages/                 home · angular · dotnet · sql · react · nextjs · nestjs
-                         · test-me · interview · resume-interview · dashboard
-                         · leaderboard · ask-notes
+                         · test-me · interview · resume-interview · resume-jd-match
+                         · dashboard · leaderboard · ask-notes
 public/data/             angular.json · dotnet.json · sql.json · react.json
                          · nextjs.json · nestjs.json   (Q&A content)
 worker/                  Worker endpoint reference files + KV/EMAIL setup docs
@@ -199,7 +210,7 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
 - [x] **Résumé Interview** — claim extraction, chat interview, substantiation grading (Backed/Shaky/Busted)
   - [x] Skills round — self-rated skills → calibrated questions + "you said vs you showed" verdict
   - [x] Voice answers (Web Speech) with delivery feedback
-  - [ ] Résumé × JD gap analysis + role-specific readiness (Phase 2)
+  - [x] **Résumé × JD Match** — match score, proven/close/missing buckets, tailoring plan, meme verdict
 - [ ] Further arenas (Python, AWS, Docker) & deeper question banks
 - [ ] Spaced repetition for mastered questions
 

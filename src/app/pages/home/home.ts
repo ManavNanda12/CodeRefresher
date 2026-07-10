@@ -197,6 +197,7 @@ export class HomeComponent {
 
   readonly features: Feature[] = [
     { icon: '📄', title: 'Résumé Interview', desc: 'The AI reads your résumé, attacks your claims, and grades your defense.', tag: 'Flagship' },
+    { icon: '🧳', title: 'Résumé × JD Match', desc: 'Paste a job post — get a match score, proven vs missing skills, and tailoring edits.', tag: 'New' },
     { icon: '🎤', title: 'AI Mock Interview', desc: 'Pick stacks, rate yourself, get grilled — code editor, XP, meme verdict.', tag: 'Practice' },
     { icon: '🧪', title: 'AI Test Me', desc: 'Answer from memory; every answer scored 0–10 with what you missed.', tag: 'Practice' },
     { icon: '💬', title: 'Follow-up Probing', desc: 'Strong answers earn a deeper “ok, but why?” — like the real room.', tag: 'Practice' },

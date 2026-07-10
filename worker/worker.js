@@ -24,6 +24,7 @@ import { handleRagIngest, handleRagQuery, handleRagAsk } from "./rag-demo.js";
 import { handleShareCreate, handleSharePage, handleShareImage, handleShareImageGet } from "./share.js";
 import { resumeExtractHandler } from "./resume-extract.js";
 import { resumeQuestionsHandler } from "./resume-questions.js";
+import { resumeJdMatchHandler } from "./resume-jd-match.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
 // ── Allowed browser origins ────────────────────────────────
@@ -127,6 +128,14 @@ export default {
     if (p === "/api/resume-interview-questions" && method === "POST") {
       if (await rateLimited(request, env, "resume", 30)) return withCors(request, tooMany());
       return withCors(request, await resumeQuestionsHandler(request, env));
+    }
+
+    // ── Résumé × JD Match (one 70B call per pair, cached in KV on a hash of
+    //    both texts — retrying the same pair is free, so 20/hr only throttles
+    //    genuinely new JDs, which no human pastes 20 of in an hour).
+    if (p === "/api/resume-jd-match" && method === "POST") {
+      if (await rateLimited(request, env, "jdmatch", 20)) return withCors(request, tooMany());
+      return withCors(request, await resumeJdMatchHandler(request, env));
     }
 
     // ── /api/embed-demo (RAG Step 1 — learn embeddings) ──

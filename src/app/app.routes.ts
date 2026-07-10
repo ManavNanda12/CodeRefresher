@@ -45,6 +45,10 @@ export const routes: Routes = [
     canDeactivate: [CanDeactivateGuard]
   },
   {
+    path: 'jd-match',
+    loadComponent: () => import('./pages/resume-jd-match/resume-jd-match').then(m => m.ResumeJdMatchComponent)
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
   },

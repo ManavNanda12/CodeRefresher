@@ -792,9 +792,25 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
 
     this.roast.set(this.pickRoast(this.overall()));
     this.memeFailed.set(false);
-    this.meme.set(this.memeSvc.forScore(this.overall()));
+    this.meme.set(this.memeSvc.forScore(this.overall(), this.memeTag()));
 
     this.later(() => this.stage.set('results'), 900);
+  }
+
+  /**
+   * The skill/tech this round hinged on — the lowest scorer when failing (the
+   * wound), the highest when passing (the flex) — so the meme caption names
+   * something the user actually just lived through.
+   */
+  private memeTag(): string {
+    const qs = this.questions();
+    const res = this.results();
+    if (!qs.length || !res.length) return '';
+    const score = (i: number) => res[i]?.score ?? 0;
+    const pick = qs.reduce((best, _, i) =>
+      (this.passed() ? score(i) > score(best) : score(i) < score(best)) ? i : best, 0);
+    const q = qs[pick];
+    return q.skill || this.claimFor(q.claimId)?.tech[0] || q.topic || '';
   }
 
   private pickRoast(score: number): string {
