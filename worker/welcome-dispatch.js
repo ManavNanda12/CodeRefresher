@@ -18,9 +18,35 @@
 
 const DEFAULT_REPO = "ManavNanda12/CodeRefresher";
 
+// Hard ceiling on welcome emails triggered per UTC day, across ALL callers/IPs.
+// The per-IP register limit caps a single source; this bounds the worst case
+// under distributed / rotated-IP abuse so the app can never blast more than this
+// many unsolicited emails from our SMTP identity in a day. Legitimate sign-up
+// volume is far below it; override with env.WELCOME_DAILY_CAP if needed.
+const DEFAULT_WELCOME_DAILY_CAP = 200;
+
+/** Reserve a slot in today's welcome-email budget. Fail-soft: allows if no KV. */
+async function withinDailyWelcomeBudget(env) {
+  if (!env.PROGRESS_KV) return true;
+  const cap = Number(env.WELCOME_DAILY_CAP) || DEFAULT_WELCOME_DAILY_CAP;
+  const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
+  const key = `welcome:count:${day}`;
+  const used = parseInt(await env.PROGRESS_KV.get(key)) || 0;
+  if (used >= cap) return false;
+  // 2-day TTL so the counter self-expires without a cleanup job.
+  await env.PROGRESS_KV.put(key, String(used + 1), { expirationTtl: 172800 });
+  return true;
+}
+
 export async function dispatchWelcomeEmail(env, userId) {
   const token = env.GITHUB_DISPATCH_TOKEN;
   if (!token) return false; // feature not configured yet — silently skip
+
+  // Abuse cap: never exceed the daily welcome-email budget, whatever the source.
+  if (!(await withinDailyWelcomeBudget(env))) {
+    console.error("welcome dispatch skipped: daily welcome-email cap reached");
+    return false;
+  }
 
   const repo = env.GITHUB_REPO || DEFAULT_REPO;
   try {

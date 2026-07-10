@@ -23,11 +23,6 @@ function alias(userId) {
   const h = hashNum(String(userId));
   return `${ADJ[h % ADJ.length]} ${NOUN[(h >> 5) % NOUN.length]}`;
 }
-/** Public display name: the part of the email before "@", falling back to an alias. */
-function displayName(email, userId) {
-  if (email && email.includes("@")) return email.split("@")[0];
-  return alias(userId);
-}
 function shortId(userId) {
   return String(userId).replace(/-/g, "").slice(0, 12);
 }
@@ -69,7 +64,9 @@ export async function updateLeaderboard(env, userId, opts = {}) {
   if (xp === 0 && rounds === 0 && best === 0) return;
 
   const id = shortId(userId);
-  const name = user.name || displayName(user.email, userId);
+  // Public board: use the user's chosen name, else a generated alias. Never derive
+  // the name from their email (leaking the local-part deanonymizes them).
+  const name = user.name?.trim() ? user.name : alias(userId);
   const level = levelFromXp(xp);
   const base = { id, name, level };
 

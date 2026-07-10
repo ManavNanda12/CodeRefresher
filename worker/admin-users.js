@@ -9,7 +9,7 @@
 //     return handleAdminUsers(request, env);
 //   }
 
-import { safeEqual } from "./security.js";
+import { safeEqual, randomToken } from "./security.js";
 
 export async function handleAdminUsers(request, env) {
   const auth = request.headers.get("Authorization") || "";
@@ -25,10 +25,20 @@ export async function handleAdminUsers(request, env) {
     for (const key of list.keys) {
       const rec = await env.PROGRESS_KV.get(key.name, "json");
       if (!rec) continue;
+
+      // Self-heal: backfill a stored random unsubscribe token for any account
+      // that predates it, so the outreach link this export feeds never has to
+      // fall back to the forgeable derivable code.
+      if (!rec.unsubToken) {
+        rec.unsubToken = randomToken();
+        await env.PROGRESS_KV.put(key.name, JSON.stringify(rec));
+      }
+
       users.push({
         userId: rec.userId || key.name.slice("user:".length),
         email: rec.email || "",
         name: rec.name || "",
+        unsubToken: rec.unsubToken,
         unsubscribed: !!rec.unsubscribed,
         // Newsletter opt-in. Accounts created before the checkbox existed have no
         // flag — treat them as opted in (same consent basis as the weekly digest).

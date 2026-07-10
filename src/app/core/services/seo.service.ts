@@ -39,9 +39,15 @@ export class SeoService {
     if (config.keywords) {
       this.meta.updateTag({ name: 'keywords', content: config.keywords });
     }
+    // Indexable pages advertise full-size image/snippet previews so the Q&A pages
+    // can win rich results; utility pages stay out of the index. (This tag is set
+    // here on every route — the static index.html value is overwritten at runtime,
+    // so the preview directives must live here to take effect.)
     this.meta.updateTag({
       name: 'robots',
-      content: config.noindex ? 'noindex, follow' : 'index, follow',
+      content: config.noindex
+        ? 'noindex, follow'
+        : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     });
 
     // Open Graph

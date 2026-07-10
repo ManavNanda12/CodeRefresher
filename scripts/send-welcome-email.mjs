@@ -86,9 +86,11 @@ async function fetchUserWithRetry(userId, attempts = 5, delayMs = 20_000) {
 const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function unsubscribeUrl(userId) {
-  const code = `cr_${String(userId).replace(/-/g, "").slice(0, 8)}`;
-  return `${WORKER_BASE}/api/email/unsubscribe?u=${encodeURIComponent(userId)}&c=${code}`;
+function unsubscribeUrl(user) {
+  // Prefer the stored random token; fall back to the legacy derivable code only
+  // for records that predate it (kept in sync with the Worker's validation).
+  const code = user.unsubToken || `cr_${String(user.userId).replace(/-/g, "").slice(0, 8)}`;
+  return `${WORKER_BASE}/api/email/unsubscribe?u=${encodeURIComponent(user.userId)}&c=${encodeURIComponent(code)}`;
 }
 
 async function renderEmail(user) {
@@ -101,7 +103,7 @@ async function renderEmail(user) {
   const heroTitle = name
     ? `${esc(name)}, your prep arena is&nbsp;open.`
     : `Your prep arena is&nbsp;open.`;
-  const unsub = unsubscribeUrl(user.userId);
+  const unsub = unsubscribeUrl(user);
 
   const html = template
     .replaceAll("{{HERO_TITLE}}", heroTitle)

@@ -130,18 +130,26 @@ export default {
     }
 
     // ── /api/embed-demo (RAG Step 1 — learn embeddings) ──
+    // These run Workers AI embeddings (+ an LLM call on rag-ask) and write to
+    // Vectorize, so they're metered spend — rate-limit them like the other AI
+    // endpoints. (Previously unthrottled: a scripted caller could run up
+    // unbounded embedding/LLM/storage cost.)
     if (p === "/api/embed-demo" && method === "POST") {
+      if (await rateLimited(request, env, "rag", 40)) return withCors(request, tooMany());
       return withCors(request, await handleEmbedDemo(request, env));
     }
 
     // ── RAG Step 2 — store + search vectors in Vectorize ──
     if (p === "/api/rag-ingest" && method === "POST") {
+      if (await rateLimited(request, env, "rag", 40)) return withCors(request, tooMany());
       return withCors(request, await handleRagIngest(request, env));
     }
     if (p === "/api/rag-query" && method === "POST") {
+      if (await rateLimited(request, env, "rag", 40)) return withCors(request, tooMany());
       return withCors(request, await handleRagQuery(request, env));
     }
     if (p === "/api/rag-ask" && method === "POST") {
+      if (await rateLimited(request, env, "rag", 40)) return withCors(request, tooMany());
       return withCors(request, await handleRagAsk(request, env));
     }
 

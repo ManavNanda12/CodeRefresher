@@ -136,10 +136,12 @@ const rich = (s) =>
 
 const plain = (s) => String(s).replace(/\*\*(.+?)\*\*/g, "$1");
 
-function unsubscribeUrl(userId, newsletterOnly) {
-  const code = `cr_${String(userId).replace(/-/g, "").slice(0, 8)}`;
+function unsubscribeUrl(userId, newsletterOnly, token) {
+  // Prefer the stored random token; fall back to the legacy derivable code only
+  // for records that predate it (kept in sync with the Worker's validation).
+  const code = token || `cr_${String(userId).replace(/-/g, "").slice(0, 8)}`;
   const t = newsletterOnly ? "&t=newsletter" : "";
-  return `${WORKER_BASE}/api/email/unsubscribe?u=${encodeURIComponent(userId)}&c=${code}${t}`;
+  return `${WORKER_BASE}/api/email/unsubscribe?u=${encodeURIComponent(userId)}&c=${encodeURIComponent(code)}${t}`;
 }
 
 /** A full-width row inside the email card. */
@@ -360,7 +362,7 @@ async function main() {
 
   let sent = 0, failed = 0;
   for (const user of recipients) {
-    const mail = personalize(rendered, user.userId);
+    const mail = personalize(rendered, user.userId, user.unsubToken);
     if (dryRun) {
       console.log(`[dry-run] → ${user.email}`);
       continue;
@@ -379,9 +381,9 @@ async function main() {
   if (failed > 0 && sent === 0) process.exit(1);
 }
 
-function personalize(rendered, userId) {
-  const news = unsubscribeUrl(userId, true);
-  const all = unsubscribeUrl(userId, false);
+function personalize(rendered, userId, unsubToken) {
+  const news = unsubscribeUrl(userId, true, unsubToken);
+  const all = unsubscribeUrl(userId, false, unsubToken);
   return {
     subject: rendered.subject,
     html: rendered.html.replaceAll("{{UNSUB_NEWS_URL}}", news).replaceAll("{{UNSUB_ALL_URL}}", all),

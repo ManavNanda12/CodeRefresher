@@ -58,14 +58,16 @@ function cosineSimilarity(a, b) {
 export async function handleEmbedDemo(request, env) {
   try {
     const { question } = await request.json();
-    if (!question) {
+    if (typeof question !== "string" || !question.trim()) {
       return Response.json({ error: "Send { question: '...' }" }, { status: 400 });
     }
+    // Cap length before it reaches the embedding model.
+    const q = question.slice(0, 2000);
 
     // Embed the question AND all 3 sentences in ONE call (cheaper + faster).
     // Workers AI returns { data: [ [768 numbers], [768 numbers], ... ] }
     // — one vector per input text, in order.
-    const texts = [question, ...SENTENCES];
+    const texts = [q, ...SENTENCES];
     const result = await env.AI.run(EMBED_MODEL, { text: texts });
     const vectors = result.data;
 
@@ -82,7 +84,7 @@ export async function handleEmbedDemo(request, env) {
       .sort((a, b) => b.score - a.score);
 
     return Response.json({
-      question,
+      question: q,
       explanation:
         "Sorted by meaning-similarity (cosine). The top result is what RAG would feed to the LLM as context.",
       ranked,

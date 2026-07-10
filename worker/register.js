@@ -77,6 +77,12 @@ export async function handleUserRegister(request, env) {
     userData.tokenHash = await sha256Hex(newToken);
   }
 
+  // ── Unsubscribe token: a stored random secret for one-click email opt-out ──
+  // Replaces the old derivable `cr_<8hex>` code so an unsubscribe link can't be
+  // forged from a known userId. Never returned to the client — only the mail
+  // scripts read it (via the admin export) to build the link.
+  if (!userData.unsubToken) userData.unsubToken = randomToken();
+
   // ── Recovery code: mint a strong random one; retire any legacy derivable code ──
   let newRecoveryCode = null;
   const legacy = legacyRecoveryCodeFor(userId);

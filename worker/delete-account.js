@@ -21,12 +21,18 @@ export async function handleDeleteAccount(request, env) {
   if (rec.tokenHash) {
     const token = bearerToken(request);
     authorized = !!token && safeEqual(await sha256Hex(token), rec.tokenHash);
+  } else if (rec.recoveryCode) {
+    // Account has a real (high-entropy) recovery code — require exactly that.
+    // Do NOT also accept the derivable `cr_<8hex>` code: it's a public transform
+    // of the userId, so accepting it would let anyone who knows the UUID delete
+    // the account.
+    authorized = safeEqual(recoveryCode, rec.recoveryCode);
   } else {
-    // Legacy account (no token yet): accept its stored code or the derived legacy code.
+    // Truly legacy account that never minted a recovery code. The derivable code
+    // is the only credential it has; this path closes the moment the account's
+    // client re-registers (register.js mints a random recoveryCode then).
     const legacy = `cr_${userId.replace(/-/g, "").slice(0, 8)}`;
-    authorized =
-      (!!rec.recoveryCode && safeEqual(recoveryCode, rec.recoveryCode)) ||
-      safeEqual(recoveryCode, legacy);
+    authorized = safeEqual(recoveryCode, legacy);
   }
   if (!authorized) {
     return Response.json({ success: false, error: "Forbidden" }, { status: 403 });

@@ -97,8 +97,10 @@ function buildDigest(user) {
 }
 
 function unsubscribeUrl(user) {
-  const code = `cr_${String(user.userId).replace(/-/g, "").slice(0, 8)}`;
-  return `${WORKER_BASE}/api/email/unsubscribe?u=${encodeURIComponent(user.userId)}&c=${code}`;
+  // Prefer the stored random token; fall back to the legacy derivable code only
+  // for records that predate it (kept in sync with the Worker's validation).
+  const code = user.unsubToken || `cr_${String(user.userId).replace(/-/g, "").slice(0, 8)}`;
+  return `${WORKER_BASE}/api/email/unsubscribe?u=${encodeURIComponent(user.userId)}&c=${encodeURIComponent(code)}`;
 }
 
 function band(avg) {

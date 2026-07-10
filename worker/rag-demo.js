@@ -35,6 +35,23 @@ import { chat } from "./llm.js";
 
 const EMBED_MODEL = "@cf/baai/bge-base-en-v1.5";
 
+// ── Input caps ──────────────────────────────────────────────────────────
+// Bound every request BEFORE it reaches the paid embed/LLM/Vectorize calls so a
+// single crafted payload can't run up unbounded cost/storage.
+const MAX_NOTES = 100;         // notes embedded + upserted per ingest
+const MAX_NOTE_LEN = 2000;     // chars per note
+const MAX_QUESTION_LEN = 2000; // chars per query/ask
+
+/** Clean + clamp an incoming notes array. Returns [] if nothing usable. */
+function sanitizeNotes(notes) {
+  if (!Array.isArray(notes)) return [];
+  return notes
+    .filter((n) => typeof n === "string")
+    .map((n) => n.slice(0, MAX_NOTE_LEN).trim())
+    .filter((n) => n.length > 0)
+    .slice(0, MAX_NOTES);
+}
+
 // Embed an array of texts → array of 768-number vectors (same as Step 1).
 async function embed(env, texts) {
   const result = await env.AI.run(EMBED_MODEL, { text: texts });
@@ -65,20 +82,21 @@ function nsOf(userId) {
 export async function handleRagIngest(request, env) {
   try {
     const { notes, userId } = await request.json();
-    if (!Array.isArray(notes) || notes.length === 0) {
+    const clean = sanitizeNotes(notes);
+    if (clean.length === 0) {
       return Response.json({ error: "Send { notes: ['...', '...'] }" }, { status: 400 });
     }
     const ns = nsOf(userId);
 
     // 1. Turn every note into a vector.
-    const vectors = await embed(env, notes);
+    const vectors = await embed(env, clean);
 
     // 2. Build Vectorize records. We store the original text in `metadata`
     //    so that when we retrieve a match later, we get the words back —
     //    a vector alone is just numbers; metadata carries the human text.
     //    `namespace` scopes the vector to this user.
     const records = await Promise.all(
-      notes.map(async (text, i) => {
+      clean.map(async (text, i) => {
         const rec = { id: await idFor(ns, text), values: vectors[i], metadata: { text } };
         if (ns) rec.namespace = ns;
         return rec;
@@ -120,13 +138,14 @@ const MIN_SCORE = 0.45;
 export async function handleRagAsk(request, env) {
   try {
     const { question, userId } = await request.json();
-    if (!question) {
+    if (typeof question !== "string" || !question.trim()) {
       return Response.json({ error: "Send { question: '...' }" }, { status: 400 });
     }
+    const q = question.slice(0, MAX_QUESTION_LEN);
     const ns = nsOf(userId);
 
     // ── R: retrieve (exactly what rag-query does), scoped to this user ──
-    const [questionVector] = await embed(env, [question]);
+    const [questionVector] = await embed(env, [q]);
     const queryOpts = { topK: 3, returnMetadata: "all" };
     if (ns) queryOpts.namespace = ns;
     const results = await env.VECTORIZE.query(questionVector, queryOpts);
@@ -151,7 +170,7 @@ export async function handleRagAsk(request, env) {
       "You are a study assistant. Answer the question using ONLY the provided notes. " +
       "If the notes do not cover it, say you don't have that information. " +
       "Be concise and practical.";
-    const userPrompt = `Notes:\n${context}\n\nQuestion: ${question}\n\nAnswer:`;
+    const userPrompt = `Notes:\n${context}\n\nQuestion: ${q}\n\nAnswer:`;
 
     // ── G: generate — via the shared multi-model engine (llm.js) ──
     // Grounded note-answering is mid-complexity, so we start on gemma2 and let
@@ -172,7 +191,7 @@ export async function handleRagAsk(request, env) {
     // Return the answer AND the sources — so you can SEE it was grounded in
     // your notes, not invented. This "show your sources" pattern is how real
     // RAG apps build trust.
-    return Response.json({ question, answer, sources: notes });
+    return Response.json({ question: q, answer, sources: notes });
   } catch (err) {
     return Response.json({ error: String(err) }, { status: 500 });
   }
@@ -182,13 +201,14 @@ export async function handleRagAsk(request, env) {
 export async function handleRagQuery(request, env) {
   try {
     const { question, userId } = await request.json();
-    if (!question) {
+    if (typeof question !== "string" || !question.trim()) {
       return Response.json({ error: "Send { question: '...' }" }, { status: 400 });
     }
+    const q = question.slice(0, MAX_QUESTION_LEN);
     const ns = nsOf(userId);
 
     // 1. Embed the question (one vector).
-    const [questionVector] = await embed(env, [question]);
+    const [questionVector] = await embed(env, [q]);
 
     // 2. Ask Vectorize for the 3 closest stored vectors. It runs the cosine
     //    comparison against EVERY stored note for us, and returns the winners
@@ -204,7 +224,7 @@ export async function handleRagQuery(request, env) {
     }));
 
     return Response.json({
-      question,
+      question: q,
       explanation: "Vectorize found these by cosine-closeness — same idea as Step 1, now from a database.",
       matches,
     });
