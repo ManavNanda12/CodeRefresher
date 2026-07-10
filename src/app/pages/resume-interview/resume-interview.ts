@@ -1,13 +1,15 @@
-import { Component, ElementRef, HostListener, OnDestroy, PLATFORM_ID, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, PLATFORM_ID, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CanComponentDeactivate } from '../../core/guards/can-deactivate-guard';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
+import { ArenaModeService } from '../../core/services/arena-mode.service';
 import { GameService } from '../../core/services/game.service';
 import { MemeService, MemeResult } from '../../core/services/meme.service';
 import { ProgressService, RoundRecord } from '../../core/services/progress.service';
 import { CodeEditorComponent, EditorLang } from '../../shared/components/code-editor/code-editor';
+import { ArenaEntryComponent } from '../../shared/components/arena-entry/arena-entry';
 import { QuestionKind } from '../../services/interview-service/interview.service';
 import {
   RatedSkill,
@@ -69,6 +71,15 @@ const TYPE_META: Record<string, { label: string; icon: string }> = {
   project: { label: 'Project', icon: '🏗️' },
   responsibility: { label: 'Soft', icon: '💤' },
 };
+
+/** Rotating lines on the arena-entry gate while the questions are generated. */
+const ENTRY_LINES = [
+  'The interviewer is re-reading your résumé…',
+  'Highlighting the boldest claims…',
+  'Arranging the exhibits on the desk…',
+  'Warming up the follow-up questions…',
+  'No pressure. Okay — some pressure…',
+];
 
 /** Rotating status lines while the laser scans the résumé. */
 const SCAN_STATUS = [
@@ -138,12 +149,13 @@ const ROASTS: Record<string, string[]> = {
 
 @Component({
   selector: 'app-resume-interview',
-  imports: [RouterLink, FormsModule, CodeEditorComponent],
+  imports: [RouterLink, FormsModule, CodeEditorComponent, ArenaEntryComponent],
   templateUrl: './resume-interview.html',
   styleUrl: './resume-interview.css',
 })
 export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactivate {
   private platformId = inject(PLATFORM_ID);
+  private arena = inject(ArenaModeService);
   private svc = inject(ResumeInterviewService);
   private memeSvc = inject(MemeService);
   private progress = inject(ProgressService);
@@ -196,6 +208,12 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
   private startedAt = 0;
   private lastReaction = -1;
 
+  // Arena-entry gate — covers the chat while the questions are generated.
+  readonly ENTRY_LINES = ENTRY_LINES;
+  entryVisible = signal(false);
+  entryClosing = signal(false);
+  private entryOpenedAt = 0;
+
   // Voice answers — Web Speech API (browser-native STT, zero server cost).
   speechSupported = signal(false);
   recording = signal(false);
@@ -220,6 +238,13 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
 
   constructor() {
     this.speechSupported.set(!!this.speechCtor());
+    // Arena mode while the trial is live: footer gone, page clamped to the
+    // viewport, the chat log owns its own scrolling.
+    effect(() => {
+      const s = this.stage();
+      if (s === 'interview' || s === 'deliberating') this.arena.enter();
+      else this.arena.exit();
+    });
     inject(SeoService).update({
       title: 'Résumé Interview — Can You Back Up Your Own CV?',
       description:
@@ -232,6 +257,7 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
     this.timers.forEach(t => clearTimeout(t));
     if (this.scanTimer) clearInterval(this.scanTimer);
     this.stopVoice();
+    this.arena.exit();
   }
 
   // ── Voice answers (Web Speech API — free, in-browser STT) ───
@@ -575,10 +601,12 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
     this.resetHints();
     this.stage.set('interview');
     this.typing.set(true);
+    this.openEntry();
 
     const rated = this.ratedSkills();
     const count = rated.length ? QUESTION_COUNT_SKILLS : QUESTION_COUNT;
     this.svc.generateQuestions(claims, count, rated, this.candidate()?.years ?? null).subscribe(qs => {
+      this.closeEntry();
       if (!qs.length) {
         this.typing.set(false);
         this.chatError.set(true);
@@ -716,10 +744,40 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
     this.hintConfirm.set(false);
   }
 
+  /**
+   * The entry gate stays up for a minimum beat (so it never flashes) and
+   * otherwise exactly as long as question generation takes — the loading
+   * wait IS the arena-entrance animation.
+   */
+  private openEntry(): void {
+    this.entryClosing.set(false);
+    this.entryVisible.set(true);
+    this.entryOpenedAt = this.now();
+  }
+
+  private closeEntry(): void {
+    if (!this.entryVisible()) return;
+    const wait = Math.max(0, 1900 - (this.now() - this.entryOpenedAt));
+    this.later(() => {
+      this.entryClosing.set(true);
+      this.later(() => this.entryVisible.set(false), 420);
+    }, wait);
+  }
+
   private pushMsg(m: ChatMsg): void {
+    // Own messages always stick to the bottom; incoming ones only when the
+    // user is already reading the newest — never yank them mid-scrollback.
+    const stick = m.from === 'user' || this.isNearBottom();
     this.typing.set(false);
     this.messages.update(list => [...list, m]);
-    this.scrollChat();
+    if (stick) this.scrollChat();
+  }
+
+  private isNearBottom(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return true;
+    const el = this.chatLog()?.nativeElement;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 160;
   }
 
   private scrollChat(): void {

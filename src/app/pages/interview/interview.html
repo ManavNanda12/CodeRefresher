@@ -108,14 +108,13 @@
     </div>
   }
 
-  <!-- ════════ STAGE: LOADING ════════ -->
+  <!-- ════════ STAGE: LOADING — the arena gate covers the wait ════════ -->
   @if (stage() === 'loading') {
-    <div class="stage stage-center">
-      @if (!loadError()) {
-        <div class="loader-pulse">🎧</div>
-        <p class="loader-text">Writing you fresh questions…</p>
-        <p class="loader-sub">The interviewer is preparing — no two interviews are the same.</p>
-      } @else {
+    @if (!loadError()) {
+      <app-arena-entry icon="🎤" [heading]="entryTitle()"
+                       [lines]="ENTRY_LINES" [closing]="entryClosing()" />
+    } @else {
+      <div class="stage stage-center">
         <div class="err-card pop-in">
           <div class="err-emoji">😵</div>
           <h3>Couldn't start the interview</h3>
@@ -123,8 +122,8 @@
           <button class="cta-btn" (click)="startInterview()">Try again</button>
           <button class="ghost-btn" (click)="restart()">Start over</button>
         </div>
-      }
-    </div>
+      </div>
+    }
   }
 
   <!-- ════════ STAGE: QUIZ ════════ -->

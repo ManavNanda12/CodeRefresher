@@ -7,6 +7,7 @@ import { GameEventsComponent } from '../game-events/game-events';
 import { DailyChallengeComponent } from '../daily-challenge/daily-challenge';
 import { GameService } from '../../../core/services/game.service';
 import { ThemeService } from '../../../core/services/theme.service';
+import { ArenaModeService } from '../../../core/services/arena-mode.service';
 
 interface NavItem {
   path: string;
@@ -41,6 +42,7 @@ export class LayoutComponent {
   private router = inject(Router);
   readonly game = inject(GameService);
   readonly theme = inject(ThemeService);
+  readonly arena = inject(ArenaModeService);
 
   sidebarOpen = signal(false);
   /** Which header dropdown is open (group id), or null. */

@@ -1,4 +1,4 @@
-<section class="ri">
+<section class="ri" [class.in-chat]="stage() === 'interview'">
 
   <!-- ════════ STAGE: INTRO — hero slides in from the left with a bounce ════════ -->
   @if (stage() === 'intro') {
@@ -192,6 +192,11 @@
 
   <!-- ════════ STAGE: INTERVIEW — the chat room ════════ -->
   @if (stage() === 'interview') {
+    @if (entryVisible()) {
+      <app-arena-entry icon="⚖️" heading="The Résumé Trial"
+                       style="--ae-a:#fbbf24; --ae-b:#c084fc"
+                       [lines]="ENTRY_LINES" [closing]="entryClosing()" />
+    }
     <div class="stage chat-stage">
       <header class="chat-top pop-in">
         <div class="plate">

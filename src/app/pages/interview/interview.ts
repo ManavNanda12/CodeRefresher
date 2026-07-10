@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, OnDestroy, computed, effect, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -6,11 +6,13 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { DataService } from '../../core/services/data.service';
 import { SeoService } from '../../core/services/seo.service';
+import { ArenaModeService } from '../../core/services/arena-mode.service';
 import { GameService } from '../../core/services/game.service';
 import { MemeService, MemeResult } from '../../core/services/meme.service';
 import { ProgressService, RoundRecord } from '../../core/services/progress.service';
 import { RefresherData } from '../../core/models/refresher-item.model';
 import { CodeEditorComponent, EditorLang } from '../../shared/components/code-editor/code-editor';
+import { ArenaEntryComponent } from '../../shared/components/arena-entry/arena-entry';
 import { InterviewService, GradeItem, GradeInput, GenQuestion, QuestionKind } from '../../services/interview-service/interview.service';
 
 type Stage = 'ready' | 'pick' | 'rate' | 'loading' | 'quiz' | 'grading' | 'results';
@@ -64,6 +66,15 @@ const PRESETS: Preset[] = [
   { label: 'The Full Gauntlet', hint: 'Angular + .NET + SQL', techs: ['angular', 'dotnet', 'sql'] },
 ];
 
+/** Rotating lines on the arena-entry gate while the questions are written. */
+const ENTRY_LINES = [
+  'Writing you fresh questions…',
+  'Calibrating to your self-ratings…',
+  'The interviewer is cracking their knuckles…',
+  'Setting up the hot seat…',
+  'No two interviews are the same…',
+];
+
 const LEVEL_ORDER = ['0-1', '1-2', '2-3', '4+'];
 const LEVEL_NAME: Record<string, string> = { '0-1': 'Rookie', '1-2': 'Builder', '2-3': 'Senior', '4+': 'Architect' };
 const PER_STACK = 5;      // questions per selected stack (2 stacks → 10, 3 → 15)
@@ -72,12 +83,13 @@ const PASS_MARK = 6;      // overall score (0-10) at or above this = "passed"
 
 @Component({
   selector: 'app-interview',
-  imports: [RouterLink, FormsModule, CodeEditorComponent],
+  imports: [RouterLink, FormsModule, CodeEditorComponent, ArenaEntryComponent],
   templateUrl: './interview.html',
   styleUrl: './interview.css',
 })
-export class InterviewComponent {
+export class InterviewComponent implements OnDestroy {
   private platformId = inject(PLATFORM_ID);
+  private arena = inject(ArenaModeService);
   private dataService = inject(DataService);
   private interview = inject(InterviewService);
   private memeSvc = inject(MemeService);
@@ -93,6 +105,15 @@ export class InterviewComponent {
   // ── State machine ───────────────────────────────────────────
   stage = signal<Stage>('ready');
   loadError = signal(false);
+
+  // Arena-entry gate — doubles as the loading screen while questions are written.
+  readonly ENTRY_LINES = ENTRY_LINES;
+  entryClosing = signal(false);
+  private entryOpenedAt = 0;
+  readonly entryTitle = computed(() => {
+    const names = this.selectedStacks().map(t => t.name).join(' + ');
+    return names ? `The ${names} Interview` : 'The Interview';
+  });
 
   /** Selected stacks (ordered), and a self-rating per stack id. */
   selectedStacks = signal<Tech[]>([]);
@@ -116,6 +137,13 @@ export class InterviewComponent {
   xpEarned = signal(0);
 
   constructor() {
+    // Arena mode while the round is live: footer gone, page clamped to the
+    // viewport, the quiz shell owns its own scrolling.
+    effect(() => {
+      const s = this.stage();
+      if (s === 'loading' || s === 'quiz' || s === 'grading') this.arena.enter();
+      else this.arena.exit();
+    });
     inject(SeoService).update({
       title: 'AI Mock Interview — Rate Yourself, Get Grilled',
       description:
@@ -267,6 +295,8 @@ export class InterviewComponent {
     const stacks = this.selectedStacks();
     if (!stacks.length) return;
     this.loadError.set(false);
+    this.entryClosing.set(false);
+    this.entryOpenedAt = this.now();
     this.stage.set('loading');
 
     forkJoin(
@@ -303,9 +333,26 @@ export class InterviewComponent {
         this.currentIndex.set(0);
         this.results.set([]);
         this.startedAt = this.now();
-        this.stage.set('quiz');
+        this.revealQuiz();
       });
     });
+  }
+
+  /**
+   * The entry gate stays up for a minimum beat (so a fast bank-fallback never
+   * flashes it) and otherwise exactly as long as generation takes — the
+   * loading wait IS the arena-entrance animation.
+   */
+  private revealQuiz(): void {
+    if (!isPlatformBrowser(this.platformId)) { this.stage.set('quiz'); return; }
+    const wait = Math.max(0, 1900 - (this.now() - this.entryOpenedAt));
+    setTimeout(() => {
+      this.entryClosing.set(true);
+      setTimeout(() => {
+        this.stage.set('quiz');
+        this.entryClosing.set(false);
+      }, 420);
+    }, wait);
   }
 
   /** Self-rating (1-10) → index into LEVEL_ORDER. */
@@ -471,6 +518,10 @@ export class InterviewComponent {
   }
 
   onMemeError(): void { this.memeFailed.set(true); }
+
+  ngOnDestroy(): void {
+    this.arena.exit();
+  }
 
   // ── Restart / replay ────────────────────────────────────────
   playAgain(): void {

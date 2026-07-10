@@ -422,6 +422,14 @@
   display: flex;
   flex-direction: column;
 }
+/* Arena mode: a round is live — clamp the page to the viewport so the active
+   stage owns scrolling (the footer is also removed from the DOM). `auto`
+   instead of `hidden` keeps tiny/landscape viewports usable as a fallback. */
+.page-content.arena-on {
+  height: 100dvh;
+  min-height: 0;
+  overflow-y: auto;
+}
 
 /* ─── Site Footer ─────────────────────────────────────────────────── */
 .site-footer {

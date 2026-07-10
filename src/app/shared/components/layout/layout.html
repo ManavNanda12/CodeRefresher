@@ -150,10 +150,11 @@
 </header>
 
 <!-- Page Content -->
-<main class="page-content">
+<main class="page-content" [class.arena-on]="arena.active()">
   <ng-content></ng-content>
 
-  <!-- ── Footer ──────────────────────────────── -->
+  <!-- ── Footer — hidden while a round is live (arena mode) ── -->
+  @if (!arena.active()) {
   <footer class="site-footer" role="contentinfo">
     <div class="footer-inner">
       <div class="footer-row">
@@ -235,4 +236,5 @@
       </div>
     </div>
   </footer>
+  }
 </main>

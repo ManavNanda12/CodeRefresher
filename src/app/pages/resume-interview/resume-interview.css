@@ -29,6 +29,9 @@
   color: var(--ri-text);
   overflow-x: hidden;
 }
+/* Live chat (arena mode): drop the big bottom padding so the shell lands
+   exactly on the viewport edge — 2rem top + chat height + 12px = 100dvh. */
+.ri.in-chat { padding-bottom: 12px; }
 
 .stage { animation: stageFade .35s ease both; }
 @keyframes stageFade { from { opacity: 0; } to { opacity: 1; } }
@@ -279,7 +282,10 @@
 .skill-msg { margin: .5rem 0 0; font-size: .8rem; color: #fbbf24; }
 
 /* ════════ INTERVIEW — chat room ════════ */
-.chat-stage { display: flex; flex-direction: column; height: calc(100vh - 170px); min-height: 480px; }
+/* Arena mode clamps the page to the viewport, so the shell fills exactly what's
+   left: 100dvh − header (64px) − .ri top padding (2rem) − a 12px bottom gap.
+   dvh (not vh) so mobile browser chrome never pushes the composer off-screen. */
+.chat-stage { display: flex; flex-direction: column; height: calc(100dvh - 108px); min-height: 380px; }
 .chat-top {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   padding: .8rem 1rem; border-radius: 16px 16px 0 0;
@@ -595,7 +601,7 @@
   .ri-step-arrow { display: none; }
   .skills-list { grid-template-columns: 1fr; }
   .msg { max-width: 94%; }
-  .chat-stage { height: calc(100vh - 140px); }
+  .chat-stage { height: calc(100dvh - 108px); }
   .chat-brand { display: none; }
 }
 

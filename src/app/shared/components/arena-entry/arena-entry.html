@@ -1,0 +1,16 @@
+<div class="ae-overlay" [class.ae-out]="closing()" role="status" aria-live="polite">
+  <div class="ae-core">
+    <div class="ae-icon-wrap">
+      <div class="ae-rings" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <span class="ae-icon">{{ icon() }}</span>
+    </div>
+    <span class="ae-kicker">Entering the arena</span>
+    <h2 class="ae-title">{{ heading() }}</h2>
+    @if (line()) {
+      <p class="ae-line">{{ line() }}</p>
+    }
+    <div class="ae-bar" aria-hidden="true"><span></span></div>
+  </div>
+</div>
