@@ -1,0 +1,48 @@
+name: Contact Email
+
+# Fired by the Cloudflare Worker (repository_dispatch) when a user submits the contact form
+# The payload carries ONLY the contactId — the script fetches email/name from the worker's secured admin endpoint.
+on:
+  repository_dispatch:
+    types: [contact-email]
+  workflow_dispatch:
+    inputs:
+      user_id:
+        description: "contactId to send the contact email to"
+        required: true
+      dry_run:
+        description: "Dry run — log the recipient, send nothing"
+        type: boolean
+        default: true
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      # CI-only dependency — not added to the app's package.json.
+      - run: npm install --no-save nodemailer@^6
+
+      - name: Send contact email
+        run: node scripts/send-contact-email.mjs
+        env:
+          WORKER_BASE: ${{ secrets.WORKER_BASE }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          # Optional — set EMAIL_PROVIDER=resend + RESEND_API_KEY to switch transport later.
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          USER_ID: ${{ github.event.client_payload.userId || inputs.user_id }}
+          # Worker-triggered runs send for real; manual runs default to dry-run.
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}

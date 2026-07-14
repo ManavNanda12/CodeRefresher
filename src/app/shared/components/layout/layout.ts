@@ -106,6 +106,7 @@ export class LayoutComponent {
   readonly mainItems: NavItem[] = [
     { path: '/dashboard',   label: 'Dashboard',   icon: '📊' },
     { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+    { path: '/contact',     label: 'Contact',     icon: '📬' },
   ];
 
   readonly homeItem: NavItem = { path: '/', label: 'Home', icon: '🏠', exact: true };

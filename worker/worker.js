@@ -26,6 +26,7 @@ import { resumeExtractHandler } from "./resume-extract.js";
 import { resumeQuestionsHandler } from "./resume-questions.js";
 import { resumeJdMatchHandler } from "./resume-jd-match.js";
 import { speakGradeHandler } from "./speak-grade.js";
+import { handleContact } from "./contact.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
 // ── Allowed browser origins ────────────────────────────────
@@ -230,6 +231,16 @@ export default {
     }
     if (p === "/api/email/unsubscribe" && method === "GET") {
       return withCors(request, await handleUnsubscribe(request, env));
+    }
+
+    // ── contact form ──
+    if (p === "/api/contact" && method === "POST") {
+      if (await rateLimited(request, env, "contact", 10)) return withCors(request, tooMany());
+      return withCors(request, await handleContact(request, env));
+    }
+
+    if (p === "/api/admin/contact" && method === "GET") {
+      return withCors(request, await getContact(request, env));
     }
 
     return new Response("Hello World!");
