@@ -1,0 +1,251 @@
+<section class="sp">
+
+  <!-- ════════ STAGE: PICK — choose a speaking prompt ════════ -->
+  @if (stage() === 'pick') {
+    <div class="stage">
+      <div class="sp-hero">
+        <span class="sp-badge">🎙️ New arena</span>
+        <h1 class="sp-title">You know the answer.<br><span class="grad">Can you SAY it?</span></h1>
+        <p class="sp-sub">
+          Pick a prompt, answer it <strong>out loud</strong>, and get coached:
+          grammar fixes, structure feedback, filler-word and pace stats, and
+          stronger ways to say what you meant. Speaking is a separate skill from
+          knowing — this is where you train it.
+        </p>
+        <p class="sp-privacy">🔒 Your voice is transcribed by your browser — audio never reaches our server.</p>
+      </div>
+
+      <div class="sp-filters" role="tablist" aria-label="Prompt category">
+        <button class="chip" [class.on]="filter() === 'all'" (click)="filter.set('all')">All</button>
+        <button class="chip" [class.on]="filter() === 'concept'" (click)="filter.set('concept')">💡 Concept</button>
+        <button class="chip" [class.on]="filter() === 'behavioral'" (click)="filter.set('behavioral')">⭐ Behavioral</button>
+        <button class="chip" [class.on]="filter() === 'workplace'" (click)="filter.set('workplace')">💬 Workplace</button>
+        <button class="chip surprise" (click)="surpriseMe()">🎲 Surprise me</button>
+      </div>
+
+      <div class="sp-grid">
+        @for (p of filtered(); track p.id) {
+          <button class="prompt-card" (click)="choose(p)">
+            <span class="pc-type">{{ TYPE_META[p.type].icon }} {{ TYPE_META[p.type].label }}</span>
+            <span class="pc-text">{{ p.prompt }}</span>
+            <span class="pc-time">~{{ p.targetSeconds }}s</span>
+          </button>
+        } @empty {
+          <p class="sp-empty">Couldn't load the prompts — check your connection and refresh.</p>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ════════ STAGE: READY — the prompt, tips, and the mic gate ════════ -->
+  @if (stage() === 'ready' && current(); as p) {
+    <div class="stage sp-ready">
+      <span class="pc-type big">{{ TYPE_META[p.type].icon }} {{ TYPE_META[p.type].label }} · ~{{ p.targetSeconds }}s</span>
+      <h2 class="sp-prompt">{{ p.prompt }}</h2>
+
+      @if (p.tips.length) {
+        <ul class="sp-tips">
+          @for (tip of p.tips; track tip) { <li>💡 {{ tip }}</li> }
+        </ul>
+      }
+
+      @if (countdown() > 0) {
+        <div class="sp-countdown" aria-live="assertive">{{ countdown() }}</div>
+        <p class="sp-count-hint">Take a breath…</p>
+      } @else {
+        <div class="sp-ready-btns">
+          @if (ttsSupported()) {
+            <button class="ghost-btn" (click)="hearPrompt()" [disabled]="ttsSpeaking()">
+              {{ ttsSpeaking() ? '🔊 Reading…' : '🔊 Hear the question' }}
+            </button>
+          }
+          @if (speech.supported()) {
+            <button class="cta-btn" (click)="startSpeaking()"><span>🎙️ Start speaking</span></button>
+          }
+          <button class="ghost-btn" (click)="startTyping()">⌨️ Type instead</button>
+        </div>
+        @if (!speech.supported()) {
+          <p class="sp-nostt">Your browser doesn't support voice input (try Chrome or Edge) — typing works everywhere.</p>
+        }
+        <button class="back-link" (click)="newPrompt()">← pick a different prompt</button>
+      }
+    </div>
+  }
+
+  <!-- ════════ STAGE: RECORDING — live mic + transcript ════════ -->
+  @if (stage() === 'recording' && current(); as p) {
+    <div class="stage sp-rec">
+      <p class="sp-rec-prompt">{{ p.prompt }}</p>
+
+      <div class="mic-circle" [class.live]="speech.recording()" aria-hidden="true">🎙️</div>
+      <div class="sp-timer" [class.over]="overTime()" aria-live="off">
+        {{ elapsed() }}s <span class="sp-target">/ ~{{ p.targetSeconds }}s</span>
+      </div>
+
+      <div class="sp-live-transcript" aria-live="polite">
+        @if (speech.finalText() || speech.interim()) {
+          {{ speech.finalText() }} <em class="interim">{{ speech.interim() }}</em>
+        } @else {
+          <span class="placeholder">Start talking — your words appear here…</span>
+        }
+      </div>
+
+      @if (speech.error()) {
+        <p class="voice-err">🎙️ {{ speech.error() }}</p>
+        <button class="ghost-btn" (click)="startTyping()">⌨️ Type instead</button>
+      }
+
+      <button class="cta-btn stop" (click)="finishRecording()"><span>⏹ I'm done</span></button>
+    </div>
+  }
+
+  <!-- ════════ STAGE: REVIEW — fix mis-hearings, see delivery stats ════════ -->
+  @if (stage() === 'review' && current(); as p) {
+    <div class="stage sp-review">
+      <p class="sp-rec-prompt">{{ p.prompt }}</p>
+
+      @if (!typedMode()) {
+        <p class="sp-review-hint">The mic mis-heard something? Fix it before grading — your delivery stats stay as spoken.</p>
+        <div class="sp-stats">
+          @if (durationBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ b.label }}</span> }
+          @if (paceBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ paceWpm() }} wpm — {{ b.label }}</span> }
+          @if (fillerBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ b.label }}</span> }
+        </div>
+      } @else {
+        <p class="sp-review-hint">Type your answer the way you would SAY it — the coach reviews it as spoken English.</p>
+      }
+
+      <textarea class="sp-transcript" rows="7"
+                [ngModel]="transcript()" (ngModelChange)="transcript.set($event)"
+                placeholder="Your answer…"></textarea>
+
+      <div class="sp-review-btns">
+        @if (!typedMode() && speech.supported()) {
+          <button class="ghost-btn" (click)="reRecord()">↺ Re-record</button>
+        }
+        <button class="cta-btn" [disabled]="!canGrade()" (click)="getCoached()">
+          <span>Get coached</span> <span class="cta-arrow">→</span>
+        </button>
+      </div>
+      @if (!canGrade()) {
+        <p class="sp-short">Say (or type) at least a full sentence — a mumble isn't an answer. 😄</p>
+      }
+    </div>
+  }
+
+  <!-- ════════ STAGE: GRADING — the coach reads it back ════════ -->
+  @if (stage() === 'grading') {
+    @if (entryVisible()) {
+      <app-arena-entry icon="🎙️" heading="The Communication Coach"
+                       style="--ae-a:#38bdf8; --ae-b:#c084fc"
+                       [lines]="ENTRY_LINES" [closing]="entryClosing()" />
+    }
+  }
+
+  <!-- ════════ STAGE: RESULTS ════════ -->
+  @if (stage() === 'results' && grade(); as g) {
+    <div class="stage sp-results">
+      @if (!g.failed) {
+        <div class="sp-score-row">
+          <div class="sp-overall" [style.--ring]="scoreColor(g.scores.overall)">
+            <span class="ov-num">{{ g.scores.overall }}</span>
+            <span class="ov-label">overall</span>
+          </div>
+          <div class="sp-subscores">
+            <div class="sub"><span class="sub-num" [style.color]="scoreColor(g.scores.clarity)">{{ g.scores.clarity }}</span> Clarity</div>
+            <div class="sub"><span class="sub-num" [style.color]="scoreColor(g.scores.structure)">{{ g.scores.structure }}</span> Structure</div>
+            <div class="sub"><span class="sub-num" [style.color]="scoreColor(g.scores.grammar)">{{ g.scores.grammar }}</span> Grammar</div>
+          </div>
+          @if (xpEarned() > 0) { <span class="sp-xp">+{{ xpEarned() }} XP</span> }
+        </div>
+
+        @if (!typedMode()) {
+          <div class="sp-stats">
+            @if (durationBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ b.label }}</span> }
+            @if (paceBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ paceWpm() }} wpm — {{ b.label }}</span> }
+            @if (fillerBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ b.label }}</span> }
+          </div>
+        }
+
+        @if (g.confidenceNote) {
+          <div class="sp-confidence">🌟 {{ g.confidenceNote }}</div>
+        }
+
+        @if (g.grammarFixes.length) {
+          <h3 class="sp-h3">✍️ Grammar — say it like this</h3>
+          <div class="fix-list">
+            @for (f of g.grammarFixes; track fixKey($index, f)) {
+              <div class="fix-card">
+                <span class="fix-before">“{{ f.before }}”</span>
+                <span class="fix-arrow">→</span>
+                <span class="fix-after">“{{ f.after }}”</span>
+                @if (f.why) { <span class="fix-why">{{ f.why }}</span> }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="sp-clean">✅ No grammar slips worth flagging — clean spoken English!</div>
+        }
+
+        @if (g.structureNote || g.concisenessNote) {
+          <h3 class="sp-h3">🧱 Structure &amp; flow</h3>
+          @if (g.structureNote) { <p class="sp-note">{{ g.structureNote }}</p> }
+          @if (g.concisenessNote) { <p class="sp-note">{{ g.concisenessNote }}</p> }
+        }
+
+        @if (g.rewrites.length) {
+          <h3 class="sp-h3">💬 Stronger ways to say it</h3>
+          <div class="rewrite-list">
+            @for (r of g.rewrites; track r) {
+              <blockquote class="rewrite">“{{ r }}”</blockquote>
+            }
+          </div>
+        }
+
+        @if (meme(); as m) {
+          @if (!memeFailed()) {
+            <div class="sp-meme">
+              <img [src]="m.url" [alt]="m.alt" loading="lazy" (error)="onMemeError()" />
+            </div>
+          }
+        }
+      } @else {
+        <div class="sp-failed">
+          <div class="sf-icon">📡</div>
+          <p>{{ g.confidenceNote }}</p>
+          @if (!typedMode()) {
+            <div class="sp-stats">
+              @if (durationBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ b.label }}</span> }
+              @if (paceBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ paceWpm() }} wpm — {{ b.label }}</span> }
+              @if (fillerBand(); as b) { <span class="stat" [class.ok]="b.ok">{{ b.icon }} {{ b.label }}</span> }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="sp-result-btns">
+        <button class="cta-btn" (click)="sameAgain()"><span>Same prompt, better take</span> <span class="cta-arrow">↻</span></button>
+        <button class="ghost-btn" (click)="newPrompt()">🎲 New prompt</button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ LEAVE-GUARD DIALOG (in-app navigation mid-rep) ════════ -->
+  @if (showLeaveDialog()) {
+    <div class="leave-overlay" (click)="stayHere()">
+      <div class="leave-dialog" role="alertdialog" aria-modal="true"
+           aria-labelledby="sp-leave-title" (click)="$event.stopPropagation()">
+        <div class="ld-icon" aria-hidden="true">🎙️</div>
+        <h3 class="ld-title" id="sp-leave-title">Leave mid-sentence?</h3>
+        <p class="ld-body">
+          Your answer isn't graded yet. Leave now and this take is
+          <strong>gone</strong> — no feedback, no XP.
+        </p>
+        <div class="ld-btns">
+          <button class="cta-btn" (click)="stayHere()"><span>Stay &amp; finish</span></button>
+          <button class="ghost-btn" (click)="confirmLeave()">Leave anyway</button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

@@ -8,6 +8,10 @@ import { UserService, WORKER_BASE } from './user.service';
 export const ARENA_IDS = ['angular', 'dotnet', 'sql', 'react', 'nextjs', 'nestjs'] as const;
 export type ArenaId = (typeof ARENA_IDS)[number];
 
+/** Rounds recorded by features without a tech arena of their own — their
+ *  per-arena progress keys must still be wiped by clearLocal(). */
+export const SYNTHETIC_ARENAS = ['resume', 'speak'] as const;
+
 /** One graded question inside a finished round. */
 export interface QuestionResult {
   module: string;
@@ -160,7 +164,7 @@ export class ProgressService {
   /** Wipe all cached progress + history from localStorage (used by "delete my data"). */
   clearLocal(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    for (const id of ARENA_IDS) localStorage.removeItem(PROGRESS_KEY(id));
+    for (const id of [...ARENA_IDS, ...SYNTHETIC_ARENAS]) localStorage.removeItem(PROGRESS_KEY(id));
     localStorage.removeItem(HISTORY_KEY);
     this.revision.update(v => v + 1);
   }

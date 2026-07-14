@@ -10,6 +10,7 @@ import { MemeService, MemeResult } from '../../core/services/meme.service';
 import { ProgressService, RoundRecord } from '../../core/services/progress.service';
 import { CodeEditorComponent, EditorLang } from '../../shared/components/code-editor/code-editor';
 import { ArenaEntryComponent } from '../../shared/components/arena-entry/arena-entry';
+import { SpeechService, computeVoiceStats } from '../../core/services/speech.service';
 import { QuestionKind } from '../../services/interview-service/interview.service';
 import {
   RatedSkill,
@@ -21,9 +22,6 @@ import {
   ResumeQuestion,
   VoiceStats,
 } from '../../services/resume-interview/resume-interview.service';
-
-/** Conservative filler-word set — avoids technical uses of "like". */
-const FILLER_RE = /\b(u+m+|u+h+|hmm+|erm+|you know|i mean|kind of|sort of|basically|actually)\b/gi;
 
 type Stage = 'intro' | 'scanning' | 'review' | 'interview' | 'deliberating' | 'results';
 
@@ -152,6 +150,7 @@ const ROASTS: Record<string, string[]> = {
   imports: [RouterLink, FormsModule, CodeEditorComponent, ArenaEntryComponent],
   templateUrl: './resume-interview.html',
   styleUrl: './resume-interview.css',
+  providers: [SpeechService],
 })
 export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactivate {
   private platformId = inject(PLATFORM_ID);
@@ -214,15 +213,9 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
   entryClosing = signal(false);
   private entryOpenedAt = 0;
 
-  // Voice answers — Web Speech API (browser-native STT, zero server cost).
-  speechSupported = signal(false);
-  recording = signal(false);
-  interim = signal('');
-  voiceError = signal('');
-  // Web Speech types aren't in lib.dom — vendor-prefixed in Chrome.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private recog: any = null;
-  private voiceSegmentStart = 0;
+  // Voice answers — Web Speech API via the shared SpeechService (browser-native
+  // STT, zero server cost). The page keeps its own per-question attribution.
+  readonly speech = inject(SpeechService);
   /** Per-question spoken transcript + seconds — feeds delivery grading. */
   private voiceText: Record<number, string> = {};
   private voiceSeconds: Record<number, number> = {};
@@ -237,7 +230,6 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
   detailOpen = signal<Set<number>>(new Set());
 
   constructor() {
-    this.speechSupported.set(!!this.speechCtor());
     // Arena mode while the trial is live: footer gone, page clamped to the
     // viewport, the chat log owns its own scrolling.
     effect(() => {
@@ -260,76 +252,24 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
     this.arena.exit();
   }
 
-  // ── Voice answers (Web Speech API — free, in-browser STT) ───
-  private speechCtor(): (new () => unknown) | null {
-    if (!isPlatformBrowser(this.platformId)) return null;
-    const w = window as unknown as Record<string, unknown>;
-    return (w['SpeechRecognition'] ?? w['webkitSpeechRecognition']) as (new () => unknown) | null;
-  }
-
+  // ── Voice answers (shared SpeechService — free, in-browser STT) ───
   toggleVoice(): void {
-    if (this.recording()) this.stopVoice();
-    else this.startVoice();
-  }
-
-  private startVoice(): void {
-    const Ctor = this.speechCtor();
-    if (!Ctor || !this.awaitingAnswer()) return;
-    this.voiceError.set('');
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const r = new (Ctor as any)();
-    r.continuous = true;
-    r.interimResults = true;
-    r.lang = navigator.language || 'en-US';
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    r.onresult = (e: any) => {
-      let interim = '';
-      for (let k = e.resultIndex; k < e.results.length; k++) {
-        const text = e.results[k][0]?.transcript ?? '';
-        if (e.results[k].isFinal) this.acceptFinalSpeech(text);
-        else interim += text;
-      }
-      this.interim.set(interim.trim());
-    };
-    r.onend = () => {
-      // Chrome auto-stops after silence — restart while the mic is meant to be live.
-      if (this.recording() && this.recog === r) {
-        try { r.start(); } catch { this.stopVoice(); }
-      }
-    };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    r.onerror = (e: any) => {
-      if (e?.error === 'not-allowed' || e?.error === 'service-not-allowed') {
-        this.stopVoice();
-        this.voiceError.set('Mic blocked — allow microphone access and try again. Typing still works!');
-      }
-      // 'no-speech' etc. → onend fires and we restart; nothing to do.
-    };
-
-    try {
-      r.start();
-    } catch {
-      this.voiceError.set("Couldn't start the mic — typing still works!");
-      return;
+    if (this.speech.recording()) this.stopVoice();
+    else if (this.awaitingAnswer()) {
+      this.speech.start({
+        onFinal: t => this.acceptFinalSpeech(t),
+        // Attribute segment seconds to the question on the table — fires on
+        // internal stops too (mic revoked), so no segment is ever lost.
+        onSegment: s => {
+          const i = this.qIndex();
+          this.voiceSeconds[i] = (this.voiceSeconds[i] ?? 0) + s;
+        },
+      });
     }
-    this.recog = r;
-    this.recording.set(true);
-    this.voiceSegmentStart = this.now();
   }
 
   stopVoice(): void {
-    if (!this.recording() && !this.recog) return;
-    this.recording.set(false);
-    this.interim.set('');
-    if (this.voiceSegmentStart) {
-      const i = this.qIndex();
-      this.voiceSeconds[i] = (this.voiceSeconds[i] ?? 0) + (this.now() - this.voiceSegmentStart) / 1000;
-      this.voiceSegmentStart = 0;
-    }
-    try { this.recog?.stop(); } catch { /* already stopped */ }
-    this.recog = null;
+    this.speech.stop();
   }
 
   /** A finalized speech chunk: append to the draft + remember it was spoken. */
@@ -343,12 +283,7 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
 
   /** Delivery stats for a question — only when a real spoken transcript exists. */
   private voiceStatsFor(i: number): VoiceStats | undefined {
-    const text = (this.voiceText[i] ?? '').trim();
-    if (!text) return undefined;
-    const words = text.split(/\s+/).length;
-    if (words < 5) return undefined; // a mumble isn't a spoken answer
-    const fillers = (text.match(FILLER_RE) ?? []).length;
-    return { seconds: Math.round(this.voiceSeconds[i] ?? 0), words, fillers };
+    return computeVoiceStats(this.voiceText[i] ?? '', this.voiceSeconds[i] ?? 0);
   }
 
   private later(fn: () => void, ms: number): void {
@@ -596,7 +531,7 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
     this.results.set([]);
     this.voiceText = {};
     this.voiceSeconds = {};
-    this.voiceError.set('');
+    this.speech.reset();
     this.tabLeaves.set(0);
     this.resetHints();
     this.stage.set('interview');
@@ -1080,7 +1015,7 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
     this.meme.set(null);
     this.detailOpen.set(new Set());
     this.resumeText = '';
-    this.stopVoice();
+    this.speech.reset();
     this.voiceText = {};
     this.voiceSeconds = {};
     this.tabLeaves.set(0);

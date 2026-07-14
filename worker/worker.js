@@ -25,6 +25,7 @@ import { handleShareCreate, handleSharePage, handleShareImage, handleShareImageG
 import { resumeExtractHandler } from "./resume-extract.js";
 import { resumeQuestionsHandler } from "./resume-questions.js";
 import { resumeJdMatchHandler } from "./resume-jd-match.js";
+import { speakGradeHandler } from "./speak-grade.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
 // ── Allowed browser origins ────────────────────────────────
@@ -136,6 +137,14 @@ export default {
     if (p === "/api/resume-jd-match" && method === "POST") {
       if (await rateLimited(request, env, "jdmatch", 20)) return withCors(request, tooMany());
       return withCors(request, await resumeJdMatchHandler(request, env));
+    }
+
+    // ── /api/speak-grade (Speak Mode — coaches ONE spoken answer per call) ──
+    // One call per speaking rep; a diligent human does <10 reps/hr, so 30
+    // leaves retry headroom while keeping scripted abuse cheap.
+    if (p === "/api/speak-grade" && method === "POST") {
+      if (await rateLimited(request, env, "speak", 30)) return withCors(request, tooMany());
+      return withCors(request, await speakGradeHandler(request, env));
     }
 
     // ── /api/embed-demo (RAG Step 1 — learn embeddings) ──

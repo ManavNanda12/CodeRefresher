@@ -3,6 +3,10 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { GradeItem, QuestionKind, Verdict } from '../interview-service/interview.service';
+import { VoiceStats } from '../../core/services/speech.service';
+
+// Re-exported from the shared SpeechService so existing import sites keep working.
+export type { VoiceStats };
 
 export type ClaimType = 'quantified' | 'tech' | 'project' | 'responsibility';
 
@@ -50,13 +54,6 @@ export interface ResumeGradeItem extends GradeItem {
   subNote: string;
   /** One-line delivery feedback — only for answers given by voice. */
   deliveryNote?: string;
-}
-
-/** Locally-computed stats for a spoken answer (Web Speech transcript). */
-export interface VoiceStats {
-  seconds: number;
-  words: number;
-  fillers: number;
 }
 
 /** One answer sent for grading, carrying the claim it defends. */

@@ -49,6 +49,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/resume-jd-match/resume-jd-match').then(m => m.ResumeJdMatchComponent)
   },
   {
+    path: 'speak',
+    loadComponent: () => import('./pages/speak/speak').then(m => m.SpeakComponent),
+    canDeactivate: [CanDeactivateGuard]
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
   },

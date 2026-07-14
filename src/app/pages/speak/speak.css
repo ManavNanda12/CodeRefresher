@@ -1,0 +1,244 @@
+/* Speak Mode — Communication Coach. Sky-blue accent on the shared arena palette. */
+
+/* Always-dark, like the other arena pages: palette is hardcoded at :host
+   (same pattern as interview.css) so the light-theme toggle never washes
+   out the trial room. */
+:host {
+  --ri-bg: #0b1020;
+  --ri-panel: rgba(255, 255, 255, 0.04);
+  --ri-panel-2: rgba(255, 255, 255, 0.06);
+  --ri-border: rgba(148, 163, 184, 0.18);
+  --ri-text: #f1f5f9;
+  --ri-soft: #cbd5e1;
+  --ri-muted: #94a3b8;
+  --ri-dim: #64748b;
+  /* Pin the arena tokens used below to their dark values too, so the
+     light-theme toggle can't wash out the panels on this always-dark page. */
+  --arena-panel: var(--ri-panel);
+  --arena-panel-2: var(--ri-panel-2);
+  --arena-border: var(--ri-border);
+  --arena-text: var(--ri-text);
+  --arena-soft: var(--ri-soft);
+  --arena-muted: var(--ri-muted);
+  --arena-dim: var(--ri-dim);
+  display: block;
+  min-height: calc(100dvh - 64px);
+  background:
+    radial-gradient(1000px 500px at 85% -10%, rgba(245, 158, 11, 0.12), transparent 60%),
+    radial-gradient(800px 420px at 0% 110%, rgba(192, 132, 252, 0.1), transparent 55%),
+    var(--ri-bg);
+  color: var(--ri-text);
+}
+
+.sp {
+  --accent: #38bdf8;
+  --accent-2: #c084fc;
+  max-width: 980px; margin: 0 auto; padding: 1.6rem 1.2rem 3rem;
+  color: var(--arena-text);
+}
+.stage { animation: spFade .3s ease; }
+@keyframes spFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── Pick ─────────────────────────────────────────────────── */
+.sp-hero { text-align: center; margin-bottom: 1.6rem; }
+.sp-badge {
+  display: inline-block; padding: .3rem .8rem; border-radius: 999px; font-size: .8rem; font-weight: 700;
+  color: var(--accent); background: rgba(56, 189, 248, .12); border: 1px solid rgba(56, 189, 248, .3);
+}
+.sp-title { font-size: clamp(1.7rem, 4.5vw, 2.6rem); font-weight: 900; line-height: 1.15; margin: .8rem 0 .6rem; }
+.sp-title .grad {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sp-sub { color: var(--arena-muted); max-width: 640px; margin: 0 auto; line-height: 1.6; }
+.sp-privacy { color: var(--arena-dim); font-size: .82rem; margin-top: .7rem; }
+
+.sp-filters { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-bottom: 1.2rem; }
+.chip {
+  padding: .5rem 1rem; border-radius: 999px; cursor: pointer; font-weight: 600; font-size: .88rem;
+  background: var(--arena-panel); border: 1px solid var(--arena-border); color: var(--arena-soft);
+  transition: border-color .15s ease, color .15s ease;
+}
+.chip:hover { border-color: var(--accent); }
+.chip.on { color: var(--accent); border-color: var(--accent); background: rgba(56, 189, 248, .1); }
+.chip.surprise { color: var(--accent-2); }
+
+.sp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: .8rem; }
+.prompt-card {
+  display: flex; flex-direction: column; gap: .5rem; text-align: left; cursor: pointer;
+  padding: 1rem 1.1rem; border-radius: 16px;
+  background: var(--arena-panel); border: 1px solid var(--arena-border); color: var(--arena-text);
+  transition: transform .15s ease, border-color .15s ease;
+}
+.prompt-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.pc-type { font-size: .76rem; font-weight: 700; color: var(--accent); }
+.pc-type.big { font-size: .9rem; }
+.pc-text { font-size: .95rem; line-height: 1.45; font-weight: 600; }
+.pc-time { font-size: .78rem; color: var(--arena-dim); }
+.sp-empty { color: var(--arena-muted); text-align: center; grid-column: 1 / -1; }
+
+/* ── Ready ────────────────────────────────────────────────── */
+/* Short stages (ready / recording) center vertically in the full-height
+   stage instead of hugging the top and leaving a void below. */
+.sp-ready, .sp-rec {
+  display: flex; flex-direction: column; justify-content: center;
+  min-height: calc(100dvh - 64px - 4.6rem); /* viewport − header − .sp padding */
+}
+.sp-ready { max-width: 640px; margin: 0 auto; text-align: center; }
+.sp-prompt { font-size: clamp(1.25rem, 3vw, 1.7rem); font-weight: 800; line-height: 1.35; margin: .8rem 0 1rem; }
+.sp-tips { list-style: none; padding: 0; margin: 0 0 1.4rem; display: grid; gap: .45rem; }
+.sp-tips li {
+  padding: .55rem .9rem; border-radius: 12px; font-size: .88rem; text-align: left;
+  background: var(--arena-panel); border: 1px solid var(--arena-border); color: var(--arena-soft);
+}
+.sp-ready-btns { display: flex; flex-wrap: wrap; gap: .7rem; justify-content: center; }
+.sp-nostt { color: var(--arena-muted); font-size: .85rem; margin-top: .8rem; }
+.back-link {
+  display: inline-block; margin-top: 1.4rem; background: none; border: none; cursor: pointer;
+  color: var(--arena-dim); font-size: .85rem;
+}
+.back-link:hover { color: var(--accent); }
+.sp-countdown {
+  font-size: 4.5rem; font-weight: 900; color: var(--accent);
+  animation: spPulse .8s ease infinite;
+}
+.sp-count-hint { color: var(--arena-muted); }
+@keyframes spPulse { 0% { transform: scale(.9); opacity: .6; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(.9); opacity: .6; } }
+
+/* ── Recording ────────────────────────────────────────────── */
+.sp-rec { max-width: 640px; margin: 0 auto; text-align: center; }
+.sp-rec-prompt { color: var(--arena-soft); font-weight: 600; line-height: 1.5; }
+.mic-circle {
+  width: 92px; height: 92px; border-radius: 50%; margin: 1.2rem auto .8rem;
+  display: flex; align-items: center; justify-content: center; font-size: 2.4rem;
+  background: rgba(56, 189, 248, .1); border: 2px solid var(--accent);
+}
+.mic-circle.live { animation: micGlow 1.4s ease-in-out infinite; }
+@keyframes micGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, .35); }
+  50% { box-shadow: 0 0 0 18px rgba(56, 189, 248, 0); }
+}
+.sp-timer { font-size: 1.6rem; font-weight: 800; }
+.sp-timer.over { color: #fbbf24; }
+.sp-target { font-size: .95rem; color: var(--arena-dim); font-weight: 600; }
+.sp-live-transcript {
+  min-height: 96px; margin: 1rem 0; padding: .9rem 1.1rem; border-radius: 14px; text-align: left;
+  background: var(--arena-panel); border: 1px solid var(--arena-border);
+  color: var(--arena-soft); line-height: 1.6; font-size: .95rem;
+}
+.sp-live-transcript .interim { color: var(--arena-dim); }
+.sp-live-transcript .placeholder { color: var(--arena-dim); font-style: italic; }
+.voice-err { color: #fca5a5; font-size: .88rem; }
+.cta-btn.stop { background: linear-gradient(135deg, #f87171, #ef4444); box-shadow: 0 8px 24px rgba(239, 68, 68, .3); color: #fff; }
+
+/* ── Review ───────────────────────────────────────────────── */
+.sp-review { max-width: 680px; margin: 0 auto; padding-top: 1rem; }
+.sp-review-hint { color: var(--arena-muted); font-size: .88rem; }
+.sp-stats { display: flex; flex-wrap: wrap; gap: .5rem; margin: .8rem 0; }
+.stat {
+  padding: .4rem .8rem; border-radius: 999px; font-size: .82rem; font-weight: 600;
+  background: rgba(251, 191, 36, .08); border: 1px solid rgba(251, 191, 36, .3); color: #fbbf24;
+}
+.stat.ok { background: rgba(52, 211, 153, .08); border-color: rgba(52, 211, 153, .3); color: #34d399; }
+.sp-transcript {
+  width: 100%; box-sizing: border-box; resize: vertical; border-radius: 14px;
+  padding: .9rem 1.1rem; font: inherit; line-height: 1.6;
+  background: var(--arena-panel); border: 1px solid var(--arena-border); color: var(--arena-text);
+}
+.sp-transcript:focus { outline: none; border-color: var(--accent); }
+.sp-review-btns { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1rem; }
+.sp-short { color: var(--arena-muted); font-size: .85rem; margin-top: .6rem; }
+
+/* ── Results ──────────────────────────────────────────────── */
+.sp-results { max-width: 680px; margin: 0 auto; padding-top: 1rem; }
+.sp-score-row { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.sp-overall {
+  width: 96px; height: 96px; border-radius: 50%; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 4px solid var(--ring, var(--accent)); background: var(--arena-panel);
+}
+.ov-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+.ov-label { font-size: .7rem; color: var(--arena-dim); text-transform: uppercase; letter-spacing: .06em; }
+.sp-subscores { display: flex; gap: 1.1rem; flex-wrap: wrap; }
+.sub { display: flex; flex-direction: column; font-size: .82rem; color: var(--arena-muted); }
+.sub-num { font-size: 1.35rem; font-weight: 800; }
+.sp-xp {
+  margin-left: auto; padding: .45rem .9rem; border-radius: 999px; font-weight: 800; font-size: .95rem;
+  color: #34d399; background: rgba(52, 211, 153, .1); border: 1px solid rgba(52, 211, 153, .35);
+}
+.sp-confidence {
+  margin: 1rem 0; padding: .8rem 1rem; border-radius: 14px; font-size: .93rem; line-height: 1.55;
+  color: var(--arena-text); background: rgba(192, 132, 252, .08); border: 1px solid rgba(192, 132, 252, .3);
+}
+.sp-h3 { margin: 1.4rem 0 .6rem; font-size: 1.05rem; font-weight: 800; }
+.fix-list { display: grid; gap: .55rem; }
+.fix-card {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .45rem .6rem;
+  padding: .75rem 1rem; border-radius: 14px;
+  background: var(--arena-panel); border: 1px solid var(--arena-border); font-size: .92rem;
+}
+.fix-before { color: #f87171; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.fix-arrow { color: var(--arena-dim); }
+.fix-after { color: #34d399; font-weight: 700; }
+.fix-why { flex-basis: 100%; color: var(--arena-dim); font-size: .8rem; }
+.sp-clean {
+  padding: .8rem 1rem; border-radius: 14px; font-size: .92rem;
+  color: #34d399; background: rgba(52, 211, 153, .08); border: 1px solid rgba(52, 211, 153, .3);
+}
+.sp-note { color: var(--arena-soft); line-height: 1.6; font-size: .92rem; margin: .35rem 0; }
+.rewrite-list { display: grid; gap: .55rem; }
+.rewrite {
+  margin: 0; padding: .75rem 1rem; border-radius: 14px; font-size: .93rem; line-height: 1.55;
+  background: rgba(56, 189, 248, .06); border-left: 3px solid var(--accent);
+  border-top: 1px solid var(--arena-border); border-right: 1px solid var(--arena-border); border-bottom: 1px solid var(--arena-border);
+  color: var(--arena-text);
+}
+.sp-meme { margin-top: 1.4rem; text-align: center; }
+.sp-meme img { max-width: 100%; border-radius: 14px; border: 1px solid var(--arena-border); }
+.sp-failed { text-align: center; padding: 1.5rem 0; color: var(--arena-muted); line-height: 1.6; }
+.sf-icon { font-size: 2.4rem; margin-bottom: .5rem; }
+.sp-result-btns { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.6rem; }
+
+/* ── Shared buttons ───────────────────────────────────────── */
+.cta-btn {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .8rem 1.6rem; border: none; border-radius: 14px;
+  font-weight: 800; font-size: 1rem; cursor: pointer; color: #05202e;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, .35);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.cta-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(14, 165, 233, .45); }
+.cta-btn:disabled { opacity: .45; cursor: not-allowed; }
+.ghost-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .75rem 1.3rem; border-radius: 14px; cursor: pointer;
+  background: var(--arena-panel); border: 1px solid var(--arena-border);
+  color: var(--arena-soft); font-weight: 600; text-decoration: none;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.ghost-btn:hover:not(:disabled) { border-color: var(--accent); transform: translateY(-1px); }
+.ghost-btn:disabled { opacity: .6; cursor: default; }
+
+/* ── Leave dialog ─────────────────────────────────────────── */
+.leave-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(4, 8, 18, .72); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 1.25rem;
+  animation: spFade .2s ease;
+}
+.leave-dialog {
+  max-width: 420px; width: 100%; text-align: center;
+  background: #10172b; border: 1px solid var(--arena-border); border-radius: 22px;
+  padding: 1.8rem 1.6rem 1.6rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .6);
+}
+.ld-icon { font-size: 2.6rem; }
+.ld-title { margin: .6rem 0 .4rem; font-weight: 900; font-size: 1.25rem; }
+.ld-body { color: var(--arena-muted); font-size: .92rem; line-height: 1.55; margin: 0; }
+.ld-btns { display: flex; gap: .7rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap; }
+
+@media (max-width: 560px) {
+  .sp-score-row { gap: .9rem; }
+  .sp-xp { margin-left: 0; }
+}

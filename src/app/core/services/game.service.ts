@@ -35,6 +35,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: 'streak_3', icon: '🔥', title: 'On Fire', desc: 'Keep a 3-day streak' },
   { id: 'streak_7', icon: '🌟', title: 'Unstoppable', desc: 'Keep a 7-day streak' },
   { id: 'level_5', icon: '💎', title: 'Rising Star', desc: 'Reach level 5' },
+  { id: 'first_word', icon: '🎙️', title: 'Find Your Voice', desc: 'Complete your first speaking rep' },
+  { id: 'smooth_talker', icon: '🗣️', title: 'Smooth Talker', desc: 'Complete 10 speaking reps' },
 ];
 
 interface GameState {
@@ -43,6 +45,7 @@ interface GameState {
   streak: { count: number; lastActive: string }; // lastActive = YYYY-MM-DD
   achievements: string[];                    // unlocked ids
   daily?: { date: string; score: number };  // last Daily Challenge completion (YYYY-MM-DD)
+  speakReps?: number;                        // completed Speak Mode reps (lifetime)
 }
 
 const KEY = 'cr:game';
@@ -200,6 +203,14 @@ export class GameService {
     return xp;
   }
 
+  /** Count a completed Speak Mode rep (XP is awarded separately via awardXp). */
+  recordSpeakRep(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const next = this.withStreak({ ...this.state(), speakReps: (this.state().speakReps ?? 0) + 1 });
+    this.commit(next);
+    this.checkAchievements();
+  }
+
   /** Spend XP (e.g. a paid Test Me hint). Floored at 0 — never goes negative. */
   spendXp(amount: number): void {
     if (!isPlatformBrowser(this.platformId) || amount <= 0) return;
@@ -271,6 +282,8 @@ export class GameService {
     unlock('streak_3', s.streak.count >= 3);
     unlock('streak_7', s.streak.count >= 7);
     unlock('level_5', level >= 5);
+    unlock('first_word', (s.speakReps ?? 0) >= 1);
+    unlock('smooth_talker', (s.speakReps ?? 0) >= 10);
 
     if (add.length) {
       this.commit({ ...s, achievements: [...s.achievements, ...add] });
@@ -390,6 +403,7 @@ export class GameService {
       streak: (a.streak?.lastActive || '') >= (b.streak?.lastActive || '') ? a.streak : b.streak,
       achievements: [...new Set([...(a.achievements || []), ...(b.achievements || [])])],
       daily: (a.daily?.date || '') >= (b.daily?.date || '') ? a.daily : b.daily,
+      speakReps: Math.max(a.speakReps || 0, b.speakReps || 0),
     };
   }
 

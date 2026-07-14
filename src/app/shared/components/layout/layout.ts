@@ -84,6 +84,8 @@ export class LayoutComponent {
           desc: 'Score your résumé against a job posting' },
         { path: '/interview', label: 'Mock Interview', icon: '🎙️',
           desc: 'Pick your stacks, get grilled at your level' },
+        { path: '/speak', label: 'Speak Mode', icon: '🗣️', badge: 'NEW',
+          desc: 'Answer out loud — get grammar & delivery coaching' },
       ],
     },
     {

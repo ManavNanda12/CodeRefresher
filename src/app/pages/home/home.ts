@@ -14,11 +14,14 @@ interface TechCard {
   delay: string;
 }
 
-interface Feature {
+/** One card in the AI-toolbox grid — the practice tools beyond the flagship. */
+interface Tool {
   icon: string;
   title: string;
   desc: string;
   tag: string;
+  cta: string;
+  path: string;
 }
 
 interface Spark {
@@ -195,20 +198,25 @@ export class HomeComponent {
     { icon: '🎯', label: 'Improve' },
   ];
 
-  readonly features: Feature[] = [
-    { icon: '📄', title: 'Résumé Interview', desc: 'The AI reads your résumé, attacks your claims, and grades your defense.', tag: 'Flagship' },
-    { icon: '🧳', title: 'Résumé × JD Match', desc: 'Paste a job post — get a match score, proven vs missing skills, and tailoring edits.', tag: 'New' },
-    { icon: '🎤', title: 'AI Mock Interview', desc: 'Pick stacks, rate yourself, get grilled — code editor, XP, meme verdict.', tag: 'Practice' },
-    { icon: '🧪', title: 'AI Test Me', desc: 'Answer from memory; every answer scored 0–10 with what you missed.', tag: 'Practice' },
-    { icon: '💬', title: 'Follow-up Probing', desc: 'Strong answers earn a deeper “ok, but why?” — like the real room.', tag: 'Practice' },
-    { icon: '📚', title: 'Structured Q&A', desc: 'Curated questions by level, with code examples and plain-English analogies.', tag: 'Learn' },
-    { icon: '🧠', title: 'Ask My Notes', desc: 'Chat with your own notes — answers only from what you saved, sources cited.', tag: 'AI' },
-    { icon: '🗓️', title: 'Daily Challenge', desc: 'One question a day. Instant feedback, bonus XP, streak.', tag: 'Daily' },
-    { icon: '📊', title: 'Smart Dashboard', desc: 'Readiness rings, module heatmap, weak spots, round history.', tag: 'Track' },
-    { icon: '🎯', title: 'Focus Rounds', desc: 'One tap drills your weakest and untested modules.', tag: 'Improve' },
-    { icon: '🏆', title: 'Leaderboard', desc: 'Climb the arena by XP, tests taken and best score.', tag: 'Compete' },
-    { icon: '📣', title: 'Share Scorecard', desc: 'Turn any result into a shareable card and challenge your friends.', tag: 'Show off' },
-    { icon: '🔁', title: 'Cross-Device Sync', desc: 'Cloud-saved progress, restored on any device with a recovery code.', tag: 'Anywhere' },
+  /** The full loop, one card per job-to-be-done — related features share a box
+   *  (Test Me + follow-ups, Q&A + daily, dashboard + focus, boards + sharing)
+   *  so the grid stays scannable. The two résumé flagships live in their own
+   *  peek sections above, not here. */
+  readonly features: Tool[] = [
+    { icon: '🗣️', title: 'Speak Mode', tag: 'New', path: '/speak', cta: 'Speak your answer',
+      desc: 'Answer prompts out loud and get coached — grammar fixes, pace & filler-word stats, and stronger ways to say it.' },
+    { icon: '🧪', title: 'AI Test Me', tag: 'Practice', path: '/test-me', cta: 'Start a test',
+      desc: 'Answer 5 questions from memory — scored 0–10 with what you missed, hint lifelines, and interviewer-style follow-up probing.' },
+    { icon: '🎤', title: 'AI Mock Interview', tag: 'Simulate', path: '/interview', cta: 'Get grilled',
+      desc: 'Combine up to 3 stacks, rate your confidence, and face fresh AI questions at your level — code editor included, verdict as a meme.' },
+    { icon: '📚', title: 'Q&A Arenas + Daily Challenge', tag: 'Learn', path: '/angular', cta: 'Start learning',
+      desc: 'Curated questions by level with code examples and plain-English analogies — plus one shared question a day for bonus XP and streaks.' },
+    { icon: '🧠', title: 'Ask My Notes', tag: 'AI', path: '/ask-notes', cta: 'Quiz your notes',
+      desc: 'Chat with your own study notes — answers come only from what you saved, with the exact sources cited.' },
+    { icon: '📊', title: 'Dashboard + Focus Rounds', tag: 'Track', path: '/dashboard', cta: 'See my readiness',
+      desc: 'Readiness rings, a module heatmap and weak spots — with one-tap Focus Rounds that drill exactly what needs work. Synced across devices.' },
+    { icon: '🏆', title: 'Leaderboard + Scorecards', tag: 'Compete', path: '/leaderboard', cta: 'Climb the boards',
+      desc: 'Three ranked boards, XP and level-up crates — plus shareable scorecards to challenge a friend to beat your round.' },
   ];
 
   readonly techCards: TechCard[] = [

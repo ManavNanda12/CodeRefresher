@@ -37,6 +37,7 @@ const LEVEL_NAME: Record<string, string> = {
  *  land in history — this meta keeps them from masquerading as Angular. */
 const EXTRA_META: ArenaMeta[] = [
   { id: 'resume', name: 'Résumé', icon: '📄', accent: '#f59e0b', gradient: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)' },
+  { id: 'speak', name: 'Speak', icon: '🎙️', accent: '#38bdf8', gradient: 'linear-gradient(135deg, #0369a1 0%, #38bdf8 100%)' },
 ];
 
 interface OverviewCard {

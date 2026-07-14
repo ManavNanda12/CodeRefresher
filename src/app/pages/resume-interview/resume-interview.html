@@ -283,14 +283,14 @@
             </span>
           </div>
         }
-        @if (recording()) {
+        @if (speech.recording()) {
           <div class="voice-live" aria-live="polite">
             <span class="voice-dot"></span> Listening — speak your answer…
-            @if (interim()) { <em class="voice-interim">“{{ interim() }}”</em> }
+            @if (speech.interim()) { <em class="voice-interim">“{{ speech.interim() }}”</em> }
           </div>
         }
-        @if (voiceError()) {
-          <p class="voice-err">🎙️ {{ voiceError() }}</p>
+        @if (speech.error()) {
+          <p class="voice-err">🎙️ {{ speech.error() }}</p>
         }
         <div class="composer-row">
           <textarea class="composer-input" rows="2"
@@ -308,11 +308,11 @@
             @if (!wantsCode() && awaitingAnswer()) {
               <button class="mini-btn" (click)="toggleEditor()" title="Add a code snippet">&lt;/&gt;</button>
             }
-            @if (speechSupported()) {
-              <button class="mini-btn mic" [class.rec]="recording()" [disabled]="!awaitingAnswer()"
+            @if (speech.supported()) {
+              <button class="mini-btn mic" [class.rec]="speech.recording()" [disabled]="!awaitingAnswer()"
                       (click)="toggleVoice()"
-                      [title]="recording() ? 'Stop the mic' : 'Answer by voice'"
-                      [attr.aria-pressed]="recording()">🎙️</button>
+                      [title]="speech.recording() ? 'Stop the mic' : 'Answer by voice'"
+                      [attr.aria-pressed]="speech.recording()">🎙️</button>
             }
             <button class="mini-btn skip" [disabled]="!awaitingAnswer()" (click)="skip()" title="Skip this question">Skip</button>
             <button class="send-btn" [disabled]="!canSend()" (click)="send()" aria-label="Send answer">

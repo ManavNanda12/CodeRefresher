@@ -88,6 +88,61 @@
   </div>
 </div>
 
+<!-- ── Résumé Interview (FLAGSHIP — first thing after the fold) ── -->
+<section class="peek-section mt-3">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
+      <span class="ai-badge live"><span class="live-dot"></span> 📄 Résumé Interview <span class="new-tag">NEW</span></span>
+      <h3 class="ai-title">Your résumé talks big. Defend it.</h3>
+      <p class="ai-desc">
+        Upload your résumé — the AI extracts your claims and grills you on the specifics.
+        Every claim ends up <strong>Backed, Shaky, or Busted</strong>.
+      </p>
+      <a routerLink="/resume-interview" class="btn-primary">Put my résumé on trial →</a>
+    </div>
+
+    <div class="peek-left reveal rv-right" aria-hidden="true">
+      <div class="iv-mock">
+        <div class="iv-mock-chips"><span>📈 “32% faster”</span><span>🛠️ Angular</span><span>🏗️ “led migration”</span></div>
+        <div class="iv-mock-kind">📄 About your résumé</div>
+        <div class="iv-mock-q">“You wrote you improved API response time by 32% — measured how, against what baseline?”</div>
+        <div class="iv-mock-verdict">
+          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">BACKED ✅</span>
+          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ +38 XP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Résumé × JD Match (the flagship's natural pair) ── -->
+<section class="peek-section">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
+      <span class="ai-badge live"><span class="live-dot"></span> 🧳 Résumé × JD Match <span class="new-tag">NEW</span></span>
+      <h3 class="ai-title">Found a job post? See if you'd pass the screen.</h3>
+      <p class="ai-desc">
+        Paste the JD next to your résumé and get the recruiter's read first: a match score,
+        every requirement sorted into <strong>proven, close, or missing</strong>, concrete
+        tailoring edits — and a <strong>meme verdict</strong> about your chances.
+      </p>
+      <a routerLink="/jd-match" class="btn-primary">Match my résumé →</a>
+    </div>
+
+    <div class="peek-left reveal rv-right" aria-hidden="true">
+      <div class="iv-mock">
+        <div class="iv-mock-chips"><span>✅ Angular</span><span>😬 Docker-ish</span><span>❌ Kubernetes</span></div>
+        <div class="iv-mock-kind">🧳 Match report</div>
+        <div class="iv-mock-q">“Solid on the frontend must-haves — but the JD wants Kubernetes and your résumé never says the word.”</div>
+        <div class="iv-mock-verdict">
+          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">MATCH 72%</span>
+          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✂️ 3 edits before you apply</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── Journey ribbon ─────────────────────────────────── -->
 <div class="journey">
   @for (step of journey; track step.label; let last = $last) {
@@ -132,7 +187,7 @@
   </div>
 </section>
 
-<!-- ── Everything you get ─────────────────────────────── -->
+<!-- ── Everything you get (combined boxes — one card per job-to-be-done) ── -->
 <section class="features-section">
   <div class="section-header reveal rv-up">
     <span class="section-eyebrow">The Full Loop</span>
@@ -142,69 +197,15 @@
 
   <div class="features-grid">
     @for (f of features; track f.title) {
-      <div class="feature-card reveal rv-up" [style.--rv-delay]="$index * 70 + 'ms'"
-           (mousemove)="tilt($event)" (mouseleave)="resetTilt($event)" (animationend)="clearAnim($event)">
+      <a [routerLink]="f.path" class="feature-card tool-card reveal rv-up" [style.--rv-delay]="$index * 70 + 'ms'"
+         (mousemove)="tilt($event)" (mouseleave)="resetTilt($event)" (animationend)="clearAnim($event)">
         <div class="feature-icon">{{ f.icon }}</div>
         <span class="feature-tag">{{ f.tag }}</span>
         <h3 class="feature-title">{{ f.title }}</h3>
         <p class="feature-desc">{{ f.desc }}</p>
-      </div>
+        <span class="tool-cta">{{ f.cta }} →</span>
+      </a>
     }
-  </div>
-</section>
-
-<!-- ── Résumé Interview (FLAGSHIP) ────────────────────── -->
-<section class="peek-section">
-  <div class="peek-card">
-    <div class="peek-right reveal rv-left">
-      <span class="ai-badge live"><span class="live-dot"></span> 📄 Résumé Interview <span class="new-tag">NEW</span></span>
-      <h3 class="ai-title">Your résumé talks big. Defend it.</h3>
-      <p class="ai-desc">
-        Upload your résumé — the AI extracts your claims and grills you on the specifics.
-        Every claim ends up <strong>Backed, Shaky, or Busted</strong>.
-      </p>
-      <a routerLink="/resume-interview" class="btn-primary">Put my résumé on trial →</a>
-    </div>
-
-    <div class="peek-left reveal rv-right" aria-hidden="true">
-      <div class="iv-mock">
-        <div class="iv-mock-chips"><span>📈 “32% faster”</span><span>🛠️ Angular</span><span>🏗️ “led migration”</span></div>
-        <div class="iv-mock-kind">📄 About your résumé</div>
-        <div class="iv-mock-q">“You wrote you improved API response time by 32% — measured how, against what baseline?”</div>
-        <div class="iv-mock-verdict">
-          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">BACKED ✅</span>
-          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ +38 XP</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Résumé × JD Match (NEW) ────────────────────────── -->
-<section class="peek-section">
-  <div class="peek-card">
-    <div class="peek-right reveal rv-left">
-      <span class="ai-badge live"><span class="live-dot"></span> 🧳 Résumé × JD Match <span class="new-tag">NEW</span></span>
-      <h3 class="ai-title">Found a job post? See if you'd pass the screen.</h3>
-      <p class="ai-desc">
-        Paste the JD next to your résumé and get the recruiter's read first: a match score,
-        every requirement sorted into <strong>proven, close, or missing</strong>, concrete
-        tailoring edits — and a <strong>meme verdict</strong> about your chances.
-      </p>
-      <a routerLink="/jd-match" class="btn-primary">Match my résumé →</a>
-    </div>
-
-    <div class="peek-left reveal rv-right" aria-hidden="true">
-      <div class="iv-mock">
-        <div class="iv-mock-chips"><span>✅ Angular</span><span>😬 Docker-ish</span><span>❌ Kubernetes</span></div>
-        <div class="iv-mock-kind">🧳 Match report</div>
-        <div class="iv-mock-q">“Solid on the frontend must-haves — but the JD wants Kubernetes and your résumé never says the word.”</div>
-        <div class="iv-mock-verdict">
-          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">MATCH 72%</span>
-          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✂️ 3 edits before you apply</span>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -265,7 +266,7 @@
   </div>
 </section>
 
-<!-- ── AI Mock Interview (NEW) ────────────────────────── -->
+<!-- ── AI Mock Interview + Speak Mode ─────────────────── -->
 <section class="peek-section">
   <div class="peek-card">
     <div class="peek-right reveal rv-left">
@@ -274,8 +275,13 @@
       <p class="ai-desc">
         Combine stacks — <strong>Angular + .NET + SQL</strong> — rate your confidence, and face
         fresh AI questions at your level. Code editor included, verdict as a <strong>meme</strong>.
+        Then take it further: answer <strong>out loud in 🗣️ Speak Mode</strong> and get grammar
+        fixes, pace &amp; filler-word stats, and stronger phrasings.
       </p>
-      <a routerLink="/interview" class="btn-primary">Start a Mock Interview →</a>
+      <div class="hero-actions">
+        <a routerLink="/interview" class="btn-primary">Start a Mock Interview →</a>
+        <a routerLink="/speak" class="btn-ghost">🗣️ Practice speaking</a>
+      </div>
     </div>
 
     <div class="peek-left reveal rv-right" aria-hidden="true">
@@ -296,17 +302,49 @@
   </div>
 </section>
 
-<!-- ── Dashboard peek ─────────────────────────────────── -->
+<!-- ── Ask My Notes peek ──────────────────────────────── -->
 <section class="peek-section">
   <div class="peek-card">
     <div class="peek-right reveal rv-left">
-      <span class="ai-badge">📊 Your Dashboard</span>
-      <h3 class="ai-title">See your readiness at a glance</h3>
+      <span class="ai-badge">🧠 Ask My Notes <span class="new-tag">NEW</span></span>
+      <h3 class="ai-title">Chat with your own notes</h3>
       <p class="ai-desc">
-        Readiness rings per tech, a module heatmap, and one-tap
-        <strong>Focus Rounds</strong> that drill exactly what needs work.
+        Paste your study notes and ask questions in plain English. The AI answers
+        <strong>only from what you saved</strong> — and shows the exact notes it used.
       </p>
-      <a routerLink="/dashboard" class="btn-primary">Open Dashboard →</a>
+      <a routerLink="/ask-notes" class="btn-primary">Try Ask My Notes →</a>
+    </div>
+
+    <div class="peek-left reveal rv-right" aria-hidden="true">
+      <div class="notes-mock">
+        <div class="nm-note">📝 “Call unsubscribe in ngOnDestroy to clean up subscriptions.”</div>
+        <div class="nm-q">❓ How do I avoid memory leaks with observables?</div>
+        <div class="nm-a">
+          <span class="nm-a-lbl">Answer from your notes</span>
+          To avoid memory leaks, unsubscribe in <code>ngOnDestroy</code> to clean up your Observable subscriptions.
+          <div class="nm-src"><span class="nm-chip">#1 unsubscribe in ngOnDestroy…</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Track · level up · compete (one combined progress peek) ── -->
+<section class="peek-section">
+  <div class="peek-card">
+    <div class="peek-right reveal rv-left">
+      <span class="ai-badge">📊 Dashboard · 🕹️ XP · 🏆 Leaderboard</span>
+      <h3 class="ai-title">Prep that plays like a game</h3>
+      <p class="ai-desc">
+        Every round feeds your dashboard — readiness rings, a module heatmap, and one-tap
+        <strong>Focus Rounds</strong> that drill exactly what needs work. Rounds earn
+        <strong>XP</strong>, keep your <strong>daily streak 🔥</strong> alive, pop
+        <strong>level-up crates</strong> — and push you up three leaderboard rankings.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/dashboard" class="btn-primary">Open Dashboard →</a>
+        <a routerLink="/leaderboard" class="btn-ghost">🏆 See the rankings</a>
+      </div>
     </div>
 
     <div class="peek-left reveal rv-right" aria-hidden="true">
@@ -332,88 +370,9 @@
         <div class="ph-row"><span>RxJS Operators</span><div class="ph-bar"><i data-bar="32" style="background:#f87171"></i></div></div>
         <div class="ph-row"><span>Change Detection</span><div class="ph-bar"><i data-bar="28" style="background:#f87171"></i></div></div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Arena Mode: XP / levels / streak / crate (gamification) ── -->
-<section class="peek-section">
-  <div class="peek-card">
-    <div class="peek-right reveal rv-left">
-      <span class="ai-badge">🕹️ Arena Mode</span>
-      <h3 class="ai-title">Prep that plays like a game</h3>
-      <p class="ai-desc">
-        Every round earns <strong>XP</strong>. Master questions to <strong>level up</strong>,
-        keep your <strong>daily streak 🔥</strong> alive, and pop a BGMI-style
-        <strong>level-up crate</strong> with achievement toasts when you break through a module.
-      </p>
-      <a routerLink="/dashboard" class="btn-primary">Check my progress →</a>
-    </div>
-
-    <div class="peek-left reveal rv-right" aria-hidden="true">
-      <div class="iv-mock">
-        <div class="iv-mock-chips"><span>⭐ Level 7</span><span>🔥 12-day streak</span><span>🏅 3 badges</span></div>
-        <div class="iv-mock-kind">🎉 Crate unlocked</div>
-        <div class="iv-mock-q">“Directives” module cleared — <strong>Directives Master</strong> achievement earned.</div>
-        <div class="iv-mock-verdict">
-          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">LEVEL UP ▲</span>
-          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ +120 XP</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Leaderboard + Daily Challenge (gamification) ────── -->
-<section class="peek-section">
-  <div class="peek-card">
-    <div class="peek-right reveal rv-left">
-      <span class="ai-badge">🏆 Leaderboard</span>
-      <h3 class="ai-title">Climb the arena rankings</h3>
-      <p class="ai-desc">
-        Three boards — <strong>Top Rank</strong> (XP), <strong>Most Tests</strong>, and
-        <strong>Best Score</strong> — with an animated top-3 podium. Grab the
-        <strong>Daily Challenge</strong> to keep your streak and edge up the board.
-      </p>
-      <a routerLink="/leaderboard" class="btn-primary">See the rankings →</a>
-    </div>
-
-    <div class="peek-left reveal rv-right" aria-hidden="true">
-      <div class="iv-mock">
-        <div class="iv-mock-chips"><span>🥇 Top Rank</span><span>🧪 Most Tests</span><span>🎯 Best Score</span></div>
-        <div class="iv-mock-kind">🏆 Top Rank · this week</div>
-        <div class="iv-mock-q">🥇 Manav — 4,820 XP · 🥈 Sam — 4,110 XP · 🥉 You — 3,980 XP</div>
-        <div class="iv-mock-verdict">
-          <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">RANK ▲ #3</span>
-          <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ 140 XP to #2</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Ask My Notes peek (NEW) ────────────────────────── -->
-<section class="peek-section">
-  <div class="peek-card">
-    <div class="peek-right reveal rv-left">
-      <span class="ai-badge">🧠 Ask My Notes <span class="new-tag">NEW</span></span>
-      <h3 class="ai-title">Chat with your own notes</h3>
-      <p class="ai-desc">
-        Paste your study notes and ask questions in plain English. The AI answers
-        <strong>only from what you saved</strong> — and shows the exact notes it used.
-      </p>
-      <a routerLink="/ask-notes" class="btn-primary">Try Ask My Notes →</a>
-    </div>
-
-    <div class="peek-left reveal rv-right" aria-hidden="true">
-      <div class="notes-mock">
-        <div class="nm-note">📝 “Call unsubscribe in ngOnDestroy to clean up subscriptions.”</div>
-        <div class="nm-q">❓ How do I avoid memory leaks with observables?</div>
-        <div class="nm-a">
-          <span class="nm-a-lbl">Answer from your notes</span>
-          To avoid memory leaks, unsubscribe in <code>ngOnDestroy</code> to clean up your Observable subscriptions.
-          <div class="nm-src"><span class="nm-chip">#1 unsubscribe in ngOnDestroy…</span></div>
-        </div>
+      <div class="iv-mock-verdict peek-progress-stamp">
+        <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">LEVEL UP ▲</span>
+        <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">🔥 12-day streak · ✨ +120 XP</span>
       </div>
     </div>
   </div>

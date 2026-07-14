@@ -48,6 +48,14 @@ A distinct, animated interview simulation. **Combine up to 3 stacks** (pick a pr
 - **Meme verdict + XP** — a pass/fail meme (rendered purely from a URL, zero extra API calls) plus XP, and **every round saves to your dashboard** (one record per stack).
 - **Token-lean** — questions are generated **once per stack** and the whole round is **graded in one batched call per stack**; skipped answers are scored locally and never sent. If generation is unavailable it **falls back to the static bank**, so it always works.
 
+### 🗣️ Speak Mode — the Communication Coach
+You know the answer — can you **say** it? Pick from ~50 speaking prompts (💡 *explain a concept to a non-techie*, ⭐ *behavioral STAR stories*, 💬 *workplace talk* like stand-ups and pushing back on scope), answer **out loud**, and get coached:
+
+- **Voice-first, privacy-first** — your browser transcribes the answer live (Web Speech API); **audio never reaches the server**, only the transcript text. A 🔊 button reads the question aloud (browser TTS) for listening practice, and a 3-2-1 countdown gives you a breath before the mic opens.
+- **Delivery stats, computed locally & free** — words-per-minute pace bands (🐢 → ✅ ideal 110–160 → 🌀 racing), filler-word density ("um", "you know", "basically"…), and duration vs the prompt's target time. Editing the transcript fixes mis-heard words for the grader, but **doesn't launder your fillers or pace** — honest by design.
+- **One LLM coaching call** returns 1–10 scores for **clarity / structure / grammar**, up to 5 **grammar fixes as before → after cards** (tense, articles, agreement — the slips non-native speakers actually make, never ASR punctuation artifacts), structure feedback per prompt type (STAR for behavioral, definition → analogy for concepts), **2–3 "stronger way to say it" rewrites** in natural spoken English, and one genuine confidence boost.
+- **Typed fallback everywhere** — no Web Speech (Firefox), blocked mic, or heavy accent? Type the answer instead; the coach reviews it as spoken English. Meme verdict, XP, streaks, achievements (🎙️ *Find Your Voice*, 🗣️ *Smooth Talker*) and dashboard records included.
+
 ### 🧠 Ask My Notes — chat with your own notes (RAG)
 Paste your own study notes — or your résumé — and ask questions in plain English. An LLM answers **only from what you saved**, never invented facts, and **shows the exact notes it used** as cited sources. Built as a real **Retrieval-Augmented Generation** pipeline on Cloudflare's edge:
 
@@ -128,6 +136,7 @@ Browser (Angular SSR)
                 ├─ /api/resume-jd-match       → résumé + JD → match score, buckets, tailoring plan (KV-cached)
                 ├─ /api/interview-questions   → generate fresh interview questions (per stack)
                 ├─ /api/interview-grade       → grade a whole round in one call (+ claim substantiation)
+                ├─ /api/speak-grade           → coach a spoken answer: grammar fixes, structure, rewrites
                 ├─ /api/rag-ingest|query|ask  → Ask My Notes (embed → Vectorize → LLaMA)
                 ├─ /api/user/register|recover|delete
                 ├─ /api/progress/sync|dashboard   → per-module stats + history
@@ -159,9 +168,10 @@ src/app/
                          (level-up crate + toasts)
   pages/                 home · angular · dotnet · sql · react · nextjs · nestjs
                          · test-me · interview · resume-interview · resume-jd-match
-                         · dashboard · leaderboard · ask-notes
+                         · speak · dashboard · leaderboard · ask-notes
 public/data/             angular.json · dotnet.json · sql.json · react.json
                          · nextjs.json · nestjs.json   (Q&A content)
+                         · speak.json   (speaking prompts)
 worker/                  Worker endpoint reference files + KV/EMAIL setup docs
 scripts/                 send-weekly-digest.mjs
 .github/workflows/       weekly-digest.yml
@@ -211,6 +221,7 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
   - [x] Skills round — self-rated skills → calibrated questions + "you said vs you showed" verdict
   - [x] Voice answers (Web Speech) with delivery feedback
   - [x] **Résumé × JD Match** — match score, proven/close/missing buckets, tailoring plan, meme verdict
+- [x] **Speak Mode** — communication coach: speak your answer, get grammar fixes, delivery stats & rewrites
 - [ ] Further arenas (Python, AWS, Docker) & deeper question banks
 - [ ] Spaced repetition for mastered questions
 
