@@ -1,14 +1,14 @@
 name: Contact Email
 
 # Fired by the Cloudflare Worker (repository_dispatch) when a user submits the contact form
-# The payload carries ONLY the userId — the script fetches email/name from the worker's secured admin endpoint.
+# The payload carries ONLY the contactId — the script fetches email/name from the worker's secured admin endpoint.
 on:
   repository_dispatch:
     types: [contact-email]
   workflow_dispatch:
     inputs:
       user_id:
-        description: "userId to send the contact email to"
+        description: "contactId to send the contact email to"
         required: true
       dry_run:
         description: "Dry run — log the recipient, send nothing"
