@@ -97,8 +97,16 @@ After any Test Me round, share your result — every share links back to CodeRef
 - **🤺 Challenge a friend** — the share page's *"Take the Same Challenge"* button drops them into the **exact arena + level**, and after their round shows a **head-to-head** ("Manav 8.2 · You 6.8") with a one-tap **rematch**.
 - Share entries **auto-expire after 90 days**, and sharing works even before sign-up.
 
-### 📬 Weekly progress emails
-An opt-out **weekly digest** (GitHub Actions cron + SMTP) emails each user their progress recap, weakest module, and a nudge to keep the streak alive.
+### 📬 Email outreach
+All email runs on **GitHub Actions + SMTP** (transport-swappable to Resend) with themed dark-arena HTML templates — the Worker never talks to a mail server:
+- **Welcome email** — a `repository_dispatch` fired on sign-up triggers an Action that sends the arena tour.
+- **Weekly digest** — an opt-out Monday cron emails each user their progress recap, weakest module, and a streak nudge.
+- **Monthly newsletter** — a 1st-of-month cron sends `scripts/newsletters/{YYYY-MM}.json` if an issue exists for the month.
+
+### 📮 Contact Us
+A validated, rate-limited contact form that reuses the same serverless email pipeline:
+1. The Worker validates the submission (field lengths, 2000-char message cap), stores it in **KV** (90-day TTL + a last-100 admin index) and fires a **`repository_dispatch`** carrying only the `contactId` — never the message itself.
+2. The GitHub Action fetches the record from the Bearer-secured admin endpoint and sends **two themed emails**: a *"thanks for reaching out"* confirmation to the sender (their message echoed back, 24–48h reply promise) and an **admin notification** with the full message and `Reply-To` set to the sender — replying in Gmail goes straight to them.
 
 ### 🎨 Light / Dark theme
 A signature dark **arena** theme with an opt-in **daylight** mode (browse surfaces flip to light; immersive game surfaces stay dark by design). Choice is persisted, with no flash on load.
@@ -118,7 +126,7 @@ A signature dark **arena** theme with an opt-in **daylight** mode (browse surfac
 | AI grading & generation | **Groq · LLaMA 3.3 70B** via the Worker (claim extraction, grading, hints, follow-ups, Ask My Notes) |
 | Résumé parsing | **pdf.js** — client-side text extraction; the PDF never leaves the browser |
 | RAG / vector search | **Cloudflare Vectorize** (vector DB) + **Workers AI** embeddings (`bge-base-en-v1.5`) |
-| Email | **GitHub Actions** cron + `nodemailer` (SMTP), transport-swappable to Resend |
+| Email | **GitHub Actions** (crons + `repository_dispatch`) + `nodemailer` (SMTP), transport-swappable to Resend |
 | Persistence | Cookie (identity) + localStorage (fast cache) + KV (source of truth) |
 
 ---
@@ -144,13 +152,20 @@ Browser (Angular SSR)
                 ├─ /api/leaderboard               → cached top-20 boards (O(1) read)
                 ├─ /api/share/create|image        → write a public scorecard + og:image
                 ├─ /share/{id}[/image.png]        → public OG-tagged scorecard page + PNG
+                ├─ /api/contact                   → contact form → KV + repository_dispatch
                 ├─ /api/admin/users               → email export (Bearer secret)
+                ├─ /api/admin/contact             → contact export (Bearer secret)
                 └─ /api/email/unsubscribe
                         │
                         └─ Workers KV  (user:{id} = profile + progress + game · leaderboard = cached boards
-                                        · share:{id} = public scorecard, 90-day TTL · email:{addr} = dedup index)
+                                        · share:{id} = public scorecard, 90-day TTL · email:{addr} = dedup index
+                                        · contact:{id} = submission, 90-day TTL)
 
-GitHub Actions (weekly cron) → scripts/send-weekly-digest.mjs → SMTP → users
+GitHub Actions
+  ├─ weekly cron              → scripts/send-weekly-digest.mjs      → SMTP → users
+  ├─ monthly cron             → scripts/send-monthly-newsletter.mjs → SMTP → users
+  ├─ repository_dispatch (sign-up)      → scripts/send-welcome-email.mjs → SMTP → new user
+  └─ repository_dispatch (contact form) → scripts/send-contact-email.mjs → SMTP → sender (thanks) + admin (notification)
 ```
 
 **Offline-first:** writes hit localStorage instantly, then sync to KV (game writes are **debounced** to respect KV's free-tier write budget). On load, KV is merged back so any device stays in sync.
@@ -168,13 +183,16 @@ src/app/
                          (level-up crate + toasts)
   pages/                 home · angular · dotnet · sql · react · nextjs · nestjs
                          · test-me · interview · resume-interview · resume-jd-match
-                         · speak · dashboard · leaderboard · ask-notes
+                         · speak · dashboard · leaderboard · ask-notes · contact
 public/data/             angular.json · dotnet.json · sql.json · react.json
                          · nextjs.json · nestjs.json   (Q&A content)
                          · speak.json   (speaking prompts)
 worker/                  Worker endpoint reference files + KV/EMAIL setup docs
-scripts/                 send-weekly-digest.mjs
-.github/workflows/       weekly-digest.yml
+scripts/                 send-weekly-digest.mjs · send-welcome-email.mjs
+                         · send-monthly-newsletter.mjs · send-contact-email.mjs
+                         · templates/ (themed HTML emails) · newsletters/ (monthly issues)
+.github/workflows/       weekly-digest.yml · welcome-email.yml
+                         · monthly-newsletter.yml · contact-email.yml
 ```
 
 Adding a new tech arena: drop a `public/data/{tech}.json`, a thin page wrapper, a route, a nav item, and a `TECH_META` entry. (See `worker/KV-SETUP.md` and `worker/EMAIL-SETUP.md` for backend setup.)
@@ -222,6 +240,7 @@ Full details: [`worker/KV-SETUP.md`](worker/KV-SETUP.md) · [`worker/EMAIL-SETUP
   - [x] Voice answers (Web Speech) with delivery feedback
   - [x] **Résumé × JD Match** — match score, proven/close/missing buckets, tailoring plan, meme verdict
 - [x] **Speak Mode** — communication coach: speak your answer, get grammar fixes, delivery stats & rewrites
+- [x] **Contact Us** — validated form → Worker KV → `repository_dispatch` → themed thanks + admin-notification emails
 - [ ] Further arenas (Python, AWS, Docker) & deeper question banks
 - [ ] Spaced repetition for mastered questions
 
