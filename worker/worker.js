@@ -38,7 +38,7 @@ const ALLOWED_ORIGINS = [
 // Endpoints with NO browser origin — skip the origin gate (own auth protects them):
 //   /api/admin/users      → GitHub Actions (Bearer ADMIN_SECRET)
 //   /api/email/unsubscribe → email link / top-level navigation (recovery-code token)
-const ORIGIN_EXEMPT = ["/api/admin/users", "/api/email/unsubscribe"];
+const ORIGIN_EXEMPT = ["/api/admin/users", "/api/admin/contact", "/api/email/unsubscribe"];
 
 function getOrigin(request) {
   return request.headers.get("Origin") || "";

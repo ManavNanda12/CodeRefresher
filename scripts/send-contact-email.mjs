@@ -62,6 +62,10 @@ async function fetchContactWithRetry(id, attempts = 5, delayMs = 20_000) {
   return null;
 }
 
+// ── rendering ────────────────────────────────────────────────
+const esc = (s) =>
+  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 async function renderEmail(contact) {
   const template = await readFile(
     new URL("./templates/welcome-email.html", import.meta.url),
