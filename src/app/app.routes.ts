@@ -65,6 +65,10 @@ export const routes: Routes = [
     path: 'ask-notes',
     loadComponent: () => import('./pages/ask-notes/ask-notes').then(m => m.AskNotesComponent)
   },
+  {
+    path: 'contact',
+    loadComponent: () => import('./pages/contact/contact').then(m => m.ContactComponent)
+  },
   // No redirect-to-home: unknown URLs must resolve to a real "not found" page,
   // not a soft redirect (which Google reports as a redirect error). The hard
   // HTTP 404 status for crawlers comes from the static /404.html on Cloudflare.
