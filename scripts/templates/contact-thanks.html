@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Thanks for contacting CodeRefresher</title>
+  <style>
+    :root { color-scheme: dark; supported-color-schemes: dark; }
+    html, body { background-color: #070d1c !important; }
+    /* Gmail wraps the message in u + .body — re-assert the dark canvas there. */
+    u + .body, u + .body .gmail-bg { background-color: #070d1c !important; }
+    /* Outlook dark/light transforms rewrite colors onto data-ogsc/data-ogsb
+       attributes — override them back to the arena palette. */
+    [data-ogsb], [data-ogsb] body { background-color: #070d1c !important; }
+    [data-ogsc] { color: #cbd5e1 !important; }
+    [data-ogsc] h1, [data-ogsc] strong { color: #f1f5f9 !important; }
+  </style>
+</head>
+<body class="body" style="margin:0;padding:0;background-color:#070d1c;background-image:linear-gradient(#070d1c,#070d1c);" bgcolor="#070d1c">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">We got your message — we&rsquo;ll get back to you soon.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+
+  <!-- background-image:linear-gradient(...) on every dark surface = Gmail dark-mode
+       inversion shield: Gmail recolors background-color/bgcolor but never touches
+       gradient backgrounds, so the arena stays dark. -->
+  <table role="presentation" class="gmail-bg" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#070d1c" style="background-color:#070d1c;background-image:linear-gradient(#070d1c,#070d1c);">
+    <tr>
+      <td align="center" style="padding:36px 16px 48px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;">
+
+          <!-- Wordmark -->
+          <tr>
+            <td align="center" style="padding:0 0 24px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;font-size:20px;font-weight:800;letter-spacing:0.5px;color:#f1f5f9;">
+              Code<span style="color:#818cf8;">Refresher</span> &#127959;&#65039;
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0c1326" style="background-color:#0c1326;background-image:linear-gradient(#0c1326,#0c1326);border:1px solid #26314a;border-radius:16px;">
+
+                <!-- Tri-color arena bar -->
+                <tr>
+                  <td style="border-radius:16px 16px 0 0;overflow:hidden;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="34%" height="4" bgcolor="#6366f1" style="font-size:0;line-height:0;border-radius:16px 0 0 0;">&nbsp;</td>
+                        <td width="33%" height="4" bgcolor="#c084fc" style="font-size:0;line-height:0;">&nbsp;</td>
+                        <td width="33%" height="4" bgcolor="#0ea5e9" style="font-size:0;line-height:0;border-radius:0 16px 0 0;">&nbsp;</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Hero -->
+                <tr>
+                  <td style="padding:40px 40px 0;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#818cf8;padding-bottom:12px;">MESSAGE RECEIVED</div>
+                    <div style="font-size:30px;line-height:38px;font-weight:800;color:#f1f5f9;padding-bottom:14px;">{{HERO_TITLE}}</div>
+                    <div style="font-size:15px;line-height:24px;color:#94a3b8;">
+                      Your message just landed in the arena. A real human (hi, that&rsquo;s Manav &#128075;) reads every single one — you&rsquo;ll usually hear back within <strong style="color:#cbd5e1;">24&ndash;48 hours</strong>.
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Echo panel: what you sent us -->
+                <tr>
+                  <td style="padding:28px 40px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#111b36" style="background-color:#111b36;background-image:linear-gradient(#111b36,#111b36);border:1px solid #2b3654;border-radius:12px;">
+                      <tr>
+                        <td style="padding:22px 24px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;">
+                          <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#c084fc;padding-bottom:8px;">&#128231; YOUR MESSAGE</div>
+                          <div style="font-size:15px;font-weight:700;color:#f1f5f9;padding-bottom:8px;">{{SUBJECT}}</div>
+                          <div style="font-size:14px;line-height:22px;color:#94a3b8;">{{MESSAGE}}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- CTA -->
+                <tr>
+                  <td align="center" style="padding:28px 40px 36px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td align="center" bgcolor="#6366f1" style="background-color:#6366f1;background-image:linear-gradient(#6366f1,#6366f1);border-radius:10px;">
+                          <a href="{{APP_URL}}" target="_blank" style="display:inline-block;padding:15px 40px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;">Back to the Arena &rarr;</a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:28px 24px 0;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;font-size:12px;line-height:20px;color:#64748b;">
+              You&rsquo;re receiving this one-time confirmation because you contacted us via the CodeRefresher contact form.<br>
+              <a href="{{APP_URL}}" style="color:#818cf8;text-decoration:underline;">{{APP_HOST}}</a><br>
+              Made for developers, by developers &middot; Manav Nanda
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
