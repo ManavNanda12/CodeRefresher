@@ -61,10 +61,10 @@ export const routes: Routes = [
     path: 'leaderboard',
     loadComponent: () => import('./pages/leaderboard/leaderboard').then(m => m.LeaderboardComponent)
   },
-  {
-    path: 'ask-notes',
-    loadComponent: () => import('./pages/ask-notes/ask-notes').then(m => m.AskNotesComponent)
-  },
+  // {
+  //   path: 'ask-notes',
+  //   loadComponent: () => import('./pages/ask-notes/ask-notes').then(m => m.AskNotesComponent)
+  // },
   {
     path: 'contact',
     loadComponent: () => import('./pages/contact/contact').then(m => m.ContactComponent)

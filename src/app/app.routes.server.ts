@@ -14,6 +14,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'interview', renderMode: RenderMode.Prerender },
   { path: 'resume-interview', renderMode: RenderMode.Prerender },
   { path: 'jd-match', renderMode: RenderMode.Prerender },
+  { path: 'contact', renderMode: RenderMode.Prerender },
 
   // Personalized / dynamic pages. They're noindex and depend on browser-only
   // state, so prerender an empty shell that hydrates client-side. This also
