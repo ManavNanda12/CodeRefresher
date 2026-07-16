@@ -95,8 +95,8 @@ export class LayoutComponent {
       items: [
         { path: '/test-me', label: 'Test Me', icon: '🧪',
           desc: '5 AI-graded questions by tech & level' },
-        { path: '/ask-notes', label: 'Ask My Notes', icon: '🧠',
-          desc: 'Chat with your own study notes' },
+        // { path: '/ask-notes', label: 'Ask My Notes', icon: '🧠',
+        //   desc: 'Chat with your own study notes' },
       ],
       topics: this.topicItems,
     },
