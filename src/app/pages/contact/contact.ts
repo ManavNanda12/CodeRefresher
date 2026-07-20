@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SeoService } from '../../core/services/seo.service';
 import { ContactService } from '../../services/contact-service/contact.service';
@@ -14,7 +14,7 @@ interface ContactForm {
 
 @Component({
   selector: 'app-contact',
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './contact.html',
   styleUrl: './contact.css',
 })

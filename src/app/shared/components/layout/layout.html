@@ -20,10 +20,11 @@
 <!-- Sidebar (mobile drawer) -->
 <aside class="sidebar" [class.open]="sidebarOpen()" aria-label="Sidebar navigation">
   <div class="sidebar-header">
-    <div class="brand">
-      <span class="brand-icon">&#60;/&#62;</span>
-      <span class="brand-name">Dev Refresher</span>
-    </div>
+    <a routerLink="/" class="brand" aria-label="Code Refresher Home" (click)="closeSidebar()">
+      <span class="brand-mark sidebar-brand-mark" aria-hidden="true">
+        <img src="assets/navbar-logo.png" alt="" class="brand-image sidebar-brand-image">
+      </span>
+    </a>
     <button class="close-btn" (click)="closeSidebar()" aria-label="Close sidebar">&#10005;</button>
   </div>
 
@@ -56,8 +57,9 @@
 <!-- ── Single Responsive Header ────────────────── -->
 <header class="app-header" role="banner">
   <a routerLink="/" class="header-brand" aria-label="Code Refresher Home">
-    <span class="brand-icon">&#60;/&#62;</span>
-    <span class="header-title">Code Refresher</span>
+    <span class="brand-mark" aria-hidden="true">
+      <img src="assets/navbar-logo.png" alt="" class="brand-image">
+    </span>
   </a>
 
   <!-- Desktop nav — hidden below 768px via CSS -->
@@ -145,7 +147,12 @@
 
   <!-- Hamburger — hidden above 768px via CSS -->
   <button class="hamburger-btn" (click)="toggleSidebar()" aria-label="Open navigation menu">
-    &#9776;
+    <svg class="hamburger-icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+      <line x1="3.5" y1="6.5" x2="20.5" y2="6.5" />
+      <line x1="3.5" y1="12"  x2="20.5" y2="12" />
+      <line x1="3.5" y1="17.5" x2="20.5" y2="17.5" />
+    </svg>
   </button>
 </header>
 
@@ -161,8 +168,9 @@
 
         <div class="footer-col footer-brand-col">
           <a routerLink="/" class="footer-brand" aria-label="Home">
-            <span class="brand-icon">&#60;/&#62;</span>
-            <span class="footer-brand-name">Dev Refresher</span>
+            <span class="brand-mark footer-brand-mark" aria-hidden="true">
+              <img src="assets/navbar-logo.png" alt="" class="brand-image footer-brand-image">
+            </span>
           </a>
           <p class="footer-tagline">The AI that reads your résumé and grills you on it. Practice by topic, track progress, level up — free forever.</p>
           <a routerLink="/resume-interview" class="footer-ai-badge live">📄 New — get interviewed on your own résumé!</a>
@@ -231,7 +239,7 @@
       </div>
 
       <div class="footer-bottom">
-        <span class="footer-copy">© {{returnCurrentYear()}} Developer Refresher · Made for developers, by developers.</span>
+        <span class="footer-copy">© {{returnCurrentYear()}} Code Refresher · Made for developers, by developers.</span>
         <button type="button" class="footer-top-link" (click)="scrollToTop()">Back to top <span class="bt-arrow">↑</span></button>
       </div>
     </div>
