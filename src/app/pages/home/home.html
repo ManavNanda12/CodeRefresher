@@ -1,8 +1,8 @@
 <!-- ── Click-burst particles (global overlay) ──────────── -->
 <div class="spark-layer" aria-hidden="true">
   @for (s of sparks(); track s.id) {
-    <span class="spark" [style.left.px]="s.x" [style.top.px]="s.y"
-          [style.--dx.px]="s.dx" [style.--dy.px]="s.dy">{{ s.emoji }}</span>
+  <span class="spark" [style.left.px]="s.x" [style.top.px]="s.y" [style.--dx.px]="s.dx" [style.--dy.px]="s.dy">{{
+    s.emoji }}</span>
   }
 </div>
 
@@ -66,7 +66,31 @@
 </section>
 
 <!-- ── Stats ──────────────────────────────────────────── -->
+<!-- Once real usage numbers exist, the first tiles show live counters (social
+     proof); until then they fall back to the static platform facts so a fresh
+     deploy never shows a sad "0". -->
 <div class="stats-bar">
+  @if (hasLiveStats()) {
+  <!-- These tiles appear AFTER the async stats fetch, i.e. after the scroll-reveal
+       observer has already run — so they must NOT use `reveal` (they'd stay at
+       opacity:0 forever). They render visible immediately. -->
+  <div class="stat" >
+    <span class="stat-num">{{ statVerdicts() }}+</span>
+    <span class="stat-lbl">Verdicts Delivered</span>
+  </div>
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span class="stat-num">{{ statResumesMonth() }}</span>
+    <span class="stat-lbl">Résumés This Month</span>
+  </div>
+  @if (showResumesToday()) {
+  <div class="stat-sep"></div>
+  <div class="stat">
+    <span class="stat-num">{{ statResumesToday() }}</span>
+    <span class="stat-lbl">Résumés Today</span>
+  </div>
+  }
+  } @else {
   <div class="stat reveal rv-pop">
     <span class="stat-num">{{ statQuestions() }}+</span>
     <span class="stat-lbl">Questions</span>
@@ -81,6 +105,7 @@
     <span class="stat-num">{{ statLevels() }}</span>
     <span class="stat-lbl">Experience Levels</span>
   </div>
+  }
   <div class="stat-sep"></div>
   <div class="stat reveal rv-pop" style="--rv-delay: 0.3s">
     <span class="stat-num">∞</span>
@@ -92,7 +117,8 @@
 <section class="peek-section mt-3">
   <div class="peek-card">
     <div class="peek-right reveal rv-left">
-      <span class="ai-badge live"><span class="live-dot"></span> 📄 Résumé Interview <span class="new-tag">NEW</span></span>
+      <span class="ai-badge live"><span class="live-dot"></span> 📄 Résumé Interview <span
+          class="new-tag">NEW</span></span>
       <h3 class="ai-title">Your résumé talks big. Defend it.</h3>
       <p class="ai-desc">
         Upload your résumé — the AI extracts your claims and grills you on the specifics.
@@ -103,9 +129,11 @@
 
     <div class="peek-left reveal rv-right" aria-hidden="true">
       <div class="iv-mock">
-        <div class="iv-mock-chips"><span>📈 “32% faster”</span><span>🛠️ Angular</span><span>🏗️ “led migration”</span></div>
+        <div class="iv-mock-chips"><span>📈 “32% faster”</span><span>🛠️ Angular</span><span>🏗️ “led migration”</span>
+        </div>
         <div class="iv-mock-kind">📄 About your résumé</div>
-        <div class="iv-mock-q">“You wrote you improved API response time by 32% — measured how, against what baseline?”</div>
+        <div class="iv-mock-q">“You wrote you improved API response time by 32% — measured how, against what baseline?”
+        </div>
         <div class="iv-mock-verdict">
           <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">BACKED ✅</span>
           <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✨ +38 XP</span>
@@ -119,7 +147,8 @@
 <section class="peek-section">
   <div class="peek-card">
     <div class="peek-right reveal rv-left">
-      <span class="ai-badge live"><span class="live-dot"></span> 🧳 Résumé × JD Match <span class="new-tag">NEW</span></span>
+      <span class="ai-badge live"><span class="live-dot"></span> 🧳 Résumé × JD Match <span
+          class="new-tag">NEW</span></span>
       <h3 class="ai-title">Found a job post? See if you'd pass the screen.</h3>
       <p class="ai-desc">
         Paste the JD next to your résumé and get the recruiter's read first: a match score,
@@ -133,7 +162,8 @@
       <div class="iv-mock">
         <div class="iv-mock-chips"><span>✅ Angular</span><span>😬 Docker-ish</span><span>❌ Kubernetes</span></div>
         <div class="iv-mock-kind">🧳 Match report</div>
-        <div class="iv-mock-q">“Solid on the frontend must-haves — but the JD wants Kubernetes and your résumé never says the word.”</div>
+        <div class="iv-mock-q">“Solid on the frontend must-haves — but the JD wants Kubernetes and your résumé never
+          says the word.”</div>
         <div class="iv-mock-verdict">
           <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">MATCH 72%</span>
           <span class="ivm-xp reveal rv-pop" style="--rv-delay: 1.2s">✂️ 3 edits before you apply</span>
@@ -146,11 +176,11 @@
 <!-- ── Journey ribbon ─────────────────────────────────── -->
 <div class="journey">
   @for (step of journey; track step.label; let last = $last) {
-    <div class="journey-step reveal rv-left" [style.--rv-delay]="$index * 110 + 'ms'">
-      <span class="journey-icon">{{ step.icon }}</span>
-      <span class="journey-label">{{ step.label }}</span>
-    </div>
-    @if (!last) { <span class="journey-arrow reveal rv-pop" [style.--rv-delay]="($index * 110 + 70) + 'ms'">→</span> }
+  <div class="journey-step reveal rv-left" [style.--rv-delay]="$index * 110 + 'ms'">
+    <span class="journey-icon">{{ step.icon }}</span>
+    <span class="journey-label">{{ step.label }}</span>
+  </div>
+  @if (!last) { <span class="journey-arrow reveal rv-pop" [style.--rv-delay]="($index * 110 + 70) + 'ms'">→</span> }
   }
 </div>
 
@@ -159,30 +189,30 @@
   <div class="section-header reveal rv-up">
     <span class="section-eyebrow">The Arenas</span>
     <h2 class="section-title">Pick Your Arena</h2>
-    <p class="section-sub">Structured Q&amp;A with detailed answers, code examples, and plain-English analogies — every card a challenge card you can Master ✓ for XP</p>
+    <p class="section-sub">Structured Q&amp;A with detailed answers, code examples, and plain-English analogies — every
+      card a challenge card you can Master ✓ for XP</p>
   </div>
 
   <div class="topics-grid">
     @for (card of techCards; track card.id; let i = $index) {
-      <a [routerLink]="card.path" class="topic-card reveal"
-         [class.rv-left]="i % 3 === 0" [class.rv-up]="i % 3 === 1" [class.rv-right]="i % 3 === 2"
-         [style.--rv-delay]="(i % 3) * 120 + 'ms'" (animationend)="clearAnim($event)">
-        <div class="topic-strip" [style.background]="card.gradient"></div>
-        <div class="topic-body">
-          <div class="topic-top">
-            <div class="topic-icon-wrap" [style.background]="card.gradient">
-              <span class="topic-icon">{{ card.icon }}</span>
-            </div>
-            <span class="topic-tag">{{ card.tag }}</span>
+    <a [routerLink]="card.path" class="topic-card reveal" [class.rv-left]="i % 3 === 0" [class.rv-up]="i % 3 === 1"
+      [class.rv-right]="i % 3 === 2" [style.--rv-delay]="(i % 3) * 120 + 'ms'" (animationend)="clearAnim($event)">
+      <div class="topic-strip" [style.background]="card.gradient"></div>
+      <div class="topic-body">
+        <div class="topic-top">
+          <div class="topic-icon-wrap" [style.background]="card.gradient">
+            <span class="topic-icon">{{ card.icon }}</span>
           </div>
-          <h3 class="topic-name">{{ card.name }}</h3>
-          <p class="topic-desc">{{ card.description }}</p>
-          <div class="topic-footer">
-            <span class="topic-count">📋 {{ card.count }}</span>
-            <span class="topic-arrow">Enter →</span>
-          </div>
+          <span class="topic-tag">{{ card.tag }}</span>
         </div>
-      </a>
+        <h3 class="topic-name">{{ card.name }}</h3>
+        <p class="topic-desc">{{ card.description }}</p>
+        <div class="topic-footer">
+          <span class="topic-count">📋 {{ card.count }}</span>
+          <span class="topic-arrow">Enter →</span>
+        </div>
+      </div>
+    </a>
     }
   </div>
 </section>
@@ -192,19 +222,20 @@
   <div class="section-header reveal rv-up">
     <span class="section-eyebrow">The Full Loop</span>
     <h2 class="section-title">Everything you need to get interview-ready</h2>
-    <p class="section-sub">Learn → Test → Track → Improve. A gamified loop that adapts to you and levels you up as you clear the gaps.</p>
+    <p class="section-sub">Learn → Test → Track → Improve. A gamified loop that adapts to you and levels you up as you
+      clear the gaps.</p>
   </div>
 
   <div class="features-grid">
     @for (f of features; track f.title) {
-      <a [routerLink]="f.path" class="feature-card tool-card reveal rv-up" [style.--rv-delay]="$index * 70 + 'ms'"
-         (mousemove)="tilt($event)" (mouseleave)="resetTilt($event)" (animationend)="clearAnim($event)">
-        <div class="feature-icon">{{ f.icon }}</div>
-        <span class="feature-tag">{{ f.tag }}</span>
-        <h3 class="feature-title">{{ f.title }}</h3>
-        <p class="feature-desc">{{ f.desc }}</p>
-        <span class="tool-cta">{{ f.cta }} →</span>
-      </a>
+    <a [routerLink]="f.path" class="feature-card tool-card reveal rv-up" [style.--rv-delay]="$index * 70 + 'ms'"
+      (mousemove)="tilt($event)" (mouseleave)="resetTilt($event)" (animationend)="clearAnim($event)">
+      <div class="feature-icon">{{ f.icon }}</div>
+      <span class="feature-tag">{{ f.tag }}</span>
+      <h3 class="feature-title">{{ f.title }}</h3>
+      <p class="feature-desc">{{ f.desc }}</p>
+      <span class="tool-cta">{{ f.cta }} →</span>
+    </a>
     }
   </div>
 </section>
@@ -289,7 +320,8 @@
         <div class="iv-mock-chips"><span>⚡ Angular</span><span>🔷 .NET</span><span>🗄️ SQL</span></div>
         <div class="iv-mock-kind">🗄️ Write a query</div>
         <div class="iv-mock-q">“Return the top-selling product this month.”</div>
-        <pre class="iv-mock-code"><code><span class="tk-kw">SELECT</span> p.name, <span class="tk-fn">SUM</span>(oi.qty) <span class="tk-kw">AS</span> sold
+        <pre
+          class="iv-mock-code"><code><span class="tk-kw">SELECT</span> p.name, <span class="tk-fn">SUM</span>(oi.qty) <span class="tk-kw">AS</span> sold
 <span class="tk-kw">FROM</span>   order_items oi
 <span class="tk-kw">JOIN</span>   products p <span class="tk-kw">ON</span> p.id = oi.product_id
 <span class="tk-kw">GROUP BY</span> p.name <span class="tk-kw">ORDER BY</span> sold <span class="tk-kw">DESC</span>;</code></pre>
@@ -351,12 +383,12 @@
       <div class="peek-rings">
         <div class="peek-ring">
           <div class="pr-dial" data-ring="76" data-score="7.6" data-color="#34d399"
-               style="background: conic-gradient(#34d399 0%, rgba(255,255,255,0.08) 0)"><span>0.0</span></div>
+            style="background: conic-gradient(#34d399 0%, rgba(255,255,255,0.08) 0)"><span>0.0</span></div>
           <span class="pr-name">⚡ Angular</span>
         </div>
         <div class="peek-ring">
           <div class="pr-dial" data-ring="41" data-score="4.1" data-color="#fbbf24"
-               style="background: conic-gradient(#fbbf24 0%, rgba(255,255,255,0.08) 0)"><span>0.0</span></div>
+            style="background: conic-gradient(#fbbf24 0%, rgba(255,255,255,0.08) 0)"><span>0.0</span></div>
           <span class="pr-name">🔷 .NET</span>
         </div>
         <div class="peek-ring">
@@ -365,10 +397,18 @@
         </div>
       </div>
       <div class="peek-heat">
-        <div class="ph-row"><span>Directives</span><div class="ph-bar"><i data-bar="82" style="background:#34d399"></i></div></div>
-        <div class="ph-row"><span>Services &amp; DI</span><div class="ph-bar"><i data-bar="71" style="background:#34d399"></i></div></div>
-        <div class="ph-row"><span>RxJS Operators</span><div class="ph-bar"><i data-bar="32" style="background:#f87171"></i></div></div>
-        <div class="ph-row"><span>Change Detection</span><div class="ph-bar"><i data-bar="28" style="background:#f87171"></i></div></div>
+        <div class="ph-row"><span>Directives</span>
+          <div class="ph-bar"><i data-bar="82" style="background:#34d399"></i></div>
+        </div>
+        <div class="ph-row"><span>Services &amp; DI</span>
+          <div class="ph-bar"><i data-bar="71" style="background:#34d399"></i></div>
+        </div>
+        <div class="ph-row"><span>RxJS Operators</span>
+          <div class="ph-bar"><i data-bar="32" style="background:#f87171"></i></div>
+        </div>
+        <div class="ph-row"><span>Change Detection</span>
+          <div class="ph-bar"><i data-bar="28" style="background:#f87171"></i></div>
+        </div>
       </div>
       <div class="iv-mock-verdict peek-progress-stamp">
         <span class="ivm-stamp reveal rv-stamp" style="--rv-delay: 0.9s">LEVEL UP ▲</span>
@@ -382,10 +422,13 @@
 <section class="cta-band" (click)="burst($event)">
   <div class="cta-inner">
     <h2 class="cta-title reveal rv-up">Your next interview starts here.</h2>
-    <p class="cta-sub reveal rv-up" style="--rv-delay: 0.12s">Free forever. No sign-up to browse — just enter the arena.</p>
+    <p class="cta-sub reveal rv-up" style="--rv-delay: 0.12s">Free forever. No sign-up to browse — just enter the arena.
+    </p>
     <div class="hero-actions">
-      <a routerLink="/resume-interview" class="btn-primary reveal rv-pop" style="--rv-delay: 0.24s" (animationend)="clearAnim($event)">📄 Put my résumé on trial →</a>
-      <a routerLink="/test-me" class="btn-ghost reveal rv-pop" style="--rv-delay: 0.34s" (animationend)="clearAnim($event)">🧪 Practice by topic</a>
+      <a routerLink="/resume-interview" class="btn-primary reveal rv-pop" style="--rv-delay: 0.24s"
+        (animationend)="clearAnim($event)">📄 Put my résumé on trial →</a>
+      <a routerLink="/test-me" class="btn-ghost reveal rv-pop" style="--rv-delay: 0.34s"
+        (animationend)="clearAnim($event)">🧪 Practice by topic</a>
     </div>
   </div>
 </section>

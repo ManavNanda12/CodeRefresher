@@ -38,6 +38,10 @@ export async function handleAdminUsers(request, env) {
         userId: rec.userId || key.name.slice("user:".length),
         email: rec.email || "",
         name: rec.name || "",
+        // The login/recovery code — the welcome email includes it so a user who
+        // loses it can dig it out of their inbox. Server-to-server only (this
+        // export is ADMIN_SECRET-guarded), never exposed to the browser.
+        recoveryCode: rec.recoveryCode || "",
         unsubToken: rec.unsubToken,
         unsubscribed: !!rec.unsubscribed,
         // Newsletter opt-in. Accounts created before the checkbox existed have no

@@ -428,6 +428,79 @@
         </div>
       }
 
+      <!-- Save the verdict / create an account — only for anonymous users, and
+           only now that the verdict is already on screen (value first, ask second). -->
+      @if (!alreadyLoggedIn()) {
+        <div class="save-card rise-in">
+
+          @if (saveState() === 'form' || saveState() === 'saving') {
+            <h3 class="save-title">💾 Save this verdict &amp; track your progress</h3>
+            <p class="save-sub">
+              Create your arena account to keep this scorecard, sync across devices, and unlock your dashboard.
+              We’ll email you a <strong>login code</strong> — no password to remember.
+            </p>
+            <div class="save-fields">
+              <label class="save-field">
+                <span>Email</span>
+                <input type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"
+                       [value]="saveEmail()" (input)="saveEmail.set($any($event.target).value)"
+                       [disabled]="saveState() === 'saving'" />
+              </label>
+              <label class="save-field">
+                <span>Name <em>(optional)</em></span>
+                <input type="text" autocomplete="name" placeholder="How should we call you?"
+                       [value]="saveName()" (input)="saveName.set($any($event.target).value)"
+                       [disabled]="saveState() === 'saving'" maxlength="24" />
+              </label>
+            </div>
+            @if (saveError()) { <p class="save-error">{{ saveError() }}</p> }
+            <button class="cta-btn save-btn" (click)="saveResults()" [disabled]="saveState() === 'saving'">
+              <span>{{ saveState() === 'saving' ? 'Saving…' : 'Save my results & create account' }}</span>
+              @if (saveState() !== 'saving') { <span class="cta-arrow">→</span> }
+            </button>
+          }
+
+          @if (saveState() === 'needCode' || saveState() === 'recovering') {
+            <h3 class="save-title">👋 You already have an account</h3>
+            <p class="save-sub">
+              <strong>{{ saveEmail() }}</strong> is already registered. Enter the <strong>login code</strong>
+              from your welcome email to sign in and attach this verdict.
+            </p>
+            <div class="save-fields">
+              <label class="save-field">
+                <span>Login code</span>
+                <input type="text" autocomplete="off" placeholder="Paste your code"
+                       [value]="codeInput()" (input)="codeInput.set($any($event.target).value)"
+                       [disabled]="saveState() === 'recovering'" />
+              </label>
+            </div>
+            @if (saveError()) { <p class="save-error">{{ saveError() }}</p> }
+            <button class="cta-btn save-btn" (click)="submitRecoveryCode()" [disabled]="saveState() === 'recovering'">
+              <span>{{ saveState() === 'recovering' ? 'Signing in…' : 'Sign in & save' }}</span>
+              @if (saveState() !== 'recovering') { <span class="cta-arrow">→</span> }
+            </button>
+            <button class="link-btn" (click)="backToSaveForm()" [disabled]="saveState() === 'recovering'">
+              Use a different email
+            </button>
+          }
+
+          @if (saveState() === 'saved') {
+            <h3 class="save-title">✅ You’re in — verdict saved!</h3>
+            @if (savedCode()) {
+              <p class="save-sub">
+                Your <strong>login code</strong> is on its way to your inbox. It’s how you sign back in on another
+                device — keep it somewhere safe:
+              </p>
+              <div class="save-code">{{ savedCode() }}</div>
+            } @else {
+              <p class="save-sub">Welcome back — this verdict is now on your dashboard.</p>
+            }
+            <a class="cta-btn save-btn" routerLink="/dashboard"><span>Go to my dashboard</span> <span class="cta-arrow">→</span></a>
+          }
+
+        </div>
+      }
+
       <div class="results-actions">
         <button class="cta-btn" (click)="grillAgain()"><span>Grill me again</span> <span class="cta-arrow">↻</span></button>
         <button class="ghost-btn" (click)="restart()">📄 New résumé</button>

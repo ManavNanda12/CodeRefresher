@@ -1,6 +1,9 @@
-import { Component, ElementRef, afterNextRender, inject, signal, WritableSignal } from '@angular/core';
+import { Component, ElementRef, afterNextRender, computed, inject, signal, WritableSignal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { SeoService } from '../../core/services/seo.service';
+
+/** Base URL of the Cloudflare Worker (matches WORKER_BASE elsewhere). */
+const WORKER_BASE = 'https://coderefresherworker.manavnanda2404.workers.dev';
 
 interface TechCard {
   id: string;
@@ -47,6 +50,22 @@ export class HomeComponent {
   readonly statTech = signal(0);
   readonly statLevels = signal(0);
 
+  // ── Live social-proof counters (GET /api/stats) ──────────────
+  // Real usage numbers. Loaded once in the browser; the count-up animation runs
+  // against whatever's loaded by the time the stats bar scrolls into view. If
+  // the fetch fails or hasn't landed, these stay 0 and the template falls back
+  // to the static platform facts (never a sad "0 verdicts").
+  private verdictsTotal = 0;
+  private resumesMonth = 0;
+  private resumesToday = 0;
+  readonly statVerdicts = signal(0);
+  readonly statResumesMonth = signal(0);
+  readonly statResumesToday = signal(0);
+  /** True once we have a real, non-zero headline number worth showing off. */
+  readonly hasLiveStats = signal(false);
+  /** Show the "today" tile only when there's something on it (0 reads as dead). */
+  readonly showResumesToday = computed(() => this.statResumesToday() > 0);
+
   // Click-burst particles
   readonly sparks = signal<Spark[]>([]);
   private sparkId = 0;
@@ -61,7 +80,37 @@ export class HomeComponent {
     });
 
     // Runs only in the browser, after the first render — SSR-safe.
-    afterNextRender(() => this.initInteractions());
+    afterNextRender(() => {
+      this.loadStats();
+      this.initInteractions();
+    });
+  }
+
+  /** Pull the live counters; feed the count-up animation when they arrive. */
+  private loadStats(): void {
+    fetch(`${WORKER_BASE}/api/stats`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (!data) return;
+        this.verdictsTotal = Number(data.verdictsTotal) || 0;
+        this.resumesMonth = Number(data.resumesMonth) || 0;
+        this.resumesToday = Number(data.resumesToday) || 0;
+        // Only flip to the live tiles once there's a real headline number.
+        this.hasLiveStats.set(this.verdictsTotal > 0 || this.resumesMonth > 0);
+        this.statResumesToday.set(this.resumesToday); // drives the "today" tile visibility
+        // Set the values NOW (the tiles render on this same tick). Don't wait for
+        // the scroll-reveal count-up — these tiles bypass the observer, and the
+        // stats bar may already be scrolled past, which would leave them blank.
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) {
+          this.statVerdicts.set(this.verdictsTotal);
+          this.statResumesMonth.set(this.resumesMonth);
+        } else {
+          this.animate(this.statVerdicts, this.verdictsTotal, 1400);
+          this.animate(this.statResumesMonth, this.resumesMonth, 1100);
+        }
+      })
+      .catch(() => { /* stays on the static fallback tiles */ });
   }
 
   // ── interactivity wiring ───────────────────────────────────
@@ -90,6 +139,9 @@ export class HomeComponent {
   }
 
   private startStats(reduce: boolean): void {
+    // Only the STATIC fallback tiles animate on scroll-into-view. The live
+    // counters are driven by loadStats() the moment the fetch returns, because
+    // their tiles bypass the scroll-reveal observer entirely.
     if (reduce) {
       this.statQuestions.set(650);
       this.statTech.set(6);

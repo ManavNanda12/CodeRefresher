@@ -11,6 +11,8 @@ import { ProgressService, RoundRecord } from '../../core/services/progress.servi
 import { CodeEditorComponent, EditorLang } from '../../shared/components/code-editor/code-editor';
 import { ArenaEntryComponent } from '../../shared/components/arena-entry/arena-entry';
 import { SpeechService, computeVoiceStats } from '../../core/services/speech.service';
+import { UserService, isValidEmail } from '../../core/services/user.service';
+import { StatsService } from '../../core/services/stats.service';
 import { QuestionKind } from '../../services/interview-service/interview.service';
 import {
   RatedSkill,
@@ -158,6 +160,8 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
   private svc = inject(ResumeInterviewService);
   private memeSvc = inject(MemeService);
   private progress = inject(ProgressService);
+  private user = inject(UserService);
+  private stats = inject(StatsService);
   readonly game = inject(GameService);
 
   readonly PASS_MARK = PASS_MARK;
@@ -228,6 +232,23 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
   roast = signal('');
   xpEarned = signal(0);
   detailOpen = signal<Set<number>>(new Set());
+
+  // ── Save results / create account (post-verdict, non-logged-in only) ──
+  // The verdict is delivered to everyone; only AFTER it do we offer to save it.
+  // A brand-new email registers + logs in (code emailed); an email that already
+  // has an account switches to the recovery-code prompt (no silent takeover).
+  //   form → saving → saved | needCode → recovering → saved
+  saveState = signal<'form' | 'saving' | 'saved' | 'needCode' | 'recovering'>('form');
+  saveEmail = signal('');
+  saveName = signal('');
+  saveError = signal('');
+  /** Recovery code to prove ownership of an already-registered email. */
+  codeInput = signal('');
+  /** The login code we just minted — shown once so the user can note it. */
+  savedCode = signal('');
+
+  /** Logged in already → the round auto-syncs; no save card needed. */
+  readonly alreadyLoggedIn = computed(() => this.user.isKnown());
 
   constructor() {
     // Arena mode while the trial is live: footer gone, page clamped to the
@@ -787,7 +808,80 @@ export class ResumeInterviewComponent implements OnDestroy, CanComponentDeactiva
     this.memeFailed.set(false);
     this.meme.set(this.memeSvc.forScore(this.overall(), this.memeTag()));
 
+    this.prefillSave();
+    this.stats.recordVerdict(); // a verdict is now on screen — count it
+
     this.later(() => this.stage.set('results'), 900);
+  }
+
+  /** Seed the save-account form from the résumé (email + name), if not logged in. */
+  private prefillSave(): void {
+    if (this.alreadyLoggedIn()) return;
+    this.saveState.set('form');
+    this.saveError.set('');
+    this.codeInput.set('');
+    this.savedCode.set('');
+    const c = this.candidate();
+    this.saveEmail.set((c?.email ?? '').trim());
+    this.saveName.set((c?.name ?? '').trim().slice(0, 24));
+  }
+
+  /**
+   * Create the account from the confirmed email/name, then log in. On a 409
+   * (email already registered) switch to the recovery-code prompt instead of
+   * silently adopting the account.
+   */
+  saveResults(): void {
+    if (this.saveState() === 'saving' || this.saveState() === 'recovering') return;
+    const email = this.saveEmail().trim();
+    if (!isValidEmail(email)) {
+      this.saveError.set('That email looks off — double-check it? 📧');
+      return;
+    }
+    this.saveError.set('');
+    this.saveState.set('saving');
+    // No newsletter checkbox on this card, so leave allowUpdates unset (don't
+    // silently opt them in — the transactional welcome email sends regardless).
+    this.user.register(email, this.saveName().trim() || undefined).subscribe(res => {
+      if (res?.emailInUse) {
+        this.saveState.set('needCode'); // returning user — prove it with the code
+        return;
+      }
+      if (res?.success) {
+        this.savedCode.set(this.user.recoveryCode());
+        this.saveState.set('saved');
+        return;
+      }
+      // Network/other failure — identity is kept locally and will sync later.
+      this.saveError.set("Couldn't reach the arena to save that — your progress is still safe on this device.");
+      this.saveState.set('form');
+    });
+  }
+
+  /** Restore the existing account from its login/recovery code, then log in. */
+  submitRecoveryCode(): void {
+    if (this.saveState() === 'recovering') return;
+    const code = this.codeInput().trim();
+    if (!code) {
+      this.saveError.set('Paste the login code from your welcome email.');
+      return;
+    }
+    this.saveError.set('');
+    this.saveState.set('recovering');
+    this.user.recover(code).subscribe(res => {
+      if (res?.success) {
+        this.saveState.set('saved');
+        return;
+      }
+      this.saveError.set("That code didn't match an account. Check your welcome email and try again.");
+      this.saveState.set('needCode');
+    });
+  }
+
+  /** Back out of the recovery prompt to the email form (e.g. wrong email typed). */
+  backToSaveForm(): void {
+    this.saveError.set('');
+    this.saveState.set('form');
   }
 
   /**

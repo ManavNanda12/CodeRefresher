@@ -14,6 +14,7 @@ import { RefresherData } from '../../core/models/refresher-item.model';
 import { CodeEditorComponent, EditorLang } from '../../shared/components/code-editor/code-editor';
 import { ArenaEntryComponent } from '../../shared/components/arena-entry/arena-entry';
 import { InterviewService, GradeItem, GradeInput, GenQuestion, QuestionKind } from '../../services/interview-service/interview.service';
+import { StatsService } from '../../core/services/stats.service';
 
 type Stage = 'ready' | 'pick' | 'rate' | 'loading' | 'quiz' | 'grading' | 'results';
 
@@ -94,6 +95,7 @@ export class InterviewComponent implements OnDestroy {
   private interview = inject(InterviewService);
   private memeSvc = inject(MemeService);
   private progress = inject(ProgressService);
+  private stats = inject(StatsService);
   readonly game = inject(GameService);
 
   readonly techs = TECHS;
@@ -479,6 +481,7 @@ export class InterviewComponent implements OnDestroy {
 
     this.memeFailed.set(false);
     this.meme.set(this.memeSvc.forScore(this.overall()));
+    this.stats.recordVerdict(); // a verdict is now on screen — count it
 
     const reveal = () => this.stage.set('results');
     if (isPlatformBrowser(this.platformId)) setTimeout(reveal, 900);

@@ -27,6 +27,7 @@ import { resumeQuestionsHandler } from "./resume-questions.js";
 import { resumeJdMatchHandler } from "./resume-jd-match.js";
 import { speakGradeHandler } from "./speak-grade.js";
 import { handleContact } from "./contact.js";
+import { handleStats, handleVerdictBump } from "./stats.js";
 import { rateLimited, tooMany } from "./rate-limit.js";
 
 // ── Allowed browser origins ────────────────────────────────
@@ -213,6 +214,16 @@ export default {
     }
     if (p === "/api/leaderboard" && method === "GET") {
       return withCors(request, await handleLeaderboard(env));
+    }
+
+    // ── homepage social-proof counters (public, cached) ──
+    if (p === "/api/stats" && method === "GET") {
+      return withCors(request, await handleStats(request, env));
+    }
+    // A verdict is counted when a results screen is delivered to the user.
+    if (p === "/api/stats/verdict" && method === "POST") {
+      if (await rateLimited(request, env, "statsverdict", 60)) return withCors(request, tooMany());
+      return withCors(request, await handleVerdictBump(request, env));
     }
 
     // ── share scorecard (write a public share entry) ──

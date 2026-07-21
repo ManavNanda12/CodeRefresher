@@ -605,6 +605,87 @@
   .chat-brand { display: none; }
 }
 
+/* ─── Save results / create account card (post-verdict) ───── */
+.save-card {
+  margin: 2rem auto 0;
+  max-width: 560px;
+  padding: 1.75rem 1.5rem;
+  border-radius: 18px;
+  background: var(--ri-panel);
+  border: 1px solid var(--ri-border);
+  text-align: center;
+}
+.save-title {
+  margin: 0 0 .5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--ri-text);
+}
+.save-sub {
+  margin: 0 auto 1.25rem;
+  max-width: 440px;
+  font-size: .92rem;
+  line-height: 1.5;
+  color: var(--ri-muted);
+}
+.save-sub strong { color: var(--ri-soft); }
+.save-fields {
+  display: flex;
+  flex-direction: column;
+  gap: .85rem;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+.save-field { display: flex; flex-direction: column; gap: .35rem; }
+.save-field span {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: var(--ri-soft);
+}
+.save-field span em { color: var(--ri-dim); font-style: normal; font-weight: 500; }
+.save-field input {
+  padding: .7rem .85rem;
+  border-radius: 12px;
+  background: var(--ri-panel-2);
+  border: 1px solid var(--ri-border);
+  color: var(--ri-text);
+  font-size: .95rem;
+  transition: border-color .15s ease;
+}
+.save-field input:focus { outline: none; border-color: var(--accent); }
+.save-field input:disabled { opacity: .55; }
+.save-error {
+  margin: -.35rem 0 .85rem;
+  font-size: .85rem;
+  color: #fca5a5;
+}
+.save-btn { width: 100%; justify-content: center; }
+.save-code {
+  margin: 0 auto 1.1rem;
+  padding: .85rem 1rem;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--ri-text);
+  background: var(--ri-panel-2);
+  border: 1px dashed var(--accent);
+  border-radius: 10px;
+  word-break: break-all;
+}
+.link-btn {
+  margin-top: .75rem;
+  background: none;
+  border: none;
+  color: var(--ri-muted);
+  font-size: .85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-btn:hover:not(:disabled) { color: var(--accent); }
+.link-btn:disabled { opacity: .45; cursor: not-allowed; }
+
 /* ─── Reduced motion: collapse theatrics to simple fades ───── */
 /* @media (prefers-reduced-motion: reduce) {
   .ri *, .ri *::before, .ri *::after {

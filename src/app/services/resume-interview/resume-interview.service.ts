@@ -22,6 +22,8 @@ export interface ResumeClaim {
 
 export interface ResumeExtract {
   name: string;
+  /** Email pulled from the résumé, if present — pre-fills the save-account field. */
+  email: string;
   headline: string;
   /** Technologies the résumé declares expertise in (skills section + bullets). */
   skills: string[];
@@ -87,6 +89,7 @@ export class ResumeInterviewService {
           if (!claims.length) throw new Error(r?.error || 'No claims found');
           return {
             name: r.name ?? '',
+            email: r.email ?? '',
             headline: r.headline ?? '',
             skills: Array.isArray(r.skills) ? r.skills : [],
             years: typeof r.years === 'number' ? r.years : null,

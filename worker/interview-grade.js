@@ -164,6 +164,9 @@ export async function interviewGradeHandler(request, env) {
       return out;
     });
 
+    // Verdict counting lives on the client (POST /api/stats/verdict) so it fires
+    // once per delivered results screen — including all-skipped / fallback rounds
+    // that never reach this handler.
     return jsonResponse({ results, _model: result.model });
   } catch (err) {
     console.error("interview-grade error:", err);

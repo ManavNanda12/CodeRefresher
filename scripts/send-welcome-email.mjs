@@ -86,6 +86,26 @@ async function fetchUserWithRetry(userId, attempts = 5, delayMs = 20_000) {
 const esc = (s) =>
   String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+/** The "your login code" card injected at {{RECOVERY_BLOCK}} in the template. */
+function renderCodeBlock(code) {
+  return `
+                <tr>
+                  <td style="padding:28px 40px 0;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0a1122" style="background-color:#0a1122;background-image:linear-gradient(#0a1122,#0a1122);border:1px solid #2b3654;border-radius:12px;">
+                      <tr>
+                        <td style="padding:22px 24px;font-family:'Inter',-apple-system,'Segoe UI',Arial,sans-serif;">
+                          <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#38bdf8;padding-bottom:8px;">&#128273; YOUR LOGIN CODE</div>
+                          <div style="font-size:13px;line-height:20px;color:#94a3b8;padding-bottom:12px;">
+                            No passwords here. This code is how you sign back in on another browser or device &mdash; keep this email, or save the code somewhere safe.
+                          </div>
+                          <div style="font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace;font-size:18px;font-weight:700;letter-spacing:1px;color:#f1f5f9;background-color:#111b36;background-image:linear-gradient(#111b36,#111b36);border:1px dashed #38bdf8;border-radius:8px;padding:14px 16px;word-break:break-all;">${esc(code)}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>`;
+}
+
 function unsubscribeUrl(user) {
   // Prefer the stored random token; fall back to the legacy derivable code only
   // for records that predate it (kept in sync with the Worker's validation).
@@ -105,10 +125,17 @@ async function renderEmail(user) {
     : `Your prep arena is&nbsp;open.`;
   const unsub = unsubscribeUrl(user);
 
+  // Login code panel — only rendered when the account has a code (all new
+  // accounts do; some very old records may not). This is the credential a user
+  // enters to sign back in on another browser/device, so we tell them to keep it.
+  const code = (user.recoveryCode || "").trim();
+  const codeBlock = code ? renderCodeBlock(code) : "";
+
   const html = template
     .replaceAll("{{HERO_TITLE}}", heroTitle)
     .replaceAll("{{APP_URL}}", APP_BASE_URL)
     .replaceAll("{{APP_HOST}}", new URL(APP_BASE_URL).host)
+    .replaceAll("{{RECOVERY_BLOCK}}", codeBlock)
     .replaceAll("{{UNSUB_URL}}", unsub);
 
   const subject = name
@@ -124,6 +151,13 @@ async function renderEmail(user) {
     `⭐ The flagship: drop your résumé PDF (it never leaves your browser) and the AI`,
     `grills you on your own claims — every one stamped Backed, Shaky or Busted.`,
     ``,
+    ...(code
+      ? [
+          `🔑 Your login code (no passwords here): ${code}`,
+          `Keep this email — you'll use this code to sign back in on another browser or device.`,
+          ``,
+        ]
+      : []),
     `Also in your arena:`,
     `- Test Me — pick your battle: 5, 10 or 15 questions, AI-graded 0-10`,
     `- AI Mock Interview — up to 3 stacks, real code editor, meme verdict`,
